@@ -139,7 +139,6 @@ Create root scripts:
     "build": "pnpm -r build",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
-    "lint": "pnpm -r lint",
     "dev": "pnpm --parallel dev"
   }
 }
@@ -169,7 +168,11 @@ Run: `pnpm install`
 
 Expected: lockfile is created and install exits 0.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 6: Note lint is intentionally deferred**
+
+Do not add a root `lint` script until package-level lint config exists.
+
+- [ ] **Step 7: Commit**
 
 ```bash
 git add package.json pnpm-workspace.yaml tsconfig.base.json .gitignore .env.example pnpm-lock.yaml
@@ -357,11 +360,20 @@ Cover `unmatched_open_bracket` and `unmatched_close_bracket`.
 
 `[[답]]` should return `nested_bracket`.
 
-- [ ] **Step 8: Run tests and confirm failure**
+- [ ] **Step 8: Test error locations**
+
+For each error type, assert:
+
+- `blockIndex`
+- 1-based `line`
+- 1-based `column`
+- `snippet`
+
+- [ ] **Step 9: Run tests and confirm failure**
 
 Run: `pnpm --filter @inq/shared test -- markdownImport`
 
-- [ ] **Step 9: Implement parser**
+- [ ] **Step 10: Implement parser**
 
 Export:
 
@@ -369,13 +381,13 @@ Export:
 export function parseMarkdownImport(markdown: string): ImportPreviewResponse;
 ```
 
-- [ ] **Step 10: Verify tests**
+- [ ] **Step 11: Verify tests**
 
 Run: `pnpm --filter @inq/shared test`
 
 Expected: pass.
 
-- [ ] **Step 11: Commit**
+- [ ] **Step 12: Commit**
 
 ```bash
 git add packages/shared
@@ -537,9 +549,9 @@ git commit -m "feat(api): add challenge run transition service"
 - Create: `apps/api/src/routes/auth.ts`
 - Test: `apps/api/tests/auth.test.ts`
 
-- [ ] **Step 1: Test locked API route**
+- [ ] **Step 1: Test protected dummy route**
 
-Unauthenticated `GET /api/decks` should return 401.
+Add a temporary protected test route inside the test app and assert unauthenticated access returns 401. Do not depend on deck routes existing yet.
 
 - [ ] **Step 2: Test first-time PIN setup**
 
@@ -553,24 +565,29 @@ When no PIN exists, `POST /api/auth/setup-pin` succeeds.
 
 Old cookie fails after `sessionsInvalidatedAt` updates.
 
-- [ ] **Step 5: Implement middleware and auth routes**
+- [ ] **Step 5: Test manual lock**
+
+`POST /api/auth/lock` clears the auth cookie. Requests with the old cookie should fail after lock.
+
+- [ ] **Step 6: Implement middleware and auth routes**
 
 Use signed session cookie with `SESSION_SECRET`.
 
-- [ ] **Step 6: Run tests**
+- [ ] **Step 7: Run tests**
 
 Run: `pnpm --filter @inq/api test -- auth`
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add apps/api
 git commit -m "feat(api): add PIN auth routes"
 ```
 
-### Task 4.2: Add deck, card, and challenge API routes
+### Task 4.2: Add deck, card, and challenge management API routes
 
 **Files:**
+- Modify: `apps/api/src/app.ts`
 - Create: `apps/api/src/routes/decks.ts`
 - Create: `apps/api/src/routes/cards.ts`
 - Create: `apps/api/src/routes/challenges.ts`
@@ -581,6 +598,8 @@ git commit -m "feat(api): add PIN auth routes"
 - [ ] **Step 1: Test deck endpoints**
 
 Cover `GET/POST/PATCH/DELETE /api/decks`.
+
+Also assert unauthenticated `GET /api/decks` returns 401 now that the route exists.
 
 - [ ] **Step 2: Test card endpoints**
 
@@ -594,6 +613,8 @@ Cover list/create/update/delete/update-from-deck.
 
 Use shared request/response types and repository functions.
 
+Register deck, card, and challenge management routes in `apps/api/src/app.ts`.
+
 - [ ] **Step 5: Run API tests**
 
 Run: `pnpm --filter @inq/api test`
@@ -605,9 +626,51 @@ git add apps/api
 git commit -m "feat(api): add deck card and challenge routes"
 ```
 
-### Task 4.3: Add run, import, and backup API routes
+### Task 4.3: Add challenge run API routes
 
 **Files:**
+- Modify: `apps/api/src/app.ts`
+- Modify: `apps/api/src/routes/challenges.ts`
+- Modify: `apps/api/src/services/challengeRunService.ts`
+- Test: `apps/api/tests/challengeRuns.test.ts`
+
+- [ ] **Step 1: Test challenge run endpoints**
+
+`GET /api/challenges/:challengeId/run` returns a persisted session.
+
+`POST /api/challenges/:challengeId/results` returns updated run state and progress.
+
+- [ ] **Step 2: Test wrong-card requeue through API**
+
+Submitting wrong moves that session card to the back of the active queue.
+
+- [ ] **Step 3: Test result correction through API**
+
+Changing a previous selected result updates run state and current challenge state.
+
+- [ ] **Step 4: Implement challenge run route handlers**
+
+Keep management routes and run routes in `routes/challenges.ts`, but keep run state logic in `challengeRunService.ts`.
+
+- [ ] **Step 5: Register routes in app**
+
+Ensure `/api/challenges/:challengeId/run` and `/api/challenges/:challengeId/results` are mounted.
+
+- [ ] **Step 6: Run API tests**
+
+Run: `pnpm --filter @inq/api test -- challengeRuns`
+
+- [ ] **Step 7: Commit**
+
+```bash
+git add apps/api
+git commit -m "feat(api): add challenge run routes"
+```
+
+### Task 4.4: Add deck run, import, and backup API routes
+
+**Files:**
+- Modify: `apps/api/src/app.ts`
 - Create: `apps/api/src/routes/deckRuns.ts`
 - Create: `apps/api/src/routes/imports.ts`
 - Create: `apps/api/src/routes/backup.ts`
@@ -618,31 +681,29 @@ git commit -m "feat(api): add deck card and challenge routes"
 - Test: `apps/api/tests/imports.test.ts`
 - Test: `apps/api/tests/backup.test.ts`
 
-- [ ] **Step 1: Test challenge run endpoints**
-
-`GET /api/challenges/:challengeId/run` returns a persisted session.
-
-`POST /api/challenges/:challengeId/results` returns updated run state and progress.
-
-- [ ] **Step 2: Test deck run endpoints**
+- [ ] **Step 1: Test deck run endpoints**
 
 Cover get, cursor update, restart.
 
-- [ ] **Step 3: Test import preview**
+- [ ] **Step 2: Test import preview**
 
 `POST /api/imports/markdown/preview` returns parser output.
 
-- [ ] **Step 4: Test import confirm revalidates markdown**
+- [ ] **Step 3: Test import confirm revalidates markdown**
 
 Confirm must accept markdown, not trusted preview cards.
 
-- [ ] **Step 5: Test backup export**
+- [ ] **Step 4: Test backup export**
 
 Backup includes decks, cards, challenges, challenge states, answer events, challenge sessions, and deck run states. It excludes PIN hash.
 
-- [ ] **Step 6: Implement routes and services**
+- [ ] **Step 5: Implement routes and services**
 
 Mount all routes under `/api`.
+
+- [ ] **Step 6: Register routes in app**
+
+Register deck run, import, and backup routes in `apps/api/src/app.ts`.
 
 - [ ] **Step 7: Run API tests**
 
@@ -750,6 +811,7 @@ git commit -m "feat(web): add quiz display components"
 ### Task 5.3: Add PIN gate UI
 
 **Files:**
+- Modify: `apps/web/src/App.tsx`
 - Create: `apps/web/src/components/PinGate.tsx`
 - Create: `apps/web/src/features/auth/PinLockScreen.tsx`
 - Create: `apps/web/src/features/auth/PinSetupScreen.tsx`
@@ -759,22 +821,26 @@ git commit -m "feat(web): add quiz display components"
 
 If locked, show PIN input before any route content.
 
-- [ ] **Step 2: Add first-time setup flow**
+- [ ] **Step 2: Wrap route tree**
+
+Modify `apps/web/src/App.tsx` so `PinGate` wraps all route content, including `/upload` and direct deep links.
+
+- [ ] **Step 3: Add first-time setup flow**
 
 If API indicates no PIN exists, show setup screen.
 
-- [ ] **Step 3: Add change PIN form**
+- [ ] **Step 4: Add change PIN form**
 
 Requires current PIN, next PIN, confirmation.
 
-- [ ] **Step 4: Verify direct route locking**
+- [ ] **Step 5: Verify direct route locking**
 
 Manually open `/upload` and `/decks`; both should show PIN first.
 
-- [ ] **Step 5: Commit**
+- [ ] **Step 6: Commit**
 
 ```bash
-git add apps/web/src/components/PinGate.tsx apps/web/src/features/auth
+git add apps/web/src/App.tsx apps/web/src/components/PinGate.tsx apps/web/src/features/auth
 git commit -m "feat(web): add PIN gate UI"
 ```
 
@@ -786,8 +852,6 @@ git commit -m "feat(web): add PIN gate UI"
 
 **Files:**
 - Create: `apps/web/src/features/challenges/HomePage.tsx`
-- Create: `apps/web/src/features/challenges/ChallengeListPage.tsx`
-- Create: `apps/web/src/features/challenges/ChallengeForm.tsx`
 - Create: `apps/web/src/features/challenges/ChallengeListItem.tsx`
 - Create: `apps/web/src/components/ActionListItem.tsx`
 - Create: `apps/web/src/components/ProgressSummary.tsx`
@@ -800,26 +864,48 @@ Show active challenges sorted by nearest due date.
 
 Tap challenge row -> `/challenges/:challengeId/run`.
 
-- [ ] **Step 3: Build challenge list**
+- [ ] **Step 3: Add home empty states**
+
+Show no-challenges and no-due-cards states.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add apps/web/src/features/challenges apps/web/src/components
+git commit -m "feat(web): add home challenge list"
+```
+
+### Task 6.2: Build challenge management
+
+**Files:**
+- Create: `apps/web/src/features/challenges/ChallengeListPage.tsx`
+- Create: `apps/web/src/features/challenges/ChallengeForm.tsx`
+- Modify: `apps/web/src/features/challenges/ChallengeListItem.tsx`
+
+- [ ] **Step 1: Build challenge list**
 
 Row tap -> runner; menu actions separate.
 
-- [ ] **Step 4: Build create/edit form**
+- [ ] **Step 2: Build create/edit form**
 
 Fields: name, deck, intervals default `[3, 5, 10]`.
 
-- [ ] **Step 5: Wire delete and update-from-deck**
+- [ ] **Step 3: Wire delete**
+
+Delete uses the row action menu, not row tap.
+
+- [ ] **Step 4: Wire update-from-deck**
 
 Show update result count.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
 git add apps/web/src/features/challenges apps/web/src/components
 git commit -m "feat(web): add challenge management screens"
 ```
 
-### Task 6.2: Build challenge runner
+### Task 6.3: Build challenge runner
 
 **Files:**
 - Create: `apps/web/src/features/runners/ChallengeRunnerPage.tsx`
@@ -863,13 +949,12 @@ git add apps/web/src/features/runners/ChallengeRunnerPage.tsx
 git commit -m "feat(web): add challenge runner"
 ```
 
-### Task 6.3: Build deck management and card edit
+### Task 6.4: Build deck list and detail
 
 **Files:**
 - Create: `apps/web/src/features/decks/DeckListPage.tsx`
 - Create: `apps/web/src/features/decks/DeckDetailPage.tsx`
 - Create: `apps/web/src/features/decks/DeckForm.tsx`
-- Create: `apps/web/src/features/decks/CardSegmentEditForm.tsx`
 
 - [ ] **Step 1: Build deck list**
 
@@ -883,36 +968,52 @@ Actions: rename, delete, manage cards.
 
 Opened through `Manage Cards`; list cards.
 
-- [ ] **Step 4: Build card edit shell**
-
-Mobile-only route for card editing.
-
-- [ ] **Step 5: Render segment fields**
-
-Allow editing existing `value` only. No add/delete/reorder/type change.
-
-- [ ] **Step 6: Add prompt and revealed preview**
-
-Use `QuizPreview`.
-
-- [ ] **Step 7: Save with version**
-
-Call `PATCH /api/cards/:cardId`.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/features/decks
-git commit -m "feat(web): add deck management and card edit"
+git commit -m "feat(web): add deck list and detail"
 ```
 
-### Task 6.4: Build deck runner and settings
+### Task 6.5: Build mobile card edit
+
+**Files:**
+- Modify: `apps/web/src/App.tsx`
+- Create: `apps/web/src/features/decks/CardEditPage.tsx`
+- Create: `apps/web/src/features/decks/CardSegmentEditForm.tsx`
+
+- [ ] **Step 1: Build card edit shell**
+
+Create `CardEditPage.tsx` as the routed page for `/cards/:cardId/edit`. It loads the card, hosts `CardSegmentEditForm`, and handles loading/error states.
+
+- [ ] **Step 2: Wire route**
+
+Ensure `apps/web/src/App.tsx` maps `/cards/:cardId/edit` to `CardEditPage`.
+
+- [ ] **Step 3: Render segment fields**
+
+Allow editing existing `value` only. No add/delete/reorder/type change.
+
+- [ ] **Step 4: Add prompt and revealed preview**
+
+Use `QuizPreview`.
+
+- [ ] **Step 5: Save with version**
+
+Call `PATCH /api/cards/:cardId`.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add apps/web/src/App.tsx apps/web/src/features/decks
+git commit -m "feat(web): add mobile card segment edit"
+```
+
+### Task 6.6: Build deck runner
 
 **Files:**
 - Create: `apps/web/src/features/runners/DeckRunnerPage.tsx`
 - Create: `apps/web/src/features/runners/MediaSessionController.ts`
-- Create: `apps/web/src/features/settings/SettingsPage.tsx`
-- Create: `apps/web/src/features/settings/BackupExportButton.tsx`
 
 - [ ] **Step 1: Load deck run state**
 
@@ -938,31 +1039,53 @@ Last card stops. Restart calls `/restart`.
 
 Support previous/next when available; keep screen buttons as fallback.
 
-- [ ] **Step 7: Build settings**
-
-Include PIN change and backup export.
-
-- [ ] **Step 8: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
-git add apps/web/src/features/runners apps/web/src/features/settings
-git commit -m "feat(web): add deck runner and settings"
+git add apps/web/src/features/runners
+git commit -m "feat(web): add deck runner"
+```
+
+### Task 6.7: Build settings
+
+**Files:**
+- Create: `apps/web/src/features/settings/SettingsPage.tsx`
+- Create: `apps/web/src/features/settings/BackupExportButton.tsx`
+- Modify: `apps/web/src/features/auth/PinChangeForm.tsx`
+
+- [ ] **Step 1: Build settings page**
+
+Include PIN change, backup export, and manual lock actions.
+
+- [ ] **Step 2: Wire PIN change**
+
+Use `POST /api/auth/change-pin`.
+
+- [ ] **Step 3: Wire backup export**
+
+Use `GET /api/backup/export`.
+
+- [ ] **Step 4: Wire manual lock**
+
+Use `POST /api/auth/lock`, then return to PIN lock screen.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add apps/web/src/features/settings apps/web/src/features/auth/PinChangeForm.tsx
+git commit -m "feat(web): add settings screen"
 ```
 
 ---
 
 ## Chunk 7: Desktop Upload
 
-### Task 7.1: Build desktop upload UI
+### Task 7.1: Build desktop upload shell
 
 **Files:**
 - Create: `apps/web/src/features/upload/UploadPage.tsx`
 - Create: `apps/web/src/features/upload/MarkdownUploadPane.tsx`
 - Create: `apps/web/src/features/upload/DeckSelectOrCreate.tsx`
-- Create: `apps/web/src/features/upload/ImportValidationSummary.tsx`
-- Create: `apps/web/src/features/upload/ImportErrorList.tsx`
-- Create: `apps/web/src/features/upload/ImportPreviewList.tsx`
-- Create: `apps/web/src/features/upload/ImportConfirmBar.tsx`
 
 - [ ] **Step 1: Build two-column layout**
 
@@ -976,35 +1099,67 @@ Create deck inline if needed.
 
 Read markdown as browser text. Do not persist file.
 
-- [ ] **Step 4: Wire preview API**
-
-Call `POST /api/imports/markdown/preview`.
-
-- [ ] **Step 5: Render validation result**
-
-Show block, line, column, error code, message, snippet.
-
-- [ ] **Step 6: Render preview cards**
-
-Show prompt text, revealed text, answer count.
-
-- [ ] **Step 7: Disable confirm with errors**
-
-Create button only enabled if no errors and deck selected.
-
-- [ ] **Step 8: Confirm import**
-
-Call `POST /api/imports/markdown/confirm` with deckId and markdown.
-
-- [ ] **Step 9: Clear markdown after successful create**
-
-Reset upload state.
-
-- [ ] **Step 10: Commit**
+- [ ] **Step 4: Commit**
 
 ```bash
 git add apps/web/src/features/upload
-git commit -m "feat(web): add desktop markdown upload"
+git commit -m "feat(web): add desktop upload shell"
+```
+
+### Task 7.2: Build upload validation and preview
+
+**Files:**
+- Modify: `apps/web/src/features/upload/UploadPage.tsx`
+- Create: `apps/web/src/features/upload/ImportValidationSummary.tsx`
+- Create: `apps/web/src/features/upload/ImportErrorList.tsx`
+- Create: `apps/web/src/features/upload/ImportPreviewList.tsx`
+
+- [ ] **Step 1: Wire preview API**
+
+Call `POST /api/imports/markdown/preview`.
+
+- [ ] **Step 2: Render validation result**
+
+Show block, line, column, error code, message, snippet.
+
+- [ ] **Step 3: Render preview cards**
+
+Show prompt text, revealed text, answer count.
+
+- [ ] **Step 4: Disable confirm with errors**
+
+Create button only enabled if no errors and deck selected.
+
+- [ ] **Step 5: Commit**
+
+```bash
+git add apps/web/src/features/upload
+git commit -m "feat(web): add upload validation preview"
+```
+
+### Task 7.3: Build upload confirm flow
+
+**Files:**
+- Modify: `apps/web/src/features/upload/UploadPage.tsx`
+- Create: `apps/web/src/features/upload/ImportConfirmBar.tsx`
+
+- [ ] **Step 1: Confirm import**
+
+Call `POST /api/imports/markdown/confirm` with deckId and markdown.
+
+- [ ] **Step 2: Clear markdown after successful create**
+
+Reset upload state.
+
+- [ ] **Step 3: Verify markdown is not persisted**
+
+Confirm the UI clears file/source state and the API confirm request only creates cards.
+
+- [ ] **Step 4: Commit**
+
+```bash
+git add apps/web/src/features/upload
+git commit -m "feat(web): add upload confirm flow"
 ```
 
 ---
@@ -1014,67 +1169,79 @@ git commit -m "feat(web): add desktop markdown upload"
 ### Task 8.1: Add PWA config
 
 **Files:**
+- Modify: `apps/web/package.json`
 - Modify: `apps/web/vite.config.ts`
 - Create: `apps/web/public/manifest.webmanifest`
 - Create: `apps/web/public/icons/`
+- Modify: `pnpm-lock.yaml`
 
 - [ ] **Step 1: Add vite-plugin-pwa**
 
-Configure manifest and service worker.
+Add `vite-plugin-pwa` to `apps/web/package.json` and run `pnpm install`.
 
-- [ ] **Step 2: Add app metadata**
+- [ ] **Step 2: Configure manifest and service worker**
+
+Update `apps/web/vite.config.ts`.
+
+- [ ] **Step 3: Add app metadata**
 
 Name, short name, theme color, display mode.
 
-- [ ] **Step 3: Verify production build**
+- [ ] **Step 4: Verify production build**
 
 Run: `pnpm --filter @inq/web build`
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add apps/web
+git add apps/web pnpm-lock.yaml
 git commit -m "feat(web): add PWA configuration"
 ```
 
 ### Task 8.2: Add browser tests
 
 **Files:**
+- Modify: `apps/web/package.json`
 - Create: `apps/web/e2e/pin-gate.spec.ts`
 - Create: `apps/web/e2e/navigation.spec.ts`
 - Create: `apps/web/e2e/challenge-run.spec.ts`
 - Create: `apps/web/e2e/deck-run.spec.ts`
 - Create: `apps/web/e2e/upload.spec.ts`
 - Create: `apps/web/playwright.config.ts`
+- Modify: `pnpm-lock.yaml`
 
-- [ ] **Step 1: Test PIN gate**
+- [ ] **Step 1: Add Playwright dependency and script**
+
+Add `test:e2e` script to `apps/web/package.json` and run `pnpm install`.
+
+- [ ] **Step 2: Test PIN gate**
 
 Direct deep links show PIN before content.
 
-- [ ] **Step 2: Test mobile navigation**
+- [ ] **Step 3: Test mobile navigation**
 
 Bottom tabs route correctly.
 
-- [ ] **Step 3: Test challenge run**
+- [ ] **Step 4: Test challenge run**
 
 Correct/wrong reveal inline answers and auto-advance.
 
-- [ ] **Step 4: Test deck run**
+- [ ] **Step 5: Test deck run**
 
 Show answer, next, completed/restart state.
 
-- [ ] **Step 5: Test desktop upload**
+- [ ] **Step 6: Test desktop upload**
 
 Valid markdown previews and confirms; invalid markdown shows errors.
 
-- [ ] **Step 6: Run browser tests**
+- [ ] **Step 7: Run browser tests**
 
 Run: `pnpm --filter @inq/web test:e2e`
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
-git add apps/web/e2e apps/web/playwright.config.ts
+git add apps/web/package.json apps/web/e2e apps/web/playwright.config.ts pnpm-lock.yaml
 git commit -m "test(web): add browser coverage"
 ```
 
