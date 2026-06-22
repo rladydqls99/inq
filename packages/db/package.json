@@ -8,11 +8,16 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prisma": "prisma",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
+    "prisma": "^6.19.3",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.19.3"
   }
 }

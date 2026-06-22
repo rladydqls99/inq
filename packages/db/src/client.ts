@@ -1,1 +1,5 @@
-export const INQ_DB_PACKAGE = "inq-db";
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
+
+export type { PrismaClient };

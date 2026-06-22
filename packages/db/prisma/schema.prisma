@@ -1,0 +1,126 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Deck {
+  id           String        @id @default(cuid())
+  title        String
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  cards        Card[]
+  challenges   Challenge[]
+  deckRunState DeckRunState?
+}
+
+model Card {
+  id              String                 @id @default(cuid())
+  deckId          String
+  deck            Deck                   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  segments        Json
+  studyViewCount  Int                    @default(0)
+  lastStudiedAt   DateTime?
+  version         Int                    @default(1)
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  challengeStates ChallengeCardState[]
+  answerEvents    ChallengeAnswerEvent[]
+
+  @@index([deckId])
+}
+
+model Challenge {
+  id                  String                 @id @default(cuid())
+  name                String
+  deckId              String
+  deck                Deck                   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  status              String                 @default("active")
+  answerMode          String                 @default("manual")
+  reviewIntervalsDays Json
+  maxStage            Int
+  completedAt         DateTime?
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
+  cardStates          ChallengeCardState[]
+  answerEvents        ChallengeAnswerEvent[]
+  runSessions         ChallengeRunSession[]
+
+  @@index([deckId])
+  @@index([status])
+}
+
+model ChallengeCardState {
+  id                 String                 @id @default(cuid())
+  challengeId        String
+  challenge          Challenge              @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  cardId             String
+  card               Card                   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  stage              Int                    @default(0)
+  challengeViewCount Int                    @default(0)
+  dueAt              DateTime?
+  lastChallengedAt   DateTime?
+  result             String?
+  completedAt        DateTime?
+  createdAt          DateTime               @default(now())
+  updatedAt          DateTime               @updatedAt
+  answerEvents       ChallengeAnswerEvent[]
+
+  @@unique([challengeId, cardId])
+  @@index([challengeId, dueAt])
+  @@index([cardId])
+}
+
+model ChallengeAnswerEvent {
+  id            String             @id @default(cuid())
+  challengeId   String
+  challenge     Challenge          @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  stateId       String
+  state         ChallengeCardState @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  cardId        String
+  card          Card               @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  sessionCardId String
+  finalResult   String
+  previousStage Int
+  nextStage     Int?
+  answeredAt    DateTime           @default(now())
+
+  @@index([challengeId])
+  @@index([stateId])
+  @@index([cardId])
+  @@index([sessionCardId])
+}
+
+model ChallengeRunSession {
+  id          String    @id @default(cuid())
+  challengeId String
+  challenge   Challenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  status      String    @default("active")
+  cursor      Int       @default(0)
+  queue       Json
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([challengeId])
+  @@index([status])
+}
+
+model DeckRunState {
+  id          String    @id @default(cuid())
+  deckId      String    @unique
+  deck        Deck      @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  cursor      Int       @default(0)
+  completedAt DateTime?
+  updatedAt   DateTime  @updatedAt
+}
+
+model PinSettings {
+  id                    String   @id @default(cuid())
+  pinHash               String
+  sessionsInvalidatedAt DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+}
