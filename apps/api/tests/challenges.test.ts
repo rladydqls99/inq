@@ -1,0 +1,111 @@
+import { describe, expect, it } from "vitest";
+
+import { createCard } from "@inq/db/repositories/cards";
+import type { QuizSegment } from "@inq/shared";
+import { createApp } from "../src/app";
+import { createTestPrisma, unlockTestApp } from "./testUtils";
+
+const segments: QuizSegment[] = [
+  { type: "text", value: "훈민정음의 창제자는 " },
+  { type: "answer", id: "answer-1", value: "세종대왕" },
+  { type: "text", value: "이다." },
+];
+
+describe("challenge routes", () => {
+  it("lists, creates, updates, updates from deck, and deletes challenges", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+
+      const createResponse = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "중간고사",
+          deckId: deck.id,
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(createResponse.status).toBe(201);
+      const created = await createResponse.json();
+      expect(created).toMatchObject({
+        name: "중간고사",
+        deckId: deck.id,
+        deckTitle: "국어",
+        status: "active",
+        answerMode: "manual",
+        reviewIntervalsDays: [3, 5, 10],
+        maxStage: 3,
+        dueCount: 1,
+        progress: {
+          totalCards: 1,
+          completedCards: 0,
+          dueCards: 1,
+          currentStageCounts: { 0: 1 },
+        },
+      });
+
+      const listResponse = await app.request("/api/challenges", {
+        headers: { cookie },
+      });
+      expect(listResponse.status).toBe(200);
+      await expect(listResponse.json()).resolves.toMatchObject([
+        { id: created.id, name: "중간고사" },
+      ]);
+
+      const patchResponse = await app.request(`/api/challenges/${created.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: "기말고사" }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(patchResponse.status).toBe(200);
+      await expect(patchResponse.json()).resolves.toMatchObject({
+        id: created.id,
+        name: "기말고사",
+      });
+
+      await createCard(prisma, { deckId: deck.id, segments });
+      const updateFromDeckResponse = await app.request(
+        `/api/challenges/${created.id}/update-from-deck`,
+        {
+          method: "POST",
+          headers: { cookie },
+        },
+      );
+      expect(updateFromDeckResponse.status).toBe(200);
+      await expect(updateFromDeckResponse.json()).resolves.toEqual({
+        addedCount: 1,
+      });
+
+      const deleteResponse = await app.request(`/api/challenges/${created.id}`, {
+        method: "DELETE",
+        headers: { cookie },
+      });
+      expect(deleteResponse.status).toBe(204);
+
+      const emptyListResponse = await app.request("/api/challenges", {
+        headers: { cookie },
+      });
+      await expect(emptyListResponse.json()).resolves.toEqual([]);
+    } finally {
+      await cleanup();
+    }
+  });
+});
+
+function testEnv() {
+  return {
+    sessionSecret: "test-secret",
+    pinSessionTtlSeconds: 60,
+  };
+}
