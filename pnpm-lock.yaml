@@ -13,6 +13,12 @@ importers:
       '@hono/node-server':
         specifier: ^1.19.6
         version: 1.19.14(hono@4.12.26)
+      '@inq/db':
+        specifier: workspace:*
+        version: link:../../packages/db
+      '@inq/shared':
+        specifier: workspace:*
+        version: link:../../packages/shared
       hono:
         specifier: ^4.10.10
         version: 4.12.26

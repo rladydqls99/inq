@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.19.6",
+    "@inq/db": "workspace:*",
+    "@inq/shared": "workspace:*",
     "hono": "^4.10.10"
   },
   "devDependencies": {
