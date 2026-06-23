@@ -221,3 +221,62 @@ textarea {
   font-size: 13px;
   font-weight: 700;
 }
+
+.action-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.action-list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 64px;
+  border: 1px solid #deded8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+  color: #171717;
+  text-decoration: none;
+}
+
+.action-list-item__content {
+  display: grid;
+  min-width: 0;
+  gap: 4px;
+}
+
+.action-list-item h2 {
+  margin: 0;
+  overflow: hidden;
+  font-size: 16px;
+  font-weight: 760;
+  letter-spacing: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.action-list-item__content span {
+  color: #62625d;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.action-list-item__trailing {
+  flex: 0 0 auto;
+}
+
+.progress-summary {
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.list-empty {
+  margin-top: 18px;
+  color: #62625d;
+  font-size: 14px;
+  font-weight: 700;
+}

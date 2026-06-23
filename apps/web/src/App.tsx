@@ -2,6 +2,7 @@ import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import { PinGate } from "./components/PinGate";
 import { PageHeader } from "./components/PageHeader";
+import { HomePage } from "./features/challenges/HomePage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
@@ -12,7 +13,7 @@ const router = createBrowserRouter([
       {
         element: <MobileAppShell />,
         children: [
-          { path: "/", element: <PlaceholderPage title="Home" /> },
+          { path: "/", element: <HomePage /> },
           { path: "/challenges", element: <PlaceholderPage title="Challenges" /> },
           {
             path: "/challenges/:challengeId/run",
