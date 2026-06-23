@@ -10,6 +10,10 @@ import {
   listChallengeResponses,
   toChallengeResponse,
 } from "../services/challengeService";
+import {
+  getOrCreateChallengeRunState,
+  submitChallengeRunResult,
+} from "../services/challengeRunService";
 
 export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
@@ -74,6 +78,34 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     });
 
     return context.body(null, 204);
+  });
+
+  route.get("/:challengeId/run", async (context) => {
+    return context.json(
+      await getOrCreateChallengeRunState(
+        options.prisma,
+        context.req.param("challengeId"),
+      ),
+    );
+  });
+
+  route.post("/:challengeId/results", async (context) => {
+    const body = await context.req.json<{
+      sessionCardId?: string;
+      finalResult?: "correct" | "wrong";
+    }>();
+
+    if (!body.sessionCardId || !body.finalResult) {
+      return context.json({ error: "challenge_result_fields_required" }, 400);
+    }
+
+    return context.json(
+      await submitChallengeRunResult(options.prisma, {
+        challengeId: context.req.param("challengeId"),
+        sessionCardId: body.sessionCardId,
+        finalResult: body.finalResult,
+      }),
+    );
   });
 
   route.post("/:challengeId/update-from-deck", async (context) => {

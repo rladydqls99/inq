@@ -1,3 +1,13 @@
+import type { Prisma, PrismaClient } from "@inq/db";
+import type {
+  ChallengeProgress,
+  ChallengeRunCard,
+  ChallengeRunState,
+  QuizSegment,
+  SubmitChallengeCardResultResponse,
+} from "@inq/shared";
+import { findChallenge, toChallengeResponse } from "./challengeService";
+
 export type ChallengeAnswerResult = "correct" | "wrong";
 
 export type ChallengeCardStateSnapshot = {
@@ -136,6 +146,178 @@ export function applySessionCardResult(input: {
       isCorrection: !isFirstSelection,
     }),
   };
+}
+
+export async function getOrCreateChallengeRunState(
+  prisma: PrismaClient,
+  challengeId: string,
+  now = new Date(),
+): Promise<ChallengeRunState> {
+  const existing = await prisma.challengeRunSession.findFirst({
+    where: {
+      challengeId,
+      status: "active",
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  if (existing) {
+    return toChallengeRunState(prisma, existing);
+  }
+
+  const states = await prisma.challengeCardState.findMany({
+    where: {
+      challengeId,
+      completedAt: null,
+      OR: [{ dueAt: null }, { dueAt: { lte: now } }],
+    },
+    orderBy: { createdAt: "asc" },
+  });
+  const queue = buildChallengeRunQueue(
+    states.map((state) => ({
+      stateId: state.id,
+      cardId: state.cardId,
+      stage: state.stage,
+      dueAt: state.dueAt,
+      completedAt: state.completedAt,
+    })),
+  );
+  const session = await prisma.challengeRunSession.create({
+    data: {
+      challengeId,
+      queue: queue as unknown as Prisma.InputJsonValue,
+    },
+  });
+
+  return toChallengeRunState(prisma, session);
+}
+
+export async function submitChallengeRunResult(
+  prisma: PrismaClient,
+  input: {
+    challengeId: string;
+    sessionCardId: string;
+    finalResult: ChallengeAnswerResult;
+    now?: Date;
+  },
+): Promise<SubmitChallengeCardResultResponse> {
+  const now = input.now ?? new Date();
+  const challenge = await prisma.challenge.findUniqueOrThrow({
+    where: { id: input.challengeId },
+    select: { reviewIntervalsDays: true },
+  });
+  const session = await prisma.challengeRunSession.findFirstOrThrow({
+    where: {
+      challengeId: input.challengeId,
+      status: "active",
+    },
+  });
+  const queue = parseQueue(session.queue);
+  const applied = applySessionCardResult({
+    queue,
+    sessionCardId: input.sessionCardId,
+    result: input.finalResult,
+    intervalsDays: challenge.reviewIntervalsDays as number[],
+    now,
+  });
+  const updatedCard = applied.queue.find(
+    (card) => card.sessionCardId === input.sessionCardId,
+  );
+
+  if (!updatedCard) {
+    throw new Error(`Session card not found: ${input.sessionCardId}`);
+  }
+
+  await prisma.$transaction([
+    prisma.challengeRunSession.update({
+      where: { id: session.id },
+      data: {
+        queue: applied.queue as unknown as Prisma.InputJsonValue,
+      },
+    }),
+    prisma.challengeCardState.update({
+      where: { id: updatedCard.stateId },
+      data: {
+        stage: applied.transition.stage,
+        dueAt: applied.transition.dueAt,
+        completedAt: applied.transition.completedAt,
+        result: input.finalResult,
+        lastChallengedAt: now,
+        challengeViewCount: { increment: 1 },
+      },
+    }),
+    prisma.challengeAnswerEvent.create({
+      data: {
+        challengeId: input.challengeId,
+        stateId: updatedCard.stateId,
+        cardId: updatedCard.cardId,
+        sessionCardId: updatedCard.sessionCardId,
+        finalResult: input.finalResult,
+        previousStage: applied.transition.event.previousStage,
+        nextStage: applied.transition.event.nextStage,
+        answeredAt: now,
+      },
+    }),
+  ]);
+
+  return {
+    runState: await toChallengeRunState(
+      prisma,
+      await prisma.challengeRunSession.findUniqueOrThrow({
+        where: { id: session.id },
+      }),
+    ),
+    progress: toChallengeResponse(
+      await findChallenge(prisma, input.challengeId),
+      now,
+    ).progress as ChallengeProgress,
+  };
+}
+
+async function toChallengeRunState(
+  prisma: PrismaClient,
+  session: {
+    id: string;
+    challengeId: string;
+    status: string;
+    cursor: number;
+    queue: unknown;
+  },
+): Promise<ChallengeRunState> {
+  const queue = parseQueue(session.queue);
+  const cards = await prisma.card.findMany({
+    where: {
+      id: { in: queue.map((card) => card.cardId) },
+    },
+  });
+  const cardsById = new Map(cards.map((card) => [card.id, card]));
+
+  return {
+    sessionId: session.id,
+    challengeId: session.challengeId,
+    status: session.status as ChallengeRunState["status"],
+    cursor: session.cursor,
+    cards: queue.map((queueCard): ChallengeRunCard => {
+      const card = cardsById.get(queueCard.cardId);
+
+      if (!card) {
+        throw new Error(`Card not found: ${queueCard.cardId}`);
+      }
+
+      return {
+        sessionCardId: queueCard.sessionCardId,
+        stateId: queueCard.stateId,
+        cardId: queueCard.cardId,
+        segments: card.segments as QuizSegment[],
+        queueIndex: queueCard.queueIndex,
+        selectedResult: queueCard.selectedResult,
+      };
+    }),
+  };
+}
+
+function parseQueue(queue: unknown): ChallengeRunQueueCard[] {
+  return queue as ChallengeRunQueueCard[];
 }
 
 function moveCardToBack(
