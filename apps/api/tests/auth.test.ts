@@ -55,6 +55,29 @@ describe("auth middleware", () => {
 });
 
 describe("PIN auth routes", () => {
+  it("reports PIN configuration and unlock status", async () => {
+    const app = createApp({ prisma, env: testEnv });
+
+    const initialResponse = await app.request("/api/auth/status");
+    expect(initialResponse.status).toBe(200);
+    await expect(initialResponse.json()).resolves.toEqual({
+      pinConfigured: false,
+      unlocked: false,
+    });
+
+    await setupPin(app, "1234");
+    const cookie = await unlockAndGetCookie(app, "1234");
+    const unlockedResponse = await app.request("/api/auth/status", {
+      headers: { cookie },
+    });
+
+    expect(unlockedResponse.status).toBe(200);
+    await expect(unlockedResponse.json()).resolves.toEqual({
+      pinConfigured: true,
+      unlocked: true,
+    });
+  });
+
   it("sets up the first PIN when none exists", async () => {
     const app = createProtectedTestApp();
 

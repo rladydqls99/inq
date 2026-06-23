@@ -1,4 +1,4 @@
-import { deleteCookie, setSignedCookie } from "hono/cookie";
+import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
 import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
@@ -8,8 +8,10 @@ import {
   changePin,
   createSessionPayload,
   invalidateSessions,
+  isSessionValid,
   setupFirstPin,
   verifyPin,
+  type PinSessionPayload,
 } from "../services/authService";
 
 export function createAuthRoutes(options: {
@@ -17,6 +19,23 @@ export function createAuthRoutes(options: {
   env: ApiEnv;
 }) {
   const route = new Hono();
+
+  route.get("/status", async (context) => {
+    const settings = await options.prisma.pinSettings.findFirst();
+    const cookieValue = await getSignedCookie(
+      context,
+      options.env.sessionSecret,
+      SESSION_COOKIE_NAME,
+    );
+    const unlocked =
+      typeof cookieValue === "string" &&
+      (await isSessionValid(options.prisma, parseSession(cookieValue)));
+
+    return context.json({
+      pinConfigured: Boolean(settings),
+      unlocked,
+    });
+  });
 
   route.post("/setup-pin", async (context) => {
     const body = await context.req.json<{ pin?: string }>();
@@ -105,4 +124,12 @@ export function createAuthRoutes(options: {
   });
 
   return route;
+}
+
+function parseSession(cookieValue: string): PinSessionPayload {
+  try {
+    return JSON.parse(cookieValue) as PinSessionPayload;
+  } catch {
+    return { createdAt: "", expiresAt: "" };
+  }
 }
