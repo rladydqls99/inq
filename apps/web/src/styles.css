@@ -158,3 +158,66 @@ textarea {
   font-size: 12px;
   font-weight: 700;
 }
+
+.pin-screen {
+  display: grid;
+  min-height: 100dvh;
+  place-items: center;
+  padding: 24px;
+  background: #f7f7f5;
+}
+
+.pin-form,
+.pin-change-form {
+  display: grid;
+  width: min(100%, 360px);
+  gap: 14px;
+}
+
+.pin-form h1 {
+  margin: 0 0 4px;
+  font-size: 24px;
+  letter-spacing: 0;
+}
+
+.pin-form label,
+.pin-change-form label {
+  display: grid;
+  gap: 6px;
+  color: #40403c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.pin-form input,
+.pin-change-form input {
+  min-height: 44px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: #171717;
+}
+
+.pin-form button,
+.pin-change-form button {
+  min-height: 44px;
+  border: 0;
+  border-radius: 8px;
+  background: #166534;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.pin-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.pin-form__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 700;
+}

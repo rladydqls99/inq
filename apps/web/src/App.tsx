@@ -1,32 +1,44 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
+import { PinGate } from "./components/PinGate";
 import { PageHeader } from "./components/PageHeader";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
 const router = createBrowserRouter([
   {
-    element: <MobileAppShell />,
+    element: <AuthenticatedRoutes />,
     children: [
-      { path: "/", element: <PlaceholderPage title="Home" /> },
-      { path: "/challenges", element: <PlaceholderPage title="Challenges" /> },
       {
-        path: "/challenges/:challengeId/run",
-        element: <PlaceholderPage title="Challenge Run" />,
+        element: <MobileAppShell />,
+        children: [
+          { path: "/", element: <PlaceholderPage title="Home" /> },
+          { path: "/challenges", element: <PlaceholderPage title="Challenges" /> },
+          {
+            path: "/challenges/:challengeId/run",
+            element: <PlaceholderPage title="Challenge Run" />,
+          },
+          { path: "/decks", element: <PlaceholderPage title="Decks" /> },
+          {
+            path: "/decks/:deckId/manage",
+            element: <PlaceholderPage title="Deck Cards" />,
+          },
+          {
+            path: "/decks/:deckId/run",
+            element: <PlaceholderPage title="Deck Run" />,
+          },
+          {
+            path: "/cards/:cardId/edit",
+            element: <PlaceholderPage title="Edit Card" />,
+          },
+          { path: "/settings", element: <PlaceholderPage title="Settings" /> },
+        ],
       },
-      { path: "/decks", element: <PlaceholderPage title="Decks" /> },
       {
-        path: "/decks/:deckId/manage",
-        element: <PlaceholderPage title="Deck Cards" />,
+        element: <DesktopUploadLayout />,
+        children: [{ path: "/upload", element: <PlaceholderPage title="Upload" /> }],
       },
-      { path: "/decks/:deckId/run", element: <PlaceholderPage title="Deck Run" /> },
-      { path: "/cards/:cardId/edit", element: <PlaceholderPage title="Edit Card" /> },
-      { path: "/settings", element: <PlaceholderPage title="Settings" /> },
     ],
-  },
-  {
-    element: <DesktopUploadLayout />,
-    children: [{ path: "/upload", element: <PlaceholderPage title="Upload" /> }],
   },
 ]);
 
@@ -39,5 +51,13 @@ function PlaceholderPage({ title }: { title: string }) {
     <section className="page">
       <PageHeader title={title} />
     </section>
+  );
+}
+
+function AuthenticatedRoutes() {
+  return (
+    <PinGate>
+      <Outlet />
+    </PinGate>
   );
 }
