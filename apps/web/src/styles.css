@@ -95,3 +95,66 @@ textarea {
 .bottom-tab-nav__item.is-active {
   color: #166534;
 }
+
+.quiz-text {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 620;
+  line-height: 1.55;
+  letter-spacing: 0;
+}
+
+.quiz-text__blank {
+  color: #525252;
+}
+
+.quiz-text__answer {
+  border-radius: 4px;
+  padding: 0 2px;
+}
+
+.quiz-text__answer.is-correct {
+  color: #15803d;
+}
+
+.quiz-text__answer.is-wrong {
+  color: #b91c1c;
+}
+
+.quiz-text__answer.is-study {
+  color: #0f766e;
+  font-weight: 800;
+}
+
+.card-player {
+  display: grid;
+  gap: 18px;
+}
+
+.card-player__controls,
+.card-player__result-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.card-player button {
+  min-height: 40px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.quiz-preview {
+  display: grid;
+  gap: 8px;
+}
+
+.quiz-preview__count,
+.auto-advance-timer {
+  color: #62625d;
+  font-size: 12px;
+  font-weight: 700;
+}
