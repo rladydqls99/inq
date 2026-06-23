@@ -1,7 +1,43 @@
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+
+import { PageHeader } from "./components/PageHeader";
+import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
+import { MobileAppShell } from "./layouts/MobileAppShell";
+
+const router = createBrowserRouter([
+  {
+    element: <MobileAppShell />,
+    children: [
+      { path: "/", element: <PlaceholderPage title="Home" /> },
+      { path: "/challenges", element: <PlaceholderPage title="Challenges" /> },
+      {
+        path: "/challenges/:challengeId/run",
+        element: <PlaceholderPage title="Challenge Run" />,
+      },
+      { path: "/decks", element: <PlaceholderPage title="Decks" /> },
+      {
+        path: "/decks/:deckId/manage",
+        element: <PlaceholderPage title="Deck Cards" />,
+      },
+      { path: "/decks/:deckId/run", element: <PlaceholderPage title="Deck Run" /> },
+      { path: "/cards/:cardId/edit", element: <PlaceholderPage title="Edit Card" /> },
+      { path: "/settings", element: <PlaceholderPage title="Settings" /> },
+    ],
+  },
+  {
+    element: <DesktopUploadLayout />,
+    children: [{ path: "/upload", element: <PlaceholderPage title="Upload" /> }],
+  },
+]);
+
 export function App() {
+  return <RouterProvider router={router} />;
+}
+
+function PlaceholderPage({ title }: { title: string }) {
   return (
-    <main>
-      <h1>inq</h1>
-    </main>
+    <section className="page">
+      <PageHeader title={title} />
+    </section>
   );
 }
