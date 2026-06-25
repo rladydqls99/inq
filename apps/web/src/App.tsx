@@ -8,6 +8,7 @@ import { CardEditPage } from "./features/decks/CardEditPage";
 import { DeckDetailPage } from "./features/decks/DeckDetailPage";
 import { DeckListPage } from "./features/decks/DeckListPage";
 import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
+import { DeckRunnerPage } from "./features/runners/DeckRunnerPage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
           },
           {
             path: "/decks/:deckId/run",
-            element: <PlaceholderPage title="Deck Run" />,
+            element: <DeckRunnerPage />,
           },
           {
             path: "/cards/:cardId/edit",
