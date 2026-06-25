@@ -18,4 +18,9 @@ export default defineConfig({
   test: {
     include: ["tests/**/*.test.{ts,tsx}"],
   },
+  server: {
+    proxy: {
+      "/api": "http://127.0.0.1:3000",
+    },
+  },
 });
