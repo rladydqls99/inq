@@ -20,6 +20,12 @@ export async function listCardsByDeck(prisma: PrismaClient, deckId: string) {
   });
 }
 
+export async function getCardById(prisma: PrismaClient, cardId: string) {
+  return prisma.card.findUniqueOrThrow({
+    where: { id: cardId },
+  });
+}
+
 export async function updateCard(
   prisma: PrismaClient,
   cardId: string,

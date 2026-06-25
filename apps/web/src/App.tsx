@@ -4,6 +4,7 @@ import { PinGate } from "./components/PinGate";
 import { PageHeader } from "./components/PageHeader";
 import { ChallengeListPage } from "./features/challenges/ChallengeListPage";
 import { HomePage } from "./features/challenges/HomePage";
+import { CardEditPage } from "./features/decks/CardEditPage";
 import { DeckDetailPage } from "./features/decks/DeckDetailPage";
 import { DeckListPage } from "./features/decks/DeckListPage";
 import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
           },
           {
             path: "/cards/:cardId/edit",
-            element: <PlaceholderPage title="Edit Card" />,
+            element: <CardEditPage />,
           },
           { path: "/settings", element: <PlaceholderPage title="Settings" /> },
         ],

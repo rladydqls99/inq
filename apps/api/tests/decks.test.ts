@@ -85,7 +85,7 @@ describe("deck and card routes", () => {
     }
   });
 
-  it("lists cards by deck and updates card segments", async () => {
+  it("lists, reads, and updates card segments", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -109,6 +109,17 @@ describe("deck and card routes", () => {
           version: 1,
         },
       ]);
+
+      const getResponse = await app.request(`/api/cards/${card.id}`, {
+        headers: { cookie },
+      });
+      expect(getResponse.status).toBe(200);
+      await expect(getResponse.json()).resolves.toMatchObject({
+        id: card.id,
+        deckId: deck.id,
+        segments,
+        version: 1,
+      });
 
       const nextSegments: QuizSegment[] = [
         { type: "text", value: "수정된 " },

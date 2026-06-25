@@ -1,7 +1,11 @@
 import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
-import { listCardsByDeck, updateCard } from "@inq/db/repositories/cards";
+import {
+  getCardById,
+  listCardsByDeck,
+  updateCard,
+} from "@inq/db/repositories/cards";
 import type { CardResponse, QuizSegment } from "@inq/shared";
 
 export function createCardRoutes(options: { prisma: PrismaClient }) {
@@ -11,6 +15,12 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     const cards = await listCardsByDeck(options.prisma, context.req.param("deckId"));
 
     return context.json(cards.map(toCardResponse));
+  });
+
+  route.get("/cards/:cardId", async (context) => {
+    const card = await getCardById(options.prisma, context.req.param("cardId"));
+
+    return context.json(toCardResponse(card));
   });
 
   route.patch("/cards/:cardId", async (context) => {
