@@ -37,6 +37,18 @@ export function PinGate({ children }: PinGateProps) {
     };
   }, []);
 
+  useEffect(() => {
+    function handleLocked() {
+      setStatus((current) =>
+        current ? { pinConfigured: current.pinConfigured, unlocked: false } : current,
+      );
+    }
+
+    window.addEventListener("inq:locked", handleLocked);
+
+    return () => window.removeEventListener("inq:locked", handleLocked);
+  }, []);
+
   async function setupPin(pin: string) {
     setError(null);
     await apiRequest("/auth/setup-pin", {

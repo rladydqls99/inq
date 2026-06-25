@@ -37,6 +37,22 @@ describe("PinGate", () => {
     expect(await screen.findByText("Private content")).toBeTruthy();
   });
 
+  it("returns to the lock screen when the app emits a lock event", async () => {
+    mockFetch([{ pinConfigured: true, unlocked: true }]);
+
+    render(
+      <PinGate>
+        <div>Private content</div>
+      </PinGate>,
+    );
+
+    expect(await screen.findByText("Private content")).toBeTruthy();
+    window.dispatchEvent(new Event("inq:locked"));
+
+    expect(await screen.findByRole("heading", { name: "Unlock" })).toBeTruthy();
+    expect(screen.queryByText("Private content")).toBeNull();
+  });
+
   it("unlocks with PIN and then renders children", async () => {
     const user = userEvent.setup();
     mockFetch([

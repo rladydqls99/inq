@@ -9,6 +9,7 @@ import { DeckDetailPage } from "./features/decks/DeckDetailPage";
 import { DeckListPage } from "./features/decks/DeckListPage";
 import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
 import { DeckRunnerPage } from "./features/runners/DeckRunnerPage";
+import { SettingsPage } from "./features/settings/SettingsPage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
@@ -38,7 +39,7 @@ const router = createBrowserRouter([
             path: "/cards/:cardId/edit",
             element: <CardEditPage />,
           },
-          { path: "/settings", element: <PlaceholderPage title="Settings" /> },
+          { path: "/settings", element: <SettingsPage /> },
         ],
       },
       {

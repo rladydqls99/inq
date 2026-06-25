@@ -465,3 +465,45 @@ textarea {
   font-size: 13px;
   font-weight: 800;
 }
+
+.settings-sections {
+  display: grid;
+  gap: 18px;
+  margin-top: 18px;
+}
+
+.settings-section {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-section h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.settings-action {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.settings-action button {
+  min-height: 40px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 760;
+}
+
+.settings-action span,
+.pin-change-form span {
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+}
