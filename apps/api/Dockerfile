@@ -14,6 +14,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 
 COPY . .
+RUN pnpm --filter @inq/db prisma generate
 RUN pnpm --filter @inq/web build
 RUN pnpm --filter @inq/api build
 
