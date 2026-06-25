@@ -68,6 +68,83 @@ describe("UploadPage", () => {
       "훈민정음을 만든 [세종대왕]이다.",
     );
   });
+
+  it("validates markdown and renders preview cards", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/imports/markdown/preview": {
+        parsed: 1,
+        errors: [],
+        previewCards: [
+          {
+            blockIndex: 0,
+            segments: [
+              { type: "text", value: "훈민정음을 만든 " },
+              { type: "answer", id: "answer-1", value: "세종대왕" },
+              { type: "text", value: "이다." },
+            ],
+          },
+        ],
+      },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.click(source);
+    await user.paste("훈민정음을 만든 [세종대왕]이다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/imports/markdown/preview",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ markdown: "훈민정음을 만든 [세종대왕]이다." }),
+      }),
+    );
+    expect(await screen.findByText("1 parsed")).toBeTruthy();
+    expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
+    expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
+    expect(
+      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+  });
+
+  it("renders validation errors and disables card creation", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/imports/markdown/preview": {
+        parsed: 0,
+        errors: [
+          {
+            blockIndex: 0,
+            line: 1,
+            column: null,
+            code: "missing_answer",
+            message: "Quiz card must contain at least one answer segment.",
+            snippet: "정답 괄호가 없다.",
+          },
+        ],
+        previewCards: [],
+      },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.type(source, "정답 괄호가 없다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+
+    expect(await screen.findByText("missing_answer")).toBeTruthy();
+    expect(screen.getByText("Quiz card must contain at least one answer segment.")).toBeTruthy();
+    expect(
+      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  });
 });
 
 function renderUploadPage() {
@@ -108,4 +185,10 @@ function deck(input: { id: string; title: string }) {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
+}
+
+function matchesTextContent(expected: string) {
+  return (_content: string, element: Element | null) =>
+    element?.textContent === expected &&
+    Array.from(element.children).every((child) => child.textContent !== expected);
 }

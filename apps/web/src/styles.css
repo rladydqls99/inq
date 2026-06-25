@@ -547,7 +547,8 @@ textarea {
   align-items: end;
 }
 
-.deck-create-form button {
+.deck-create-form button,
+.upload-actions button {
   min-height: 40px;
   border: 0;
   border-radius: 8px;
@@ -558,7 +559,8 @@ textarea {
   font-weight: 800;
 }
 
-.deck-create-form button:disabled {
+.deck-create-form button:disabled,
+.upload-actions button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -590,6 +592,62 @@ textarea {
 .upload-pane textarea {
   min-height: 54dvh;
   resize: vertical;
+}
+
+.upload-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.import-summary {
+  color: #166534;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.import-summary.is-error {
+  color: #b91c1c;
+}
+
+.import-error-list,
+.import-preview-list {
+  display: grid;
+  gap: 10px;
+}
+
+.import-error,
+.import-preview-card {
+  display: grid;
+  gap: 8px;
+  border: 1px solid #deded8;
+  border-radius: 8px;
+  padding: 10px;
+}
+
+.import-error__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #62625d;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.import-error p {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.import-error code {
+  white-space: pre-wrap;
+}
+
+.import-preview-card > span {
+  color: #62625d;
+  font-size: 12px;
+  font-weight: 800;
 }
 
 @media (max-width: 860px) {
