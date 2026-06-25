@@ -6,5 +6,5 @@
     "rootDir": ".",
     "noEmit": false
   },
-  "include": ["src", "tests"]
+  "include": ["src"]
 }
