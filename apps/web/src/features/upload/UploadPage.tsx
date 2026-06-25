@@ -4,6 +4,7 @@ import type { ImportPreviewResponse } from "@inq/shared";
 import { apiRequest } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { DeckSelectOrCreate } from "./DeckSelectOrCreate";
+import { ImportConfirmBar } from "./ImportConfirmBar";
 import { ImportErrorList } from "./ImportErrorList";
 import { ImportPreviewList } from "./ImportPreviewList";
 import { ImportValidationSummary } from "./ImportValidationSummary";
@@ -13,6 +14,7 @@ export function UploadPage() {
   const [selectedDeckId, setSelectedDeckId] = useState("");
   const [markdown, setMarkdown] = useState("");
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
+  const [createdMessage, setCreatedMessage] = useState<string | null>(null);
   const selectDeck = useCallback((deckId: string) => {
     setSelectedDeckId(deckId);
   }, []);
@@ -23,6 +25,7 @@ export function UploadPage() {
     preview.parsed > 0;
 
   async function validateMarkdown() {
+    setCreatedMessage(null);
     const response = await apiRequest<ImportPreviewResponse>(
       "/imports/markdown/preview",
       {
@@ -31,6 +34,20 @@ export function UploadPage() {
       },
     );
     setPreview(response);
+  }
+
+  async function confirmImport() {
+    const response = await apiRequest<{ createdCount: number }>(
+      "/imports/markdown/confirm",
+      {
+        method: "POST",
+        body: JSON.stringify({ deckId: selectedDeckId, markdown }),
+      },
+    );
+
+    setMarkdown("");
+    setPreview(null);
+    setCreatedMessage(`${response.createdCount} cards created`);
   }
 
   return (
@@ -52,10 +69,12 @@ export function UploadPage() {
             >
               Validate
             </button>
-            <button type="button" disabled={!canCreate}>
-              Create cards
-            </button>
           </div>
+          <ImportConfirmBar
+            canCreate={canCreate}
+            createdMessage={createdMessage}
+            onConfirm={confirmImport}
+          />
           <ImportValidationSummary preview={preview} />
           <ImportErrorList errors={preview?.errors ?? []} />
           <ImportPreviewList cards={preview?.previewCards ?? []} />

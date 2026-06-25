@@ -145,6 +145,50 @@ describe("UploadPage", () => {
         .disabled,
     ).toBe(true);
   });
+
+  it("confirms import with the original markdown and clears source state", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/imports/markdown/preview": {
+        parsed: 1,
+        errors: [],
+        previewCards: [
+          {
+            blockIndex: 0,
+            segments: [
+              { type: "text", value: "훈민정음을 만든 " },
+              { type: "answer", id: "answer-1", value: "세종대왕" },
+              { type: "text", value: "이다." },
+            ],
+          },
+        ],
+      },
+      "/api/imports/markdown/confirm": { createdCount: 1 },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.click(source);
+    await user.paste("훈민정음을 만든 [세종대왕]이다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+    await user.click(await screen.findByRole("button", { name: "Create cards" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/imports/markdown/confirm",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          deckId: "deck-1",
+          markdown: "훈민정음을 만든 [세종대왕]이다.",
+        }),
+      }),
+    );
+    expect(await screen.findByText("1 cards created")).toBeTruthy();
+    expect(screen.getByLabelText("Markdown source")).toHaveProperty("value", "");
+    expect(screen.queryByText("1 parsed")).toBeNull();
+  });
 });
 
 function renderUploadPage() {
