@@ -280,3 +280,60 @@ textarea {
   font-size: 14px;
   font-weight: 700;
 }
+
+.challenge-form {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.challenge-form label {
+  display: grid;
+  gap: 6px;
+  color: #40403c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.challenge-form input,
+.challenge-form select {
+  min-height: 40px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff;
+  color: #171717;
+}
+
+.challenge-form button,
+.row-actions button {
+  min-height: 36px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 720;
+}
+
+.challenge-form button {
+  background: #166534;
+  color: #fff;
+}
+
+.challenge-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.challenge-row {
+  display: grid;
+  gap: 6px;
+}
+
+.row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-left: 4px;
+}
