@@ -1,0 +1,28 @@
+services:
+  api:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: api
+    environment:
+      DATABASE_URL: file:/data/inq.db
+      NODE_ENV: production
+      PIN_SESSION_TTL_SECONDS: ${PIN_SESSION_TTL_SECONDS:-86400}
+      SESSION_SECRET: ${SESSION_SECRET:-change-me-use-a-long-random-value}
+    volumes:
+      - inq-sqlite:/data
+    restart: unless-stopped
+
+  nginx:
+    build:
+      context: ..
+      dockerfile: apps/api/Dockerfile
+      target: web
+    depends_on:
+      - api
+    ports:
+      - "${NGINX_PORT:-8080}:80"
+    restart: unless-stopped
+
+volumes:
+  inq-sqlite:
