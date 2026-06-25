@@ -10,6 +10,7 @@ import { DeckListPage } from "./features/decks/DeckListPage";
 import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
 import { DeckRunnerPage } from "./features/runners/DeckRunnerPage";
 import { SettingsPage } from "./features/settings/SettingsPage";
+import { UploadPage } from "./features/upload/UploadPage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
@@ -44,7 +45,7 @@ const router = createBrowserRouter([
       },
       {
         element: <DesktopUploadLayout />,
-        children: [{ path: "/upload", element: <PlaceholderPage title="Upload" /> }],
+        children: [{ path: "/upload", element: <UploadPage /> }],
       },
     ],
   },

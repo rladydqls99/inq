@@ -507,3 +507,95 @@ textarea {
   font-size: 13px;
   font-weight: 800;
 }
+
+.upload-page {
+  display: grid;
+  gap: 18px;
+}
+
+.deck-select-create {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) minmax(320px, 1fr);
+  gap: 14px;
+  align-items: end;
+}
+
+.deck-select-create label,
+.deck-create-form label,
+.upload-pane label {
+  display: grid;
+  gap: 6px;
+  color: #40403c;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.deck-select-create select,
+.deck-create-form input {
+  min-height: 40px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 0 10px;
+  background: #fff;
+  color: #171717;
+}
+
+.deck-create-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: end;
+}
+
+.deck-create-form button {
+  min-height: 40px;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #166534;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 800;
+}
+
+.deck-create-form button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.upload-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 18px;
+  min-height: calc(100dvh - 168px);
+}
+
+.upload-pane {
+  display: grid;
+  align-content: start;
+  gap: 12px;
+  border: 1px solid #deded8;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fff;
+}
+
+.upload-pane h2 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.upload-pane textarea {
+  min-height: 54dvh;
+  resize: vertical;
+}
+
+@media (max-width: 860px) {
+  .deck-select-create,
+  .deck-create-form,
+  .upload-grid {
+    grid-template-columns: 1fr;
+  }
+}
