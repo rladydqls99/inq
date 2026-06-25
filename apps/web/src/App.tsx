@@ -4,6 +4,7 @@ import { PinGate } from "./components/PinGate";
 import { PageHeader } from "./components/PageHeader";
 import { ChallengeListPage } from "./features/challenges/ChallengeListPage";
 import { HomePage } from "./features/challenges/HomePage";
+import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
 
@@ -18,7 +19,7 @@ const router = createBrowserRouter([
           { path: "/challenges", element: <ChallengeListPage /> },
           {
             path: "/challenges/:challengeId/run",
-            element: <PlaceholderPage title="Challenge Run" />,
+            element: <ChallengeRunnerPage />,
           },
           { path: "/decks", element: <PlaceholderPage title="Decks" /> },
           {
