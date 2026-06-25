@@ -281,13 +281,16 @@ textarea {
   font-weight: 700;
 }
 
-.challenge-form {
+.challenge-form,
+.compact-form {
   display: grid;
   gap: 10px;
   margin-top: 14px;
 }
 
-.challenge-form label {
+.challenge-form label,
+.compact-form label,
+.card-editor label {
   display: grid;
   gap: 6px;
   color: #40403c;
@@ -296,7 +299,8 @@ textarea {
 }
 
 .challenge-form input,
-.challenge-form select {
+.challenge-form select,
+.compact-form input {
   min-height: 40px;
   border: 1px solid #d2d2ca;
   border-radius: 8px;
@@ -306,7 +310,10 @@ textarea {
 }
 
 .challenge-form button,
-.row-actions button {
+.compact-form button,
+.row-actions button,
+.row-action-link,
+.card-editor__actions button {
   min-height: 36px;
   border: 1px solid #d2d2ca;
   border-radius: 8px;
@@ -316,17 +323,21 @@ textarea {
   font-weight: 720;
 }
 
-.challenge-form button {
+.challenge-form button,
+.compact-form button,
+.card-editor__actions button {
   background: #166534;
   color: #fff;
 }
 
-.challenge-form button:disabled {
+.challenge-form button:disabled,
+.compact-form button:disabled {
   cursor: not-allowed;
   opacity: 0.55;
 }
 
-.challenge-row {
+.challenge-row,
+.deck-row {
   display: grid;
   gap: 6px;
 }
@@ -336,6 +347,13 @@ textarea {
   flex-wrap: wrap;
   gap: 6px;
   padding-left: 4px;
+}
+
+.row-action-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 10px;
+  text-decoration: none;
 }
 
 .runner-surface {
@@ -360,4 +378,50 @@ textarea {
   color: #fff;
   cursor: pointer;
   font-weight: 800;
+}
+
+.card-editor-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.card-editor {
+  display: grid;
+  gap: 12px;
+  border: 1px solid #deded8;
+  border-radius: 8px;
+  padding: 12px;
+  background: #fff;
+}
+
+.card-editor__revealed {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 760;
+  line-height: 1.5;
+}
+
+.card-editor textarea {
+  min-height: 112px;
+  resize: vertical;
+}
+
+.card-editor__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.card-editor__actions span {
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.card-editor__error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 760;
 }

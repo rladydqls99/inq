@@ -4,6 +4,8 @@ import { PinGate } from "./components/PinGate";
 import { PageHeader } from "./components/PageHeader";
 import { ChallengeListPage } from "./features/challenges/ChallengeListPage";
 import { HomePage } from "./features/challenges/HomePage";
+import { DeckDetailPage } from "./features/decks/DeckDetailPage";
+import { DeckListPage } from "./features/decks/DeckListPage";
 import { ChallengeRunnerPage } from "./features/runners/ChallengeRunnerPage";
 import { DesktopUploadLayout } from "./layouts/DesktopUploadLayout";
 import { MobileAppShell } from "./layouts/MobileAppShell";
@@ -21,10 +23,10 @@ const router = createBrowserRouter([
             path: "/challenges/:challengeId/run",
             element: <ChallengeRunnerPage />,
           },
-          { path: "/decks", element: <PlaceholderPage title="Decks" /> },
+          { path: "/decks", element: <DeckListPage /> },
           {
             path: "/decks/:deckId/manage",
-            element: <PlaceholderPage title="Deck Cards" />,
+            element: <DeckDetailPage />,
           },
           {
             path: "/decks/:deckId/run",
