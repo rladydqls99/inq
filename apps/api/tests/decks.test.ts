@@ -141,6 +141,27 @@ describe("deck and card routes", () => {
         version: 2,
       });
 
+      for (const invalidSegments of [
+        [{ type: "text", value: "정답 없는 카드" }],
+        [{ type: "answer", id: "answer-1", value: "" }],
+      ]) {
+        const invalidResponse = await app.request(`/api/cards/${card.id}`, {
+          method: "PATCH",
+          body: JSON.stringify({
+            segments: invalidSegments,
+            version: 2,
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        });
+        expect(invalidResponse.status).toBe(400);
+        await expect(invalidResponse.json()).resolves.toEqual({
+          error: "invalid_card_segments",
+        });
+      }
+
       const deleteResponse = await app.request(`/api/cards/${card.id}`, {
         method: "DELETE",
         headers: { cookie },

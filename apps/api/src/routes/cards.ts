@@ -7,7 +7,7 @@ import {
   listCardsByDeck,
   updateCard,
 } from "@inq/db/repositories/cards";
-import type { CardResponse, QuizSegment } from "@inq/shared";
+import { hasAnswerSegment, type CardResponse, type QuizSegment } from "@inq/shared";
 
 export function createCardRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
@@ -32,6 +32,10 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
 
     if (!body.segments || typeof body.version !== "number") {
       return context.json({ error: "card_update_fields_required" }, 400);
+    }
+
+    if (!isValidQuizSegments(body.segments)) {
+      return context.json({ error: "invalid_card_segments" }, 400);
     }
 
     const card = await updateCard(options.prisma, context.req.param("cardId"), {
@@ -71,4 +75,33 @@ function toCardResponse(card: {
     createdAt: card.createdAt.toISOString(),
     updatedAt: card.updatedAt.toISOString(),
   };
+}
+
+function isValidQuizSegments(segments: unknown): segments is QuizSegment[] {
+  return (
+    Array.isArray(segments) &&
+    segments.length > 0 &&
+    segments.every(isValidQuizSegment) &&
+    hasAnswerSegment(segments)
+  );
+}
+
+function isValidQuizSegment(segment: unknown): segment is QuizSegment {
+  if (!segment || typeof segment !== "object") {
+    return false;
+  }
+
+  const candidate = segment as Partial<QuizSegment>;
+
+  if (candidate.type === "text") {
+    return typeof candidate.value === "string";
+  }
+
+  return (
+    candidate.type === "answer" &&
+    typeof candidate.id === "string" &&
+    candidate.id.length > 0 &&
+    typeof candidate.value === "string" &&
+    candidate.value.length > 0
+  );
 }
