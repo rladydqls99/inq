@@ -120,10 +120,20 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.get("/:challengeId/run", async (context) => {
+    const challengeId = context.req.param("challengeId");
+    const challenge = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!challenge) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
     return context.json(
       await getOrCreateChallengeRunState(
         options.prisma,
-        context.req.param("challengeId"),
+        challengeId,
       ),
     );
   });

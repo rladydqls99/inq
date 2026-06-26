@@ -14,6 +14,26 @@ const segments: QuizSegment[] = [
 ];
 
 describe("challenge run routes", () => {
+  it("returns not found when getting run state for a missing challenge", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/challenges/missing-challenge/run", {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({
+        error: "challenge_not_found",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("gets a persisted challenge run session", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
