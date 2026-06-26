@@ -47,6 +47,36 @@ describe("deck run routes", () => {
         completedAt: expect.any(String),
       });
 
+      const overflowResponse = await app.request(`/api/decks/${deck.id}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 99 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(overflowResponse.status).toBe(200);
+      await expect(overflowResponse.json()).resolves.toMatchObject({
+        deckId: deck.id,
+        cursor: 1,
+        completedAt: expect.any(String),
+      });
+
+      const negativeResponse = await app.request(`/api/decks/${deck.id}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: -5 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(negativeResponse.status).toBe(200);
+      await expect(negativeResponse.json()).resolves.toMatchObject({
+        deckId: deck.id,
+        cursor: 0,
+        completedAt: null,
+      });
+
       const restartResponse = await app.request(
         `/api/decks/${deck.id}/run/restart`,
         {

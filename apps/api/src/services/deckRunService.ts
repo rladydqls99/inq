@@ -35,9 +35,10 @@ export async function updateDeckRun(
   cursor: number,
 ): Promise<DeckRunResponse> {
   const cardCount = await prisma.card.count({ where: { deckId } });
+  const boundedCursor = Math.min(Math.max(cursor, 0), cardCount);
   await updateDeckRunCursor(prisma, deckId, {
-    cursor,
-    completedAt: cursor >= cardCount ? new Date() : null,
+    cursor: boundedCursor,
+    completedAt: boundedCursor >= cardCount ? new Date() : null,
   });
 
   return getDeckRunResponse(prisma, deckId);
