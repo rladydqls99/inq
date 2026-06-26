@@ -329,6 +329,37 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("rejects results for cards outside the active challenge run queue", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      await getRun(app, challenge.id, cookie);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: JSON.stringify({
+          sessionCardId: "missing-session-card",
+          finalResult: "correct",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({
+        error: "session_card_not_found",
+      });
+      await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(0);
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("corrects a previous result and recalculates state from the session starting stage", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

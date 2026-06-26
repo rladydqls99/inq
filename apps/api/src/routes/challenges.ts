@@ -183,6 +183,21 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_not_found" }, 404);
     }
 
+    const activeSession = await options.prisma.challengeRunSession.findFirst({
+      where: {
+        challengeId,
+        status: "active",
+      },
+      select: { queue: true },
+    });
+
+    if (
+      !activeSession ||
+      !queueHasSessionCard(activeSession.queue, body.sessionCardId)
+    ) {
+      return context.json({ error: "session_card_not_found" }, 404);
+    }
+
     return context.json(
       await submitChallengeRunResult(options.prisma, {
         challengeId,
@@ -229,4 +244,17 @@ function isValidReviewIntervals(intervals: unknown): intervals is number[] {
 
 function isChallengeResult(result: unknown): result is "correct" | "wrong" {
   return result === "correct" || result === "wrong";
+}
+
+function queueHasSessionCard(queue: unknown, sessionCardId: string) {
+  return (
+    Array.isArray(queue) &&
+    queue.some(
+      (card) =>
+        card &&
+        typeof card === "object" &&
+        "sessionCardId" in card &&
+        card.sessionCardId === sessionCardId,
+    )
+  );
 }
