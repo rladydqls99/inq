@@ -79,6 +79,24 @@ describe("challenge run routes", () => {
 
       const reloadedRun = await getRun(app, challenge.id, cookie);
       expect(reloadedRun.cursor).toBe(1);
+
+      const negativeResponse = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: -5 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(negativeResponse.status).toBe(200);
+      await expect(negativeResponse.json()).resolves.toMatchObject({
+        challengeId: challenge.id,
+        cursor: 0,
+        status: "active",
+      });
     } finally {
       await cleanup();
     }
