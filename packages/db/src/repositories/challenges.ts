@@ -64,6 +64,13 @@ export async function updateChallengeFromDeck(
           cardId: card.id,
         })),
       });
+      await transaction.challenge.update({
+        where: { id: challenge.id },
+        data: {
+          status: "active",
+          completedAt: null,
+        },
+      });
     }
 
     return { addedCount: missingCards.length };

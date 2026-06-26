@@ -144,6 +144,53 @@ describe("challenge routes", () => {
       await cleanup();
     }
   });
+
+  it("reactivates a completed challenge when new deck cards are added", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "복습 완료",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+      await prisma.challenge.update({
+        where: { id: challenge.id },
+        data: {
+          status: "completed",
+          completedAt: new Date("2026-06-25T00:00:00.000Z"),
+        },
+      });
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: challenge.id },
+        data: { completedAt: new Date("2026-06-25T00:00:00.000Z") },
+      });
+      await createCard(prisma, { deckId: deck.id, segments });
+
+      const updateResponse = await app.request(
+        `/api/challenges/${challenge.id}/update`,
+        {
+          method: "POST",
+          headers: { cookie },
+        },
+      );
+
+      expect(updateResponse.status).toBe(200);
+      await expect(updateResponse.json()).resolves.toEqual({ addedCount: 1 });
+      await expect(
+        prisma.challenge.findUniqueOrThrow({ where: { id: challenge.id } }),
+      ).resolves.toMatchObject({
+        status: "active",
+        completedAt: null,
+      });
+    } finally {
+      await cleanup();
+    }
+  });
 });
 
 function testEnv() {
