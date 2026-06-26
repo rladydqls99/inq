@@ -39,6 +39,15 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "invalid_review_intervals" }, 400);
     }
 
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: body.deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
     const challenge = await createChallenge(options.prisma, {
       name,
       deckId: body.deckId,

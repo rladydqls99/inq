@@ -239,6 +239,33 @@ describe("challenge routes", () => {
     }
   });
 
+  it("rejects challenge creation when the target deck does not exist", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "중간고사",
+          deckId: "missing-deck",
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("returns not found when patching a missing challenge", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
