@@ -139,15 +139,25 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.patch("/:challengeId/run", async (context) => {
+    const challengeId = context.req.param("challengeId");
     const body = await context.req.json<{ cursor?: number }>();
 
     if (typeof body.cursor !== "number") {
       return context.json({ error: "cursor_required" }, 400);
     }
 
+    const challenge = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!challenge) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
     return context.json(
       await updateChallengeRunCursor(options.prisma, {
-        challengeId: context.req.param("challengeId"),
+        challengeId,
         cursor: body.cursor,
       }),
     );
