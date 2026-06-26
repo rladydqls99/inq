@@ -73,7 +73,7 @@ describe("UploadPage", () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/imports/markdown/preview": {
+      "/api/import/markdown/preview": {
         parsed: 1,
         errors: [],
         previewCards: [
@@ -97,7 +97,7 @@ describe("UploadPage", () => {
     await user.click(screen.getByRole("button", { name: "Validate" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/imports/markdown/preview",
+      "/api/import/markdown/preview",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({ markdown: "훈민정음을 만든 [세종대왕]이다." }),
@@ -116,7 +116,7 @@ describe("UploadPage", () => {
     const user = userEvent.setup();
     mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/imports/markdown/preview": {
+      "/api/import/markdown/preview": {
         parsed: 0,
         errors: [
           {
@@ -150,7 +150,7 @@ describe("UploadPage", () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/imports/markdown/preview": {
+      "/api/import/markdown/preview": {
         parsed: 1,
         errors: [],
         previewCards: [
@@ -164,7 +164,7 @@ describe("UploadPage", () => {
           },
         ],
       },
-      "/api/imports/markdown/confirm": { createdCount: 1 },
+      "/api/import/markdown/confirm": { createdCount: 1 },
     });
 
     renderUploadPage();
@@ -176,7 +176,7 @@ describe("UploadPage", () => {
     await user.click(await screen.findByRole("button", { name: "Create cards" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/imports/markdown/confirm",
+      "/api/import/markdown/confirm",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({

@@ -27,7 +27,7 @@ export function UploadPage() {
   async function validateMarkdown() {
     setCreatedMessage(null);
     const response = await apiRequest<ImportPreviewResponse>(
-      "/imports/markdown/preview",
+      "/import/markdown/preview",
       {
         method: "POST",
         body: JSON.stringify({ markdown }),
@@ -38,7 +38,7 @@ export function UploadPage() {
 
   async function confirmImport() {
     const response = await apiRequest<{ createdCount: number }>(
-      "/imports/markdown/confirm",
+      "/import/markdown/confirm",
       {
         method: "POST",
         body: JSON.stringify({ deckId: selectedDeckId, markdown }),

@@ -11,7 +11,7 @@ describe("markdown import routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
 
-      const response = await app.request("/api/imports/markdown/preview", {
+      const response = await app.request("/api/import/markdown/preview", {
         method: "POST",
         body: JSON.stringify({
           markdown: "훈민정음을 만든 [조선]의 왕은 [세종대왕]이다.",
@@ -52,7 +52,7 @@ describe("markdown import routes", () => {
       const cookie = await unlockTestApp(app);
       const deck = await prisma.deck.create({ data: { title: "국어" } });
 
-      const response = await app.request("/api/imports/markdown/confirm", {
+      const response = await app.request("/api/import/markdown/confirm", {
         method: "POST",
         body: JSON.stringify({
           deckId: deck.id,
@@ -71,7 +71,7 @@ describe("markdown import routes", () => {
       );
 
       const invalidResponse = await app.request(
-        "/api/imports/markdown/confirm",
+        "/api/import/markdown/confirm",
         {
           method: "POST",
           body: JSON.stringify({

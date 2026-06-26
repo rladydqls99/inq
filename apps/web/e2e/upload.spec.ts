@@ -8,7 +8,7 @@ test("desktop upload previews and confirms valid markdown", async ({ page }) => 
       body: JSON.stringify([{ id: "deck-1", title: "국어", cardCount: 0 }]),
     });
   });
-  await page.route("**/api/imports/markdown/preview", async (route) => {
+  await page.route("**/api/import/markdown/preview", async (route) => {
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
@@ -27,7 +27,7 @@ test("desktop upload previews and confirms valid markdown", async ({ page }) => 
       }),
     });
   });
-  await page.route("**/api/imports/markdown/confirm", async (route) => {
+  await page.route("**/api/import/markdown/confirm", async (route) => {
     await route.fulfill({
       status: 201,
       contentType: "application/json",
@@ -54,7 +54,7 @@ test("desktop upload shows validation errors", async ({ page }) => {
       body: JSON.stringify([{ id: "deck-1", title: "국어", cardCount: 0 }]),
     });
   });
-  await page.route("**/api/imports/markdown/preview", async (route) => {
+  await page.route("**/api/import/markdown/preview", async (route) => {
     await route.fulfill({
       contentType: "application/json",
       body: JSON.stringify({
