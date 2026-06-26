@@ -119,7 +119,7 @@ export async function isSessionValid(
     return false;
   }
 
-  return createdAt.getTime() >= settings.sessionsInvalidatedAt.getTime();
+  return createdAt.getTime() > settings.sessionsInvalidatedAt.getTime();
 }
 
 async function hashPin(pin: string) {
