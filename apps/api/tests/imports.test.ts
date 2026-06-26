@@ -92,4 +92,30 @@ describe("markdown import routes", () => {
       await cleanup();
     }
   });
+
+  it("rejects markdown confirm when the target deck does not exist", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/import/markdown/confirm", {
+        method: "POST",
+        body: JSON.stringify({
+          deckId: "missing-deck",
+          markdown: "훈민정음을 만든 [조선]의 왕은 [세종대왕]이다.",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+    } finally {
+      await cleanup();
+    }
+  });
 });

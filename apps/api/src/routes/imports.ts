@@ -26,6 +26,15 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "import_fields_required" }, 400);
     }
 
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: body.deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
     const result = await confirmMarkdownImport(options.prisma, {
       deckId: body.deckId,
       markdown: body.markdown,
