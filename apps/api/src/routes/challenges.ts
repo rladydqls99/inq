@@ -99,9 +99,13 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.delete("/:challengeId", async (context) => {
-    await options.prisma.challenge.delete({
+    const result = await options.prisma.challenge.deleteMany({
       where: { id: context.req.param("challengeId") },
     });
+
+    if (result.count === 0) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
 
     return context.body(null, 204);
   });
