@@ -4,6 +4,7 @@ import { createCard } from "@inq/db/repositories/cards";
 import { createChallenge } from "@inq/db/repositories/challenges";
 import type { QuizSegment } from "@inq/shared";
 import { createApp } from "../src/app";
+import { getOrCreateChallengeRunState } from "../src/services/challengeRunService";
 import { createTestPrisma, testEnv, unlockTestApp } from "./testUtils";
 
 const segments: QuizSegment[] = [
@@ -78,6 +79,84 @@ describe("challenge run routes", () => {
 
       const reloadedRun = await getRun(app, challenge.id, cookie);
       expect(reloadedRun.cursor).toBe(1);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("marks the active run session completed when cursor moves past the queue", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      const run = await getRun(app, challenge.id, cookie);
+
+      const updateResponse = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: run.cards.length }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+
+      expect(updateResponse.status).toBe(200);
+      await expect(updateResponse.json()).resolves.toMatchObject({
+        challengeId: challenge.id,
+        cursor: run.cards.length,
+        status: "completed",
+      });
+      await expect(
+        prisma.challengeRunSession.count({
+          where: { challengeId: challenge.id, status: "active" },
+        }),
+      ).resolves.toBe(0);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("does not keep an empty active run session when no cards are due", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const { challenge } = await createChallengeFixture(prisma);
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: challenge.id },
+        data: { dueAt: new Date("2026-07-01T00:00:00.000Z") },
+      });
+
+      const earlyRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        new Date("2026-06-25T00:00:00.000Z"),
+      );
+      expect(earlyRun).toMatchObject({
+        challengeId: challenge.id,
+        status: "completed",
+        cards: [],
+      });
+      await expect(
+        prisma.challengeRunSession.count({
+          where: { challengeId: challenge.id, status: "active" },
+        }),
+      ).resolves.toBe(0);
+
+      const dueRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        new Date("2026-07-01T00:00:00.000Z"),
+      );
+      expect(dueRun).toMatchObject({
+        challengeId: challenge.id,
+        status: "active",
+      });
+      expect(dueRun.cards).toHaveLength(2);
     } finally {
       await cleanup();
     }

@@ -186,6 +186,8 @@ export async function getOrCreateChallengeRunState(
     data: {
       challengeId,
       queue: queue as unknown as Prisma.InputJsonValue,
+      status: queue.length === 0 ? "completed" : "active",
+      completedAt: queue.length === 0 ? now : null,
     },
   });
 
@@ -205,9 +207,14 @@ export async function updateChallengeRunCursor(
   });
   const queue = parseQueue(session.queue);
   const boundedCursor = Math.min(Math.max(input.cursor, 0), queue.length);
+  const completed = boundedCursor >= queue.length;
   const updatedSession = await prisma.challengeRunSession.update({
     where: { id: session.id },
-    data: { cursor: boundedCursor },
+    data: {
+      cursor: boundedCursor,
+      status: completed ? "completed" : "active",
+      completedAt: completed ? new Date() : null,
+    },
   });
 
   return toChallengeRunState(prisma, updatedSession);
