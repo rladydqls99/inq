@@ -13,6 +13,7 @@ import {
 import {
   getOrCreateChallengeRunState,
   submitChallengeRunResult,
+  updateChallengeRunCursor,
 } from "../services/challengeRunService";
 
 export function createChallengeRoutes(options: { prisma: PrismaClient }) {
@@ -86,6 +87,21 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
         options.prisma,
         context.req.param("challengeId"),
       ),
+    );
+  });
+
+  route.patch("/:challengeId/run", async (context) => {
+    const body = await context.req.json<{ cursor?: number }>();
+
+    if (typeof body.cursor !== "number") {
+      return context.json({ error: "cursor_required" }, 400);
+    }
+
+    return context.json(
+      await updateChallengeRunCursor(options.prisma, {
+        challengeId: context.req.param("challengeId"),
+        cursor: body.cursor,
+      }),
     );
   });
 

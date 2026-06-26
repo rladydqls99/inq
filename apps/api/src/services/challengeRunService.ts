@@ -192,6 +192,27 @@ export async function getOrCreateChallengeRunState(
   return toChallengeRunState(prisma, session);
 }
 
+export async function updateChallengeRunCursor(
+  prisma: PrismaClient,
+  input: { challengeId: string; cursor: number },
+): Promise<ChallengeRunState> {
+  const session = await prisma.challengeRunSession.findFirstOrThrow({
+    where: {
+      challengeId: input.challengeId,
+      status: "active",
+    },
+    orderBy: { createdAt: "desc" },
+  });
+  const queue = parseQueue(session.queue);
+  const boundedCursor = Math.min(Math.max(input.cursor, 0), queue.length);
+  const updatedSession = await prisma.challengeRunSession.update({
+    where: { id: session.id },
+    data: { cursor: boundedCursor },
+  });
+
+  return toChallengeRunState(prisma, updatedSession);
+}
+
 export async function submitChallengeRunResult(
   prisma: PrismaClient,
   input: {

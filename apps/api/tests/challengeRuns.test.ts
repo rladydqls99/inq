@@ -50,6 +50,39 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("updates the persisted challenge run cursor", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      await getRun(app, challenge.id, cookie);
+
+      const updateResponse = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: 1 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(updateResponse.status).toBe(200);
+      await expect(updateResponse.json()).resolves.toMatchObject({
+        challengeId: challenge.id,
+        cursor: 1,
+      });
+
+      const reloadedRun = await getRun(app, challenge.id, cookie);
+      expect(reloadedRun.cursor).toBe(1);
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("submits a wrong result and moves the card to the back of the active queue", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
