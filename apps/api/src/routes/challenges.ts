@@ -52,6 +52,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.patch("/:challengeId", async (context) => {
+    const challengeId = context.req.param("challengeId");
     const body = await context.req.json<{
       name?: string;
       reviewIntervalsDays?: number[];
@@ -78,8 +79,17 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       data.maxStage = reviewIntervalsDays.length;
     }
 
+    const exists = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!exists) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
     const challenge = await options.prisma.challenge.update({
-      where: { id: context.req.param("challengeId") },
+      where: { id: challengeId },
       data,
     });
 
