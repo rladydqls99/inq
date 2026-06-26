@@ -2,7 +2,6 @@ import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
 import {
-  deleteCard,
   listCardsByDeck,
   updateCard,
 } from "@inq/db/repositories/cards";
@@ -62,7 +61,13 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.delete("/cards/:cardId", async (context) => {
-    await deleteCard(options.prisma, context.req.param("cardId"));
+    const result = await options.prisma.card.deleteMany({
+      where: { id: context.req.param("cardId") },
+    });
+
+    if (result.count === 0) {
+      return context.json({ error: "card_not_found" }, 404);
+    }
 
     return context.body(null, 204);
   });
