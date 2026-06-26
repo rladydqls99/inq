@@ -28,7 +28,15 @@ test("challenge runner reveals inline answers after scoring", async ({ page }) =
       body: JSON.stringify({ pinConfigured: true, unlocked: true }),
     });
   });
-  await page.route("**/api/challenges/challenge-1/run", async (route) => {
+  await page.route("**/api/challenges/challenge-1/run", async (route, request) => {
+    if (request.method() === "PATCH") {
+      await route.fulfill({
+        contentType: "application/json",
+        body: JSON.stringify({ ...runState, cursor: 1 }),
+      });
+      return;
+    }
+
     await route.fulfill({ contentType: "application/json", body: JSON.stringify(runState) });
   });
   await page.route("**/api/challenges/challenge-1/results", async (route) => {
@@ -55,4 +63,6 @@ test("challenge runner reveals inline answers after scoring", async ({ page }) =
   await page.getByRole("button", { name: "Correct" }).click();
   await expect(page.getByText("훈민정음을 만든 세종대왕이다.")).toBeVisible();
   await expect(page.getByText("5s")).toBeVisible();
+  await page.getByRole("button", { name: "Next" }).last().click();
+  await expect(page.getByText("Completed")).toBeVisible();
 });

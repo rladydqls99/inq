@@ -71,18 +71,29 @@ export function ChallengeRunnerPage() {
     setRunState(response.runState);
   }
 
-  function moveTo(nextCursor: number) {
+  async function moveTo(nextCursor: number) {
     if (!runState) {
       return;
     }
 
     const boundedCursor = Math.min(
       Math.max(nextCursor, 0),
-      Math.max(runState.cards.length - 1, 0),
+      runState.cards.length,
     );
 
-    setCursor(boundedCursor);
-    setSelectedResult(runState.cards[boundedCursor]?.selectedResult ?? null);
+    const nextRunState = await apiRequest<ChallengeRunState>(
+      `/challenges/${runState.challengeId}/run`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: boundedCursor }),
+      },
+    );
+
+    setRunState(nextRunState);
+    setCursor(nextRunState.cursor);
+    setSelectedResult(
+      nextRunState.cards[nextRunState.cursor]?.selectedResult ?? null,
+    );
   }
 
   return (
@@ -94,14 +105,14 @@ export function ChallengeRunnerPage() {
           mode="challenge"
           segments={currentCard.segments}
           selectedResult={selectedResult}
-          onPrevious={() => moveTo(cursor - 1)}
-          onNext={() => moveTo(cursor + 1)}
+          onPrevious={() => void moveTo(cursor - 1)}
+          onNext={() => void moveTo(cursor + 1)}
           onResult={(result) => void submitResult(result)}
         />
         {selectedResult ? (
           <div className="runner-next">
             <AutoAdvanceTimer seconds={5} />
-            <button type="button" onClick={() => moveTo(cursor + 1)}>
+            <button type="button" onClick={() => void moveTo(cursor + 1)}>
               Next
             </button>
           </div>

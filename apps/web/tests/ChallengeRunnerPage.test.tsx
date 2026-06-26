@@ -55,6 +55,13 @@ describe("ChallengeRunnerPage", () => {
 
     const nextButtons = screen.getAllByRole("button", { name: "Next" });
     await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+      }),
+    );
 
     await waitFor(() => {
       expect(
@@ -63,6 +70,38 @@ describe("ChallengeRunnerPage", () => {
         ),
       ).toBeTruthy();
     });
+  });
+
+  it("moves past the final card into completed state", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetch({ cardCount: 1 });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+    await user.click(screen.getByRole("button", { name: "Correct" }));
+    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+      }),
+    );
+    expect(await screen.findByText("Completed")).toBeTruthy();
   });
 });
 
@@ -74,16 +113,22 @@ function matchesTextContent(element: Element | null, text: string) {
   return Array.from(element.children).every((child) => child.textContent !== text);
 }
 
-function mockFetch() {
+function mockFetch(options: { cardCount?: number } = {}) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
+    const state = runState(options);
+
+    if (path === "/api/challenges/challenge-1/run" && init?.method === "PATCH") {
+      const body = JSON.parse(init.body as string) as { cursor: number };
+      return Promise.resolve(jsonResponse({ ...state, cursor: body.cursor }));
+    }
 
     if (path === "/api/challenges/challenge-1/run") {
-      return Promise.resolve(jsonResponse(runState()));
+      return Promise.resolve(jsonResponse(state));
     }
 
     if (path === "/api/challenges/challenge-1/results" && init?.method === "POST") {
-      return Promise.resolve(jsonResponse({ runState: runState(), progress: {} }));
+      return Promise.resolve(jsonResponse({ runState: state, progress: {} }));
     }
 
     return Promise.resolve(jsonResponse({}));
@@ -101,37 +146,39 @@ function jsonResponse(body: unknown) {
   });
 }
 
-function runState() {
+function runState(options: { cardCount?: number } = {}) {
+  const cards = [
+    {
+      sessionCardId: "session-card-1",
+      stateId: "state-1",
+      cardId: "card-1",
+      queueIndex: 0,
+      selectedResult: null,
+      segments: [
+        { type: "text", value: "훈민정음의 창제자는 " },
+        { type: "answer", id: "answer-1", value: "세종대왕" },
+        { type: "text", value: "이다." },
+      ],
+    },
+    {
+      sessionCardId: "session-card-2",
+      stateId: "state-2",
+      cardId: "card-2",
+      queueIndex: 1,
+      selectedResult: null,
+      segments: [
+        { type: "text", value: "조선의 수도는 " },
+        { type: "answer", id: "answer-1", value: "한양" },
+        { type: "text", value: "이다." },
+      ],
+    },
+  ].slice(0, options.cardCount ?? 2);
+
   return {
     sessionId: "session-1",
     challengeId: "challenge-1",
     status: "active",
     cursor: 0,
-    cards: [
-      {
-        sessionCardId: "session-card-1",
-        stateId: "state-1",
-        cardId: "card-1",
-        queueIndex: 0,
-        selectedResult: null,
-        segments: [
-          { type: "text", value: "훈민정음의 창제자는 " },
-          { type: "answer", id: "answer-1", value: "세종대왕" },
-          { type: "text", value: "이다." },
-        ],
-      },
-      {
-        sessionCardId: "session-card-2",
-        stateId: "state-2",
-        cardId: "card-2",
-        queueIndex: 1,
-        selectedResult: null,
-        segments: [
-          { type: "text", value: "조선의 수도는 " },
-          { type: "answer", id: "answer-1", value: "한양" },
-          { type: "text", value: "이다." },
-        ],
-      },
-    ],
+    cards,
   };
 }
