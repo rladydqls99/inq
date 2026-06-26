@@ -34,6 +34,11 @@ export function DeckDetailPage() {
     };
   }, [deckId]);
 
+  async function deleteCard(cardId: string) {
+    await apiRequest(`/cards/${cardId}`, { method: "DELETE" });
+    setCards((currentCards) => currentCards.filter((card) => card.id !== cardId));
+  }
+
   return (
     <section className="page">
       <PageHeader title="Deck Cards" />
@@ -47,6 +52,9 @@ export function DeckDetailPage() {
               <Link className="row-action-link" to={`/cards/${card.id}/edit`}>
                 Edit card
               </Link>
+              <button type="button" onClick={() => void deleteCard(card.id)}>
+                Delete card
+              </button>
             </div>
           </article>
         ))}

@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -35,6 +36,29 @@ describe("DeckDetailPage", () => {
       "/cards/card-1/edit",
     );
   });
+
+  it("deletes a card from the deck detail list", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+    });
+
+    renderDeckDetail();
+
+    const listItem = await screen.findByText("훈민정음을 만든 왕은 세종대왕이다.");
+    const cardItem = listItem.closest("article");
+
+    expect(cardItem).not.toBeNull();
+    await user.click(
+      within(cardItem as HTMLElement).getByRole("button", { name: "Delete card" }),
+    );
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/cards/card-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(screen.queryByText("훈민정음을 만든 왕은 세종대왕이다.")).toBeNull();
+  });
 });
 
 function renderDeckDetail() {
@@ -48,8 +72,13 @@ function renderDeckDetail() {
 }
 
 function mockFetchByPath(responsesByPath: Record<string, unknown>) {
-  const fetchMock = vi.fn((input: RequestInfo | URL) => {
+  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
+
+    if (path === "/api/cards/card-1" && init?.method === "DELETE") {
+      return Promise.resolve(new Response(null, { status: 204 }));
+    }
+
     const response = responsesByPath[path] ?? {};
 
     return Promise.resolve(
