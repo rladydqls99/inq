@@ -34,6 +34,10 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_fields_required" }, 400);
     }
 
+    if (!isValidReviewIntervals(body.reviewIntervalsDays)) {
+      return context.json({ error: "invalid_review_intervals" }, 400);
+    }
+
     const challenge = await createChallenge(options.prisma, {
       name: body.name,
       deckId: body.deckId,
@@ -59,6 +63,10 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     }
 
     if (reviewIntervalsDays !== undefined) {
+      if (!isValidReviewIntervals(reviewIntervalsDays)) {
+        return context.json({ error: "invalid_review_intervals" }, 400);
+      }
+
       data.reviewIntervalsDays = reviewIntervalsDays;
       data.maxStage = reviewIntervalsDays.length;
     }
@@ -140,4 +148,12 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   route.post("/:challengeId/update-from-deck", updateChallengeFromDeckHandler);
 
   return route;
+}
+
+function isValidReviewIntervals(intervals: unknown): intervals is number[] {
+  return (
+    Array.isArray(intervals) &&
+    intervals.length > 0 &&
+    intervals.every((interval) => Number.isInteger(interval) && interval > 0)
+  );
 }

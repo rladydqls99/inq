@@ -145,6 +145,58 @@ describe("challenge routes", () => {
     }
   });
 
+  it("rejects missing or invalid review intervals", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+
+      for (const reviewIntervalsDays of [[], [0, 3], [3, -1], [Number.NaN]]) {
+        const response = await app.request("/api/challenges", {
+          method: "POST",
+          body: JSON.stringify({
+            name: "잘못된 챌린지",
+            deckId: deck.id,
+            reviewIntervalsDays,
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        });
+
+        expect(response.status).toBe(400);
+        await expect(response.json()).resolves.toEqual({
+          error: "invalid_review_intervals",
+        });
+      }
+
+      await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "기존 챌린지",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+      const patchResponse = await app.request(`/api/challenges/${challenge.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ reviewIntervalsDays: [] }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(patchResponse.status).toBe(400);
+      await expect(patchResponse.json()).resolves.toEqual({
+        error: "invalid_review_intervals",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("reactivates a completed challenge when new deck cards are added", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
