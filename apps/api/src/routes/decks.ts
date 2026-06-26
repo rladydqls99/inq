@@ -44,7 +44,17 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "title_required" }, 400);
     }
 
-    const deck = await renameDeck(options.prisma, context.req.param("deckId"), {
+    const deckId = context.req.param("deckId");
+    const exists = await options.prisma.deck.findUnique({
+      where: { id: deckId },
+      select: { id: true },
+    });
+
+    if (!exists) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
+    const deck = await renameDeck(options.prisma, deckId, {
       title,
     });
     const cardCount = await options.prisma.card.count({
