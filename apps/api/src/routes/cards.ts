@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import type { PrismaClient } from "@inq/db";
 import {
   deleteCard,
-  getCardById,
   listCardsByDeck,
   updateCard,
 } from "@inq/db/repositories/cards";
@@ -19,7 +18,13 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.get("/cards/:cardId", async (context) => {
-    const card = await getCardById(options.prisma, context.req.param("cardId"));
+    const card = await options.prisma.card.findUnique({
+      where: { id: context.req.param("cardId") },
+    });
+
+    if (!card) {
+      return context.json({ error: "card_not_found" }, 404);
+    }
 
     return context.json(toCardResponse(card));
   });
