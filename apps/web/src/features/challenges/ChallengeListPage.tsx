@@ -9,6 +9,10 @@ import { ChallengeListItem } from "./ChallengeListItem";
 export function ChallengeListPage() {
   const [challenges, setChallenges] = useState<ChallengeResponse[]>([]);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [editingChallengeId, setEditingChallengeId] = useState<string | null>(
+    null,
+  );
+  const [editingName, setEditingName] = useState("");
 
   async function loadChallenges() {
     setChallenges(await apiRequest<ChallengeResponse[]>("/challenges"));
@@ -31,6 +35,27 @@ export function ChallengeListPage() {
     setUpdateMessage(`${result.addedCount} cards added`);
   }
 
+  function startEditing(challenge: ChallengeResponse) {
+    setEditingChallengeId(challenge.id);
+    setEditingName(challenge.name);
+  }
+
+  async function saveChallengeName(challengeId: string) {
+    const name = editingName.trim();
+
+    if (!name) {
+      return;
+    }
+
+    await apiRequest(`/challenges/${challengeId}`, {
+      method: "PATCH",
+      body: JSON.stringify({ name }),
+    });
+    setEditingChallengeId(null);
+    setEditingName("");
+    await loadChallenges();
+  }
+
   return (
     <section className="page">
       <PageHeader title="Challenges" />
@@ -44,8 +69,33 @@ export function ChallengeListPage() {
             data-testid={`challenge-row-${challenge.id}`}
           >
             <ChallengeListItem challenge={challenge} />
+            {editingChallengeId === challenge.id ? (
+              <div className="inline-edit">
+                <label>
+                  Challenge name
+                  <input
+                    value={editingName}
+                    onChange={(event) => setEditingName(event.target.value)}
+                  />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => void saveChallengeName(challenge.id)}
+                >
+                  Save
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingChallengeId(null)}
+                >
+                  Cancel
+                </button>
+              </div>
+            ) : null}
             <div className="row-actions" aria-label={`${challenge.name} actions`}>
-              <button type="button">Edit</button>
+              <button type="button" onClick={() => startEditing(challenge)}>
+                Edit
+              </button>
               <button
                 type="button"
                 onClick={() => void updateFromDeck(challenge.id)}

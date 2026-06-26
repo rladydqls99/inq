@@ -83,11 +83,53 @@ describe("ChallengeListPage", () => {
       expect.objectContaining({ method: "DELETE" }),
     );
   });
+
+  it("renames a challenge from the row actions", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
+      "/api/decks": [],
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    await user.click(within(listItem).getByRole("button", { name: "Edit" }));
+    const nameInput = within(listItem).getByLabelText("Challenge name");
+    await user.clear(nameInput);
+    await user.type(nameInput, "기말고사");
+    await user.click(within(listItem).getByRole("button", { name: "Save" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ name: "기말고사" }),
+      }),
+    );
+  });
 });
 
 function mockFetchByPath(responsesByPath: Record<string, unknown>) {
-  const fetchMock = vi.fn((input: RequestInfo | URL) => {
+  const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
+
+    if (path === "/api/challenges/challenge-1" && init?.method === "PATCH") {
+      return Promise.resolve(
+        new Response(
+          JSON.stringify(challenge({ id: "challenge-1", name: "기말고사" })),
+          {
+            status: 200,
+            headers: { "content-type": "application/json" },
+          },
+        ),
+      );
+    }
+
     const response = responsesByPath[path] ?? {};
 
     return Promise.resolve(
