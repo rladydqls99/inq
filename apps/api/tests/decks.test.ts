@@ -140,6 +140,15 @@ describe("deck and card routes", () => {
         segments: nextSegments,
         version: 2,
       });
+
+      const deleteResponse = await app.request(`/api/cards/${card.id}`, {
+        method: "DELETE",
+        headers: { cookie },
+      });
+      expect(deleteResponse.status).toBe(204);
+      await expect(prisma.card.count({ where: { id: card.id } })).resolves.toBe(
+        0,
+      );
     } finally {
       await cleanup();
     }

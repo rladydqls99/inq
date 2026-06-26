@@ -42,3 +42,9 @@ export async function updateCard(
     },
   });
 }
+
+export async function deleteCard(prisma: PrismaClient, cardId: string) {
+  await prisma.card.delete({
+    where: { id: cardId },
+  });
+}

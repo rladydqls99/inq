@@ -2,6 +2,7 @@ import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
 import {
+  deleteCard,
   getCardById,
   listCardsByDeck,
   updateCard,
@@ -39,6 +40,12 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     });
 
     return context.json(toCardResponse(card));
+  });
+
+  route.delete("/cards/:cardId", async (context) => {
+    await deleteCard(options.prisma, context.req.param("cardId"));
+
+    return context.body(null, 204);
   });
 
   return route;
