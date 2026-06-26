@@ -181,6 +181,29 @@ describe("deck and card routes", () => {
     }
   });
 
+  it("returns not found when updating a missing card", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/cards/missing-card", {
+        method: "PATCH",
+        body: JSON.stringify({ segments, version: 1 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({ error: "card_not_found" });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("lists, reads, and updates card segments", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
