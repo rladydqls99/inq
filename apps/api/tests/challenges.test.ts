@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { createCard } from "@inq/db/repositories/cards";
+import { createChallenge } from "@inq/db/repositories/challenges";
 import type { QuizSegment } from "@inq/shared";
 import { createApp } from "../src/app";
 import { createTestPrisma, unlockTestApp } from "./testUtils";
@@ -97,6 +98,48 @@ describe("challenge routes", () => {
         headers: { cookie },
       });
       await expect(emptyListResponse.json()).resolves.toEqual([]);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("lists challenges by nearest due date first", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+      const later = await createChallenge(prisma, {
+        name: "나중",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+      const sooner = await createChallenge(prisma, {
+        name: "먼저",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: later.id },
+        data: { dueAt: new Date("2026-07-10T00:00:00.000Z") },
+      });
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: sooner.id },
+        data: { dueAt: new Date("2026-07-01T00:00:00.000Z") },
+      });
+
+      const listResponse = await app.request("/api/challenges", {
+        headers: { cookie },
+      });
+
+      expect(listResponse.status).toBe(200);
+      const challenges = await listResponse.json();
+      expect(
+        challenges.map((challenge: { name: string }) => challenge.name),
+      ).toEqual(["먼저", "나중"]);
     } finally {
       await cleanup();
     }

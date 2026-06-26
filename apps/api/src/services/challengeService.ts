@@ -25,7 +25,9 @@ export async function listChallengeResponses(
     orderBy: { createdAt: "asc" },
   });
 
-  return challenges.map((challenge) => toChallengeResponse(challenge, now));
+  return challenges
+    .map((challenge) => toChallengeResponse(challenge, now))
+    .sort(compareChallengesByDueDate);
 }
 
 export function toChallengeResponse(
@@ -105,4 +107,29 @@ function findNextDueAt(
 
 function isDue(dueAt: Date | null, now: Date) {
   return dueAt === null || dueAt.getTime() <= now.getTime();
+}
+
+function compareChallengesByDueDate(
+  left: ChallengeResponse,
+  right: ChallengeResponse,
+) {
+  const leftDueNow = left.dueCount > 0;
+  const rightDueNow = right.dueCount > 0;
+
+  if (leftDueNow !== rightDueNow) {
+    return leftDueNow ? -1 : 1;
+  }
+
+  const leftTime = left.nextDueAt
+    ? Date.parse(left.nextDueAt)
+    : Number.POSITIVE_INFINITY;
+  const rightTime = right.nextDueAt
+    ? Date.parse(right.nextDueAt)
+    : Number.POSITIVE_INFINITY;
+
+  if (leftTime !== rightTime) {
+    return leftTime - rightTime;
+  }
+
+  return left.createdAt.localeCompare(right.createdAt);
 }
