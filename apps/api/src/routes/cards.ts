@@ -45,11 +45,15 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     const cardId = context.req.param("cardId");
     const exists = await options.prisma.card.findUnique({
       where: { id: cardId },
-      select: { id: true },
+      select: { id: true, version: true },
     });
 
     if (!exists) {
       return context.json({ error: "card_not_found" }, 404);
+    }
+
+    if (exists.version !== body.version) {
+      return context.json({ error: "card_version_conflict" }, 409);
     }
 
     const card = await updateCard(options.prisma, cardId, {

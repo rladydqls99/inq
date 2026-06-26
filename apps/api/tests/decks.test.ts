@@ -300,6 +300,19 @@ describe("deck and card routes", () => {
         });
       }
 
+      const staleVersionResponse = await app.request(`/api/cards/${card.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ segments: nextSegments, version: 1 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(staleVersionResponse.status).toBe(409);
+      await expect(staleVersionResponse.json()).resolves.toEqual({
+        error: "card_version_conflict",
+      });
+
       const deleteResponse = await app.request(`/api/cards/${card.id}`, {
         method: "DELETE",
         headers: { cookie },
