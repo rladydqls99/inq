@@ -154,7 +154,8 @@ mostly mobile-first, except quiz upload, which is optimized for desktop.
 - `GET /api/challenges/:challengeId/run`
 - `PATCH /api/challenges/:challengeId/run`
 - `POST /api/challenges/:challengeId/results`
-- `POST /api/import/markdown`
+- `POST /api/import/markdown/preview`
+- `POST /api/import/markdown/confirm`
 - `GET /api/backup/export`
 
 ## Deployment
