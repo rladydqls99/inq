@@ -55,10 +55,23 @@ export function HomePage() {
 }
 
 function compareByNextDueAt(left: ChallengeResponse, right: ChallengeResponse) {
-  const leftTime = left.nextDueAt ? Date.parse(left.nextDueAt) : Number.POSITIVE_INFINITY;
+  const leftDueNow = left.dueCount > 0;
+  const rightDueNow = right.dueCount > 0;
+
+  if (leftDueNow !== rightDueNow) {
+    return leftDueNow ? -1 : 1;
+  }
+
+  const leftTime = left.nextDueAt
+    ? Date.parse(left.nextDueAt)
+    : Number.POSITIVE_INFINITY;
   const rightTime = right.nextDueAt
     ? Date.parse(right.nextDueAt)
     : Number.POSITIVE_INFINITY;
 
-  return leftTime - rightTime;
+  if (leftTime !== rightTime) {
+    return leftTime - rightTime;
+  }
+
+  return left.createdAt.localeCompare(right.createdAt);
 }

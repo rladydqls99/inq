@@ -40,6 +40,35 @@ describe("HomePage", () => {
     expect(items[0]?.getAttribute("href")).toBe("/challenges/soon/run");
   });
 
+  it("keeps currently due challenges before future due challenges", async () => {
+    mockFetch([
+      challenge({
+        id: "future",
+        name: "미래",
+        dueCount: 0,
+        nextDueAt: "2026-06-24T00:00:00.000Z",
+      }),
+      challenge({
+        id: "due-now",
+        name: "지금",
+        dueCount: 1,
+        nextDueAt: null,
+      }),
+    ]);
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
+
+    const items = await screen.findAllByRole("link");
+    expect(items.map((item) => within(item).getByRole("heading").textContent)).toEqual([
+      "지금",
+      "미래",
+    ]);
+  });
+
   it("shows empty state when there are no challenges", async () => {
     mockFetch([]);
 
@@ -69,7 +98,10 @@ function challenge(input: {
   id: string;
   name: string;
   nextDueAt: string | null;
+  dueCount?: number;
 }) {
+  const dueCount = input.dueCount ?? 1;
+
   return {
     id: input.id,
     name: input.name,
@@ -79,11 +111,11 @@ function challenge(input: {
     answerMode: "manual",
     reviewIntervalsDays: [3, 5, 10],
     maxStage: 3,
-    dueCount: 1,
+    dueCount,
     progress: {
       totalCards: 10,
       completedCards: 2,
-      dueCards: 1,
+      dueCards: dueCount,
       currentStageCounts: { 0: 8 },
     },
     nextDueAt: input.nextDueAt,
