@@ -258,6 +258,105 @@ describe("challenge run routes", () => {
       await cleanup();
     }
   });
+
+  it("completes the challenge when every card state is completed", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "최종 복습",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: challenge.id },
+        data: { stage: 3 },
+      });
+      const run = await getRun(app, challenge.id, cookie);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: JSON.stringify({
+          sessionCardId: run.cards[0].sessionCardId,
+          finalResult: "correct",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      const updatedChallenge = await prisma.challenge.findUniqueOrThrow({
+        where: { id: challenge.id },
+      });
+      expect(updatedChallenge.status).toBe("completed");
+      expect(updatedChallenge.completedAt).toEqual(expect.any(Date));
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("reactivates a completed challenge when a final answer is corrected to wrong", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "최종 복습",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: challenge.id },
+        data: { stage: 3 },
+      });
+      const run = await getRun(app, challenge.id, cookie);
+      const sessionCardId = run.cards[0].sessionCardId;
+
+      await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: JSON.stringify({ sessionCardId, finalResult: "correct" }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      await expect(
+        prisma.challenge.findUniqueOrThrow({ where: { id: challenge.id } }),
+      ).resolves.toMatchObject({
+        status: "completed",
+        completedAt: expect.any(Date),
+      });
+      const correctionResponse = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({ sessionCardId, finalResult: "wrong" }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+
+      expect(correctionResponse.status).toBe(200);
+      const updatedChallenge = await prisma.challenge.findUniqueOrThrow({
+        where: { id: challenge.id },
+      });
+      expect(updatedChallenge.status).toBe("active");
+      expect(updatedChallenge.completedAt).toBeNull();
+    } finally {
+      await cleanup();
+    }
+  });
 });
 
 async function createChallengeFixture(prisma: Awaited<ReturnType<typeof createTestPrisma>>["prisma"]) {

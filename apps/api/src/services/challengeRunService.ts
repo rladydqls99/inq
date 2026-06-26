@@ -256,14 +256,14 @@ export async function submitChallengeRunResult(
     throw new Error(`Session card not found: ${input.sessionCardId}`);
   }
 
-  await prisma.$transaction([
-    prisma.challengeRunSession.update({
+  await prisma.$transaction(async (transaction) => {
+    await transaction.challengeRunSession.update({
       where: { id: session.id },
       data: {
         queue: applied.queue as unknown as Prisma.InputJsonValue,
       },
-    }),
-    prisma.challengeCardState.update({
+    });
+    await transaction.challengeCardState.update({
       where: { id: updatedCard.stateId },
       data: {
         stage: applied.transition.stage,
@@ -273,8 +273,8 @@ export async function submitChallengeRunResult(
         lastChallengedAt: now,
         challengeViewCount: { increment: 1 },
       },
-    }),
-    prisma.challengeAnswerEvent.create({
+    });
+    await transaction.challengeAnswerEvent.create({
       data: {
         challengeId: input.challengeId,
         stateId: updatedCard.stateId,
@@ -285,8 +285,23 @@ export async function submitChallengeRunResult(
         nextStage: applied.transition.event.nextStage,
         answeredAt: now,
       },
-    }),
-  ]);
+    });
+
+    const remainingCards = await transaction.challengeCardState.count({
+      where: {
+        challengeId: input.challengeId,
+        completedAt: null,
+      },
+    });
+
+    await transaction.challenge.update({
+      where: { id: input.challengeId },
+      data:
+        remainingCards === 0
+          ? { status: "completed", completedAt: now }
+          : { status: "active", completedAt: null },
+    });
+  });
 
   return {
     runState: await toChallengeRunState(
