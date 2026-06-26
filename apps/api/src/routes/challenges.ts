@@ -160,6 +160,15 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_id_required" }, 400);
     }
 
+    const exists = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!exists) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
     return context.json(
       await updateChallengeFromDeck(options.prisma, challengeId),
     );
