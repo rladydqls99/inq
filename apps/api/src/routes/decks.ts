@@ -19,12 +19,13 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
 
   route.post("/", async (context) => {
     const body = await context.req.json<{ title?: string }>();
+    const title = body.title?.trim();
 
-    if (!body.title) {
+    if (!title) {
       return context.json({ error: "title_required" }, 400);
     }
 
-    const deck = await createDeck(options.prisma, { title: body.title });
+    const deck = await createDeck(options.prisma, { title });
 
     return context.json(
       toDeckResponse({
@@ -37,13 +38,14 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/:deckId", async (context) => {
     const body = await context.req.json<{ title?: string }>();
+    const title = body.title?.trim();
 
-    if (!body.title) {
+    if (!title) {
       return context.json({ error: "title_required" }, 400);
     }
 
     const deck = await renameDeck(options.prisma, context.req.param("deckId"), {
-      title: body.title,
+      title,
     });
     const cardCount = await options.prisma.card.count({
       where: { deckId: deck.id },

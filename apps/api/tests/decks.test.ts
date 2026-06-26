@@ -85,6 +85,42 @@ describe("deck and card routes", () => {
     }
   });
 
+  it("trims deck titles and rejects blank titles", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const createResponse = await app.request("/api/decks", {
+        method: "POST",
+        body: JSON.stringify({ title: "  국어  " }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(createResponse.status).toBe(201);
+      const created = await createResponse.json();
+      expect(created.title).toBe("국어");
+
+      const renameResponse = await app.request(`/api/decks/${created.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title: "   " }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(renameResponse.status).toBe(400);
+      await expect(renameResponse.json()).resolves.toEqual({
+        error: "title_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("lists, reads, and updates card segments", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
