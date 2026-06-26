@@ -203,10 +203,11 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       select: { queue: true },
     });
 
-    if (
-      !activeSession ||
-      !queueHasSessionCard(activeSession.queue, body.sessionCardId)
-    ) {
+    if (!activeSession) {
+      return context.json({ error: "active_challenge_run_not_found" }, 404);
+    }
+
+    if (!queueHasSessionCard(activeSession.queue, body.sessionCardId)) {
       return context.json({ error: "session_card_not_found" }, 404);
     }
 

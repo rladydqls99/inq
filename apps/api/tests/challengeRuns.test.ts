@@ -355,6 +355,36 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("returns not found when submitting a result before the challenge run starts", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: JSON.stringify({
+          sessionCardId: "missing-session-card",
+          finalResult: "correct",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({
+        error: "active_challenge_run_not_found",
+      });
+      await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(0);
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("rejects results for cards outside the active challenge run queue", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
