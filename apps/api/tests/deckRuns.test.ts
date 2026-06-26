@@ -53,6 +53,28 @@ describe("deck run routes", () => {
     }
   });
 
+  it("returns not found when restarting run state for a missing deck", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request(
+        "/api/decks/missing-deck/run/restart",
+        {
+          method: "POST",
+          headers: { cookie },
+        },
+      );
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("gets, updates, and restarts deck run state", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

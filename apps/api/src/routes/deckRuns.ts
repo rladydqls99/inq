@@ -49,8 +49,18 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.post("/:deckId/run/restart", async (context) => {
+    const deckId = context.req.param("deckId");
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
     return context.json(
-      await restartDeckRunResponse(options.prisma, context.req.param("deckId")),
+      await restartDeckRunResponse(options.prisma, deckId),
     );
   });
 
