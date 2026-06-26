@@ -11,8 +11,18 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
 
   route.get("/:deckId/run", async (context) => {
+    const deckId = context.req.param("deckId");
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
     return context.json(
-      await getDeckRunResponse(options.prisma, context.req.param("deckId")),
+      await getDeckRunResponse(options.prisma, deckId),
     );
   });
 
