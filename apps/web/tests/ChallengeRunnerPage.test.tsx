@@ -1,6 +1,13 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +16,7 @@ import { ChallengeRunnerPage } from "../src/features/runners/ChallengeRunnerPage
 
 describe("ChallengeRunnerPage", () => {
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
     vi.restoreAllMocks();
   });
@@ -103,6 +111,94 @@ describe("ChallengeRunnerPage", () => {
     );
     expect(await screen.findByText("Completed")).toBeTruthy();
   });
+
+  it("keeps the answered wrong card visible before advancing to the next queue card", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetch({ moveWrongToBack: true });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+    await user.click(screen.getByRole("button", { name: "Wrong" }));
+
+    expect(
+      screen.getByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
+      ),
+    ).toBeTruthy();
+    await screen.findByText("5s");
+
+    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 0 }),
+      }),
+    );
+    expect(
+      await screen.findByText((_, element) =>
+        matchesTextContent(element, "조선의 수도는 ____이다."),
+      ),
+    ).toBeTruthy();
+  });
+
+  it("automatically advances five seconds after a result is selected", async () => {
+    const fetchMock = mockFetch();
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+
+    vi.useFakeTimers();
+    fireEvent.click(screen.getByRole("button", { name: "Correct" }));
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+      await Promise.resolve();
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+      }),
+    );
+    expect(
+      screen.getByText((_, element) =>
+        matchesTextContent(element, "조선의 수도는 ____이다."),
+      ),
+    ).toBeTruthy();
+  });
 });
 
 function matchesTextContent(element: Element | null, text: string) {
@@ -113,14 +209,15 @@ function matchesTextContent(element: Element | null, text: string) {
   return Array.from(element.children).every((child) => child.textContent !== text);
 }
 
-function mockFetch(options: { cardCount?: number } = {}) {
+function mockFetch(options: { cardCount?: number; moveWrongToBack?: boolean } = {}) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
     const state = runState(options);
 
     if (path === "/api/challenges/challenge-1/run" && init?.method === "PATCH") {
       const body = JSON.parse(init.body as string) as { cursor: number };
-      return Promise.resolve(jsonResponse({ ...state, cursor: body.cursor }));
+      const nextState = options.moveWrongToBack ? moveFirstCardToBack(state) : state;
+      return Promise.resolve(jsonResponse({ ...nextState, cursor: body.cursor }));
     }
 
     if (path === "/api/challenges/challenge-1/run") {
@@ -128,7 +225,12 @@ function mockFetch(options: { cardCount?: number } = {}) {
     }
 
     if (path === "/api/challenges/challenge-1/results" && init?.method === "POST") {
-      return Promise.resolve(jsonResponse({ runState: state, progress: {} }));
+      return Promise.resolve(
+        jsonResponse({
+          runState: options.moveWrongToBack ? moveFirstCardToBack(state) : state,
+          progress: {},
+        }),
+      );
     }
 
     return Promise.resolve(jsonResponse({}));
@@ -137,6 +239,15 @@ function mockFetch(options: { cardCount?: number } = {}) {
   vi.stubGlobal("fetch", fetchMock);
 
   return fetchMock;
+}
+
+function moveFirstCardToBack(state: ReturnType<typeof runState>) {
+  const [firstCard, ...remainingCards] = state.cards;
+
+  return {
+    ...state,
+    cards: firstCard ? [...remainingCards, firstCard] : state.cards,
+  };
 }
 
 function jsonResponse(body: unknown) {
