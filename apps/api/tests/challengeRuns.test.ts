@@ -222,6 +222,37 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("rejects invalid challenge result values", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      const run = await getRun(app, challenge.id, cookie);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: JSON.stringify({
+          sessionCardId: run.cards[0].sessionCardId,
+          finalResult: "maybe",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: "challenge_result_fields_required",
+      });
+      await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(0);
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("corrects a previous result and recalculates state from the session starting stage", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

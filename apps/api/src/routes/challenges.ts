@@ -119,7 +119,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       finalResult?: "correct" | "wrong";
     }>();
 
-    if (!body.sessionCardId || !body.finalResult) {
+    if (!body.sessionCardId || !isChallengeResult(body.finalResult)) {
       return context.json({ error: "challenge_result_fields_required" }, 400);
     }
 
@@ -156,4 +156,8 @@ function isValidReviewIntervals(intervals: unknown): intervals is number[] {
     intervals.length > 0 &&
     intervals.every((interval) => Number.isInteger(interval) && interval > 0)
   );
+}
+
+function isChallengeResult(result: unknown): result is "correct" | "wrong" {
+  return result === "correct" || result === "wrong";
 }
