@@ -197,6 +197,48 @@ describe("challenge routes", () => {
     }
   });
 
+  it("trims challenge names and rejects blank names", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+
+      const createResponse = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "  중간고사  ",
+          deckId: deck.id,
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(createResponse.status).toBe(201);
+      const created = await createResponse.json();
+      expect(created.name).toBe("중간고사");
+
+      const patchResponse = await app.request(`/api/challenges/${created.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: "   " }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(patchResponse.status).toBe(400);
+      await expect(patchResponse.json()).resolves.toEqual({
+        error: "challenge_name_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("reactivates a completed challenge when new deck cards are added", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

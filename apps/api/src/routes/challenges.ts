@@ -29,8 +29,9 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       deckId?: string;
       reviewIntervalsDays?: number[];
     }>();
+    const name = body.name?.trim();
 
-    if (!body.name || !body.deckId || !body.reviewIntervalsDays) {
+    if (!name || !body.deckId || !body.reviewIntervalsDays) {
       return context.json({ error: "challenge_fields_required" }, 400);
     }
 
@@ -39,7 +40,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     }
 
     const challenge = await createChallenge(options.prisma, {
-      name: body.name,
+      name,
       deckId: body.deckId,
       reviewIntervalsDays: body.reviewIntervalsDays,
     });
@@ -59,7 +60,13 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     const data: Prisma.ChallengeUpdateInput = {};
 
     if (body.name !== undefined) {
-      data.name = body.name;
+      const name = body.name.trim();
+
+      if (!name) {
+        return context.json({ error: "challenge_name_required" }, 400);
+      }
+
+      data.name = name;
     }
 
     if (reviewIntervalsDays !== undefined) {
