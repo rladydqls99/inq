@@ -27,14 +27,24 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.patch("/:deckId/run", async (context) => {
+    const deckId = context.req.param("deckId");
     const body = await context.req.json<{ cursor?: number }>();
 
     if (typeof body.cursor !== "number") {
       return context.json({ error: "cursor_required" }, 400);
     }
 
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
     return context.json(
-      await updateDeckRun(options.prisma, context.req.param("deckId"), body.cursor),
+      await updateDeckRun(options.prisma, deckId, body.cursor),
     );
   });
 
