@@ -178,6 +178,32 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("returns not found when updating a challenge run before it has started", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({
+        error: "active_challenge_run_not_found",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("marks the active run session completed when cursor moves past the queue", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

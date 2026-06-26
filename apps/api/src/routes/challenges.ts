@@ -155,6 +155,18 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_not_found" }, 404);
     }
 
+    const activeSession = await options.prisma.challengeRunSession.findFirst({
+      where: {
+        challengeId,
+        status: "active",
+      },
+      select: { id: true },
+    });
+
+    if (!activeSession) {
+      return context.json({ error: "active_challenge_run_not_found" }, 404);
+    }
+
     return context.json(
       await updateChallengeRunCursor(options.prisma, {
         challengeId,
