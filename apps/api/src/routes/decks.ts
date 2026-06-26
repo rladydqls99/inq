@@ -3,7 +3,6 @@ import { Hono } from "hono";
 import type { PrismaClient } from "@inq/db";
 import {
   createDeck,
-  deleteDeck,
   listDecks,
   renameDeck,
 } from "@inq/db/repositories/decks";
@@ -65,7 +64,13 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.delete("/:deckId", async (context) => {
-    await deleteDeck(options.prisma, context.req.param("deckId"));
+    const result = await options.prisma.deck.deleteMany({
+      where: { id: context.req.param("deckId") },
+    });
+
+    if (result.count === 0) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
 
     return context.body(null, 204);
   });
