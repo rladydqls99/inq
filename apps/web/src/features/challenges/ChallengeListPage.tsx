@@ -33,6 +33,7 @@ export function ChallengeListPage() {
       { method: "POST" },
     );
     setUpdateMessage(`${result.addedCount} cards added`);
+    await loadChallenges();
   }
 
   function startEditing(challenge: ChallengeResponse) {

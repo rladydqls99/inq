@@ -84,6 +84,39 @@ describe("ChallengeListPage", () => {
     );
   });
 
+  it("reloads challenge progress after updating from deck", async () => {
+    const user = userEvent.setup();
+    let listCalls = 0;
+    mockFetchByPath({
+      "/api/challenges": () => {
+        listCalls += 1;
+        return [
+          challenge({
+            id: "challenge-1",
+            name: "중간고사",
+            totalCards: listCalls === 1 ? 10 : 12,
+          }),
+        ];
+      },
+      "/api/decks": [],
+      "/api/challenges/challenge-1/update-from-deck": { addedCount: 2 },
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    expect(within(listItem).getByText("2/10")).toBeTruthy();
+
+    await user.click(within(listItem).getByRole("button", { name: "Update from deck" }));
+
+    expect(await screen.findByText("2 cards added")).toBeTruthy();
+    expect(await within(listItem).findByText("2/12")).toBeTruthy();
+  });
+
   it("renames a challenge from the row actions", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
@@ -114,7 +147,7 @@ describe("ChallengeListPage", () => {
   });
 });
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+function mockFetchByPath(responsesByPath: Record<string, unknown | (() => unknown)>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
 
@@ -131,9 +164,10 @@ function mockFetchByPath(responsesByPath: Record<string, unknown>) {
     }
 
     const response = responsesByPath[path] ?? {};
+    const body = typeof response === "function" ? response() : response;
 
     return Promise.resolve(
-      new Response(JSON.stringify(response), {
+      new Response(JSON.stringify(body), {
         status: 200,
         headers: { "content-type": "application/json" },
       }),
@@ -144,7 +178,9 @@ function mockFetchByPath(responsesByPath: Record<string, unknown>) {
   return fetchMock;
 }
 
-function challenge(input: { id: string; name: string }) {
+function challenge(input: { id: string; name: string; totalCards?: number }) {
+  const totalCards = input.totalCards ?? 10;
+
   return {
     id: input.id,
     name: input.name,
@@ -156,7 +192,7 @@ function challenge(input: { id: string; name: string }) {
     maxStage: 3,
     dueCount: 1,
     progress: {
-      totalCards: 10,
+      totalCards,
       completedCards: 2,
       dueCards: 1,
       currentStageCounts: { 0: 8 },
