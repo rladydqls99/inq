@@ -164,6 +164,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.post("/:challengeId/results", async (context) => {
+    const challengeId = context.req.param("challengeId");
     const body = await context.req.json<{
       sessionCardId?: string;
       finalResult?: "correct" | "wrong";
@@ -173,9 +174,18 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_result_fields_required" }, 400);
     }
 
+    const challenge = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!challenge) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
     return context.json(
       await submitChallengeRunResult(options.prisma, {
-        challengeId: context.req.param("challengeId"),
+        challengeId,
         sessionCardId: body.sessionCardId,
         finalResult: body.finalResult,
       }),
