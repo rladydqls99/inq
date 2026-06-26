@@ -59,7 +59,6 @@ describe("DeckListPage", () => {
       "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 2 })],
       "/api/decks/deck-1": deck({ id: "deck-1", title: "국어 수정", cardCount: 2 }),
     });
-    vi.spyOn(window, "prompt").mockReturnValue("국어 수정");
 
     render(
       <MemoryRouter>
@@ -73,6 +72,11 @@ describe("DeckListPage", () => {
     );
 
     await user.click(within(listItem).getByRole("button", { name: "Rename" }));
+    const titleInput = within(listItem).getByLabelText("Deck name");
+    await user.clear(titleInput);
+    await user.type(titleInput, "국어 수정");
+    await user.click(within(listItem).getByRole("button", { name: "Save" }));
+
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1",
       expect.objectContaining({
