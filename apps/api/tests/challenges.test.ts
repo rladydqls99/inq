@@ -77,7 +77,7 @@ describe("challenge routes", () => {
 
       await createCard(prisma, { deckId: deck.id, segments });
       const updateFromDeckResponse = await app.request(
-        `/api/challenges/${created.id}/update-from-deck`,
+        `/api/challenges/${created.id}/update`,
         {
           method: "POST",
           headers: { cookie },

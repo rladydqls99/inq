@@ -1,4 +1,4 @@
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 
 import type { Prisma, PrismaClient } from "@inq/db";
 import {
@@ -124,14 +124,20 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     );
   });
 
-  route.post("/:challengeId/update-from-deck", async (context) => {
+  async function updateChallengeFromDeckHandler(context: Context) {
+    const challengeId = context.req.param("challengeId");
+
+    if (!challengeId) {
+      return context.json({ error: "challenge_id_required" }, 400);
+    }
+
     return context.json(
-      await updateChallengeFromDeck(
-        options.prisma,
-        context.req.param("challengeId"),
-      ),
+      await updateChallengeFromDeck(options.prisma, challengeId),
     );
-  });
+  }
+
+  route.post("/:challengeId/update", updateChallengeFromDeckHandler);
+  route.post("/:challengeId/update-from-deck", updateChallengeFromDeckHandler);
 
   return route;
 }
