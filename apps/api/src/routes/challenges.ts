@@ -207,7 +207,18 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "active_challenge_run_not_found" }, 404);
     }
 
-    if (!queueHasSessionCard(activeSession.queue, body.sessionCardId)) {
+    const queueCard = findQueueCard(activeSession.queue, body.sessionCardId);
+
+    if (!queueCard) {
+      return context.json({ error: "session_card_not_found" }, 404);
+    }
+
+    const cardState = await options.prisma.challengeCardState.findUnique({
+      where: { id: queueCard.stateId },
+      select: { id: true },
+    });
+
+    if (!cardState) {
       return context.json({ error: "session_card_not_found" }, 404);
     }
 
@@ -259,15 +270,23 @@ function isChallengeResult(result: unknown): result is "correct" | "wrong" {
   return result === "correct" || result === "wrong";
 }
 
-function queueHasSessionCard(queue: unknown, sessionCardId: string) {
-  return (
-    Array.isArray(queue) &&
-    queue.some(
-      (card) =>
-        card &&
-        typeof card === "object" &&
-        "sessionCardId" in card &&
-        card.sessionCardId === sessionCardId,
-    )
-  );
+function findQueueCard(queue: unknown, sessionCardId: string) {
+  if (!Array.isArray(queue)) {
+    return null;
+  }
+
+  for (const card of queue) {
+    if (
+      card &&
+      typeof card === "object" &&
+      "sessionCardId" in card &&
+      "stateId" in card &&
+      card.sessionCardId === sessionCardId &&
+      typeof card.stateId === "string"
+    ) {
+      return card;
+    }
+  }
+
+  return null;
 }
