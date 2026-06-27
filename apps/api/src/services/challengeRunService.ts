@@ -182,13 +182,27 @@ export async function getOrCreateChallengeRunState(
       completedAt: state.completedAt,
     })),
   );
-  const session = await prisma.challengeRunSession.create({
-    data: {
-      challengeId,
-      queue: queue as unknown as Prisma.InputJsonValue,
-      status: queue.length === 0 ? "completed" : "active",
-      completedAt: queue.length === 0 ? now : null,
-    },
+  const session = await prisma.$transaction(async (transaction) => {
+    const runSession = await transaction.challengeRunSession.create({
+      data: {
+        challengeId,
+        queue: queue as unknown as Prisma.InputJsonValue,
+        status: queue.length === 0 ? "completed" : "active",
+        completedAt: queue.length === 0 ? now : null,
+      },
+    });
+
+    if (queue.length === 0) {
+      await transaction.challenge.update({
+        where: { id: challengeId },
+        data: {
+          status: "completed",
+          completedAt: now,
+        },
+      });
+    }
+
+    return runSession;
   });
 
   return toChallengeRunState(prisma, session);

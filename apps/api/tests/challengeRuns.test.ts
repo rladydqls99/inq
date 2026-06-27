@@ -127,6 +127,40 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("marks the challenge completed when starting a run with no due cards", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const challenge = await createChallenge(prisma, {
+        name: "빈 챌린지",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        challengeId: challenge.id,
+        status: "completed",
+        cards: [],
+      });
+      await expect(
+        prisma.challenge.findUniqueOrThrow({ where: { id: challenge.id } }),
+      ).resolves.toMatchObject({
+        status: "completed",
+        completedAt: expect.any(Date),
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("omits deleted cards from an existing challenge run session", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
