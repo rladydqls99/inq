@@ -51,18 +51,30 @@ export async function exportBackup(
       challengeId: session.challengeId,
       status: session.status as ChallengeRunSessionExport["status"],
       cursor: session.cursor,
-      queue: (session.queue as Array<Omit<ChallengeRunCard, "segments">>).map(
-        (queueCard) => ({
-          ...queueCard,
-          segments: (cardMap.get(queueCard.cardId)?.segments ?? []) as QuizSegment[],
-        }),
-      ),
+      queue: toChallengeRunQueueExport(session.queue, cardMap),
       completedAt: session.completedAt?.toISOString() ?? null,
       createdAt: session.createdAt.toISOString(),
       updatedAt: session.updatedAt.toISOString(),
     })),
     deckRunStates: deckRunStates.map(toDeckRunStateExport),
   };
+}
+
+function toChallengeRunQueueExport(
+  queue: unknown,
+  cardMap: Map<string, { segments: unknown }>,
+): ChallengeRunCard[] {
+  if (!Array.isArray(queue)) {
+    return [];
+  }
+
+  return (queue as Array<Omit<ChallengeRunCard, "segments">>)
+    .filter((queueCard) => cardMap.has(queueCard.cardId))
+    .map((queueCard, queueIndex) => ({
+      ...queueCard,
+      queueIndex,
+      segments: cardMap.get(queueCard.cardId)?.segments as QuizSegment[],
+    }));
 }
 
 function toCardResponse(card: {

@@ -54,4 +54,36 @@ describe("backup routes", () => {
       await cleanup();
     }
   });
+
+  it("excludes deleted cards from exported challenge run queues", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const card = await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "중간고사",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      await app.request(`/api/challenges/${challenge.id}/run`, {
+        headers: { cookie },
+      });
+      await prisma.card.delete({ where: { id: card.id } });
+
+      const response = await app.request("/api/backup/export", {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(200);
+      const backup = await response.json();
+      expect(backup.challengeRunSessions).toHaveLength(1);
+      expect(backup.challengeRunSessions[0].queue).toEqual([]);
+    } finally {
+      await cleanup();
+    }
+  });
 });
