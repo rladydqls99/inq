@@ -103,6 +103,42 @@ describe("challenge routes", () => {
     }
   });
 
+  it("creates an empty deck challenge as completed", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "빈 덱" } });
+
+      const response = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "빈 챌린지",
+          deckId: deck.id,
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(201);
+      await expect(response.json()).resolves.toMatchObject({
+        name: "빈 챌린지",
+        status: "completed",
+        progress: {
+          totalCards: 0,
+          completedCards: 0,
+          dueCards: 0,
+        },
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("lists challenges by nearest due date first", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

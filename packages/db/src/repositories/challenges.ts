@@ -7,6 +7,11 @@ export async function createChallenge(
   const maxStage = input.reviewIntervalsDays.length;
 
   return prisma.$transaction(async (transaction) => {
+    const cards = await transaction.card.findMany({
+      where: { deckId: input.deckId },
+      select: { id: true },
+    });
+    const emptyDeck = cards.length === 0;
     const challenge = await transaction.challenge.create({
       data: {
         name: input.name,
@@ -14,12 +19,9 @@ export async function createChallenge(
         reviewIntervalsDays:
           input.reviewIntervalsDays as unknown as Prisma.InputJsonValue,
         maxStage,
+        status: emptyDeck ? "completed" : "active",
+        completedAt: emptyDeck ? new Date() : null,
       },
-    });
-
-    const cards = await transaction.card.findMany({
-      where: { deckId: input.deckId },
-      select: { id: true },
     });
 
     if (cards.length > 0) {
