@@ -11,7 +11,17 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
 
   route.get("/decks/:deckId/cards", async (context) => {
-    const cards = await listCardsByDeck(options.prisma, context.req.param("deckId"));
+    const deckId = context.req.param("deckId");
+    const deck = await options.prisma.deck.findUnique({
+      where: { id: deckId },
+      select: { id: true },
+    });
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
+    const cards = await listCardsByDeck(options.prisma, deckId);
 
     return context.json(cards.map(toCardResponse));
   });
