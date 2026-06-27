@@ -21,8 +21,26 @@ type Location = {
 export function parseMarkdownImport(markdown: string): ImportPreviewResponse {
   const errors: ImportValidationError[] = [];
   const previewCards: ImportPreviewCard[] = [];
+  const blocks = splitMarkdownBlocks(markdown);
 
-  for (const block of splitMarkdownBlocks(markdown)) {
+  if (blocks.length === 0) {
+    return {
+      parsed: 0,
+      errors: [
+        {
+          blockIndex: 0,
+          line: null,
+          column: null,
+          code: "empty_import",
+          message: "Markdown import must contain at least one quiz block.",
+          snippet: "",
+        },
+      ],
+      previewCards: [],
+    };
+  }
+
+  for (const block of blocks) {
     const parsedBlock = parseBlock(block);
 
     if (parsedBlock.errors.length > 0) {

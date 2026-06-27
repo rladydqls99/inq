@@ -96,6 +96,7 @@ export type ImportPreviewRequest = {
 };
 
 export type ImportValidationErrorCode =
+  | "empty_import"
   | "missing_answer"
   | "unmatched_open_bracket"
   | "unmatched_close_bracket"

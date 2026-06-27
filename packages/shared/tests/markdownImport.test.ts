@@ -84,6 +84,24 @@ describe("parseMarkdownImport", () => {
     });
   });
 
+  it("returns empty_import when markdown has no quiz blocks", () => {
+    const result = parseMarkdownImport("  \n---\n\n");
+
+    expect(result).toMatchObject({
+      parsed: 0,
+      previewCards: [],
+      errors: [
+        {
+          blockIndex: 0,
+          line: null,
+          column: null,
+          code: "empty_import",
+          snippet: "",
+        },
+      ],
+    });
+  });
+
   it("returns unmatched_open_bracket with a 1-based location", () => {
     const result = parseMarkdownImport("첫 줄\n둘째 줄 [정답");
 
