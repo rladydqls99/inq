@@ -327,13 +327,33 @@ async function toChallengeRunState(
     queue: unknown;
   },
 ): Promise<ChallengeRunState> {
-  const queue = parseQueue(session.queue);
+  let queue = parseQueue(session.queue);
   const cards = await prisma.card.findMany({
     where: {
       id: { in: queue.map((card) => card.cardId) },
     },
   });
   const cardsById = new Map(cards.map((card) => [card.id, card]));
+  const validQueue = reindexQueue(
+    queue.filter((queueCard) => cardsById.has(queueCard.cardId)),
+  );
+
+  if (validQueue.length !== queue.length) {
+    const cursor = Math.min(session.cursor, validQueue.length);
+    const completed = cursor >= validQueue.length;
+    await prisma.challengeRunSession.update({
+      where: { id: session.id },
+      data: {
+        queue: validQueue as unknown as Prisma.InputJsonValue,
+        cursor,
+        status: completed ? "completed" : session.status,
+        completedAt: completed ? new Date() : null,
+      },
+    });
+    queue = validQueue;
+    session.cursor = cursor;
+    session.status = completed ? "completed" : session.status;
+  }
 
   return {
     sessionId: session.id,
@@ -344,7 +364,7 @@ async function toChallengeRunState(
       const card = cardsById.get(queueCard.cardId);
 
       if (!card) {
-        throw new Error(`Card not found: ${queueCard.cardId}`);
+        throw new Error(`Card not found after queue cleanup: ${queueCard.cardId}`);
       }
 
       return {

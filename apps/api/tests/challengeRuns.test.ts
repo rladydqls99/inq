@@ -127,6 +127,33 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("omits deleted cards from an existing challenge run session", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      const run = await getRun(app, challenge.id, cookie);
+
+      await prisma.card.delete({ where: { id: run.cards[0].cardId } });
+
+      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(200);
+      const reloadedRun = await response.json();
+      expect(reloadedRun.cards).toHaveLength(1);
+      expect(reloadedRun.cards[0]).toMatchObject({
+        cardId: run.cards[1].cardId,
+        queueIndex: 0,
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("updates the persisted challenge run cursor", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
