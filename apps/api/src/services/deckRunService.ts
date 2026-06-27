@@ -19,7 +19,7 @@ export async function getDeckRunResponse(
   ]);
   const cursor = Math.min(runState.cursor, cards.length);
   const completedAt =
-    cards.length > 0 && cursor >= cards.length
+    cursor >= cards.length
       ? runState.completedAt ?? new Date()
       : null;
 
