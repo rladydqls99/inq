@@ -1,5 +1,5 @@
 import { deleteCookie, getSignedCookie, setSignedCookie } from "hono/cookie";
-import { Hono } from "hono";
+import { Hono, type Context } from "hono";
 
 import type { PrismaClient } from "@inq/db";
 import type { ApiEnv } from "../env";
@@ -122,6 +122,16 @@ export function createAuthRoutes(options: {
   });
 
   route.post("/lock", async (context) => {
+    const authorized = await hasActiveSession(
+      context,
+      options.prisma,
+      options.env,
+    );
+
+    if (!authorized) {
+      return context.json({ error: "unauthorized" }, 401);
+    }
+
     await invalidateSessions(options.prisma);
     deleteCookie(context, SESSION_COOKIE_NAME, { path: "/" });
 
@@ -129,6 +139,23 @@ export function createAuthRoutes(options: {
   });
 
   return route;
+}
+
+async function hasActiveSession(
+  context: Context,
+  prisma: PrismaClient,
+  env: ApiEnv,
+) {
+  const cookieValue = await getSignedCookie(
+    context,
+    env.sessionSecret,
+    SESSION_COOKIE_NAME,
+  );
+
+  return (
+    typeof cookieValue === "string" &&
+    (await isSessionValid(prisma, parseSession(cookieValue)))
+  );
 }
 
 function parseSession(cookieValue: string): PinSessionPayload {

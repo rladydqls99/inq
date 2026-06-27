@@ -209,6 +209,20 @@ describe("PIN auth routes", () => {
     });
     expect(protectedResponse.status).toBe(401);
   });
+
+  it("rejects manual lock without an active session", async () => {
+    const app = createProtectedTestApp();
+    await setupPin(app, "1234");
+
+    const response = await app.request("/api/auth/lock", {
+      method: "POST",
+    });
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "unauthorized",
+    });
+  });
 });
 
 async function setupPin(
