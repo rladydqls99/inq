@@ -305,6 +305,7 @@ describe("deck and card routes", () => {
       for (const invalidSegments of [
         [{ type: "text", value: "정답 없는 카드" }],
         [{ type: "answer", id: "answer-1", value: "" }],
+        [{ type: "answer", id: "answer-1", value: "   " }],
       ]) {
         const invalidResponse = await app.request(`/api/cards/${card.id}`, {
           method: "PATCH",
