@@ -182,6 +182,15 @@ export async function getOrCreateChallengeRunState(
       completedAt: state.completedAt,
     })),
   );
+  const incompleteStateCount =
+    queue.length === 0
+      ? await prisma.challengeCardState.count({
+          where: {
+            challengeId,
+            completedAt: null,
+          },
+        })
+      : queue.length;
 
   if (queue.length === 0) {
     const completedSession = await prisma.challengeRunSession.findFirst({
@@ -207,7 +216,7 @@ export async function getOrCreateChallengeRunState(
       },
     });
 
-    if (queue.length === 0) {
+    if (incompleteStateCount === 0) {
       await transaction.challenge.update({
         where: { id: challengeId },
         data: {

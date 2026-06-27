@@ -188,6 +188,39 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("does not complete a challenge when cards are scheduled for the future", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      await prisma.challengeCardState.updateMany({
+        where: { challengeId: challenge.id },
+        data: { dueAt: new Date("2999-01-01T00:00:00.000Z") },
+      });
+
+      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject({
+        challengeId: challenge.id,
+        status: "completed",
+        cards: [],
+      });
+      await expect(
+        prisma.challenge.findUniqueOrThrow({ where: { id: challenge.id } }),
+      ).resolves.toMatchObject({
+        status: "active",
+        completedAt: null,
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("omits deleted cards from an existing challenge run session", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
