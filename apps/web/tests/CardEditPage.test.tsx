@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -64,6 +64,26 @@ describe("CardEditPage", () => {
     );
     expect(await screen.findByText("Saved")).toBeTruthy();
   });
+
+  it("shows a save error when the card version is stale", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/cards/card-1": [
+        card(),
+        { body: { error: "card_version_conflict" }, status: 409 },
+      ],
+    });
+
+    renderCardEdit();
+
+    const answerInput = await screen.findByLabelText("Answer 1");
+    await user.clear(answerInput);
+    await user.type(answerInput, "대한민국");
+    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("카드가 이미 변경되었습니다. 다시 열어 주세요.")).toBeTruthy();
+    expect(screen.queryByText("Saved")).toBeNull();
+  });
 });
 
 function renderCardEdit() {
@@ -76,14 +96,25 @@ function renderCardEdit() {
   );
 }
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+type MockResponse = unknown | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse | MockResponse[]>) {
+  const queues = new Map(
+    Object.entries(responsesByPath).map(([path, response]) => [
+      path,
+      Array.isArray(response) ? [...response] : [response],
+    ]),
+  );
   const fetchMock = vi.fn((input: RequestInfo | URL) => {
     const path = typeof input === "string" ? input : input.toString();
-    const response = responsesByPath[path] ?? {};
+    const queue = queues.get(path) ?? [{}];
+    const response = queue.length > 1 ? queue.shift() : queue[0];
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
 
     return Promise.resolve(
-      new Response(JSON.stringify(response), {
-        status: 200,
+      new Response(JSON.stringify(body), {
+        status,
         headers: { "content-type": "application/json" },
       }),
     );
@@ -91,6 +122,16 @@ function mockFetchByPath(responsesByPath: Record<string, unknown>) {
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
+}
+
+function isMockErrorResponse(response: MockResponse): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }
 
 function card() {
