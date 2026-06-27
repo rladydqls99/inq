@@ -17,11 +17,27 @@ export async function getDeckRunResponse(
       orderBy: { createdAt: "asc" },
     }),
   ]);
+  const cursor = Math.min(runState.cursor, cards.length);
+  const completedAt =
+    cards.length > 0 && cursor >= cards.length
+      ? runState.completedAt ?? new Date()
+      : null;
+
+  if (
+    cursor !== runState.cursor ||
+    (runState.completedAt?.getTime() ?? null) !==
+      (completedAt?.getTime() ?? null)
+  ) {
+    await updateDeckRunCursor(prisma, deckId, {
+      cursor,
+      completedAt,
+    });
+  }
 
   return {
     deckId,
-    cursor: runState.cursor,
-    completedAt: runState.completedAt?.toISOString() ?? null,
+    cursor,
+    completedAt: completedAt?.toISOString() ?? null,
     cards: cards.map((card) => ({
       cardId: card.id,
       segments: card.segments as QuizSegment[],
