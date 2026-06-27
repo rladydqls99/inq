@@ -39,6 +39,17 @@ describe("parseMarkdownImport", () => {
     ]);
   });
 
+  it("trims whitespace around answer values", () => {
+    const result = parseMarkdownImport("동명사를 목적어로 취하는 동사는 [ avoid ]이다.");
+
+    expect(result.errors).toEqual([]);
+    expect(result.previewCards[0]?.segments).toEqual([
+      { type: "text", value: "동명사를 목적어로 취하는 동사는 " },
+      { type: "answer", id: "answer-1", value: "avoid" },
+      { type: "text", value: "이다." },
+    ]);
+  });
+
   it("splits cards only when a trimmed line equals separator", () => {
     const result = parseMarkdownImport(
       [

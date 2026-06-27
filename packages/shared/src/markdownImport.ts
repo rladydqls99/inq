@@ -184,7 +184,7 @@ function parseBlock(block: MarkdownBlock): {
       segments.push({
         type: "answer",
         id: `answer-${answerCount}`,
-        value: answerBuffer,
+        value: answerBuffer.trim(),
       });
       openBracketIndex = null;
       answerBuffer = "";
