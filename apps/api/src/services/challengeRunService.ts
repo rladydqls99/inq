@@ -182,6 +182,21 @@ export async function getOrCreateChallengeRunState(
       completedAt: state.completedAt,
     })),
   );
+
+  if (queue.length === 0) {
+    const completedSession = await prisma.challengeRunSession.findFirst({
+      where: {
+        challengeId,
+        status: "completed",
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    if (completedSession) {
+      return toChallengeRunState(prisma, completedSession);
+    }
+  }
+
   const session = await prisma.$transaction(async (transaction) => {
     const runSession = await transaction.challengeRunSession.create({
       data: {
