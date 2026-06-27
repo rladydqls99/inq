@@ -39,12 +39,13 @@ export function createAuthRoutes(options: {
 
   route.post("/setup-pin", async (context) => {
     const body = await context.req.json<{ pin?: string }>();
+    const pin = body.pin?.trim();
 
-    if (!body.pin) {
+    if (!pin) {
       return context.json({ error: "pin_required" }, 400);
     }
 
-    const result = await setupFirstPin(options.prisma, body.pin);
+    const result = await setupFirstPin(options.prisma, pin);
 
     if (!result.ok) {
       return context.json({ error: result.reason }, 409);
@@ -55,12 +56,13 @@ export function createAuthRoutes(options: {
 
   route.post("/unlock", async (context) => {
     const body = await context.req.json<{ pin?: string }>();
+    const pin = body.pin?.trim();
 
-    if (!body.pin) {
+    if (!pin) {
       return context.json({ error: "pin_required" }, 400);
     }
 
-    const result = await verifyPin(options.prisma, body.pin);
+    const result = await verifyPin(options.prisma, pin);
 
     if (!result.ok) {
       return context.json({ error: result.reason }, 401);
@@ -96,15 +98,18 @@ export function createAuthRoutes(options: {
       nextPin?: string;
       nextPinConfirm?: string;
     }>();
+    const currentPin = body.currentPin?.trim();
+    const nextPin = body.nextPin?.trim();
+    const nextPinConfirm = body.nextPinConfirm?.trim();
 
-    if (!body.currentPin || !body.nextPin || !body.nextPinConfirm) {
+    if (!currentPin || !nextPin || !nextPinConfirm) {
       return context.json({ error: "pin_fields_required" }, 400);
     }
 
     const result = await changePin(options.prisma, {
-      currentPin: body.currentPin,
-      nextPin: body.nextPin,
-      nextPinConfirm: body.nextPinConfirm,
+      currentPin,
+      nextPin,
+      nextPinConfirm,
     });
 
     if (!result.ok) {
