@@ -46,16 +46,20 @@ export async function exportBackup(
     challenges,
     challengeCardStates: challengeCardStates.map(toChallengeCardStateExport),
     challengeAnswerEvents: challengeAnswerEvents.map(toChallengeAnswerEventExport),
-    challengeRunSessions: challengeRunSessions.map((session) => ({
-      id: session.id,
-      challengeId: session.challengeId,
-      status: session.status as ChallengeRunSessionExport["status"],
-      cursor: session.cursor,
-      queue: toChallengeRunQueueExport(session.queue, cardMap),
-      completedAt: session.completedAt?.toISOString() ?? null,
-      createdAt: session.createdAt.toISOString(),
-      updatedAt: session.updatedAt.toISOString(),
-    })),
+    challengeRunSessions: challengeRunSessions.map((session) => {
+      const queue = toChallengeRunQueueExport(session.queue, cardMap);
+
+      return {
+        id: session.id,
+        challengeId: session.challengeId,
+        status: session.status as ChallengeRunSessionExport["status"],
+        cursor: Math.min(session.cursor, queue.length),
+        queue,
+        completedAt: session.completedAt?.toISOString() ?? null,
+        createdAt: session.createdAt.toISOString(),
+        updatedAt: session.updatedAt.toISOString(),
+      };
+    }),
     deckRunStates: deckRunStates.map(toDeckRunStateExport),
   };
 }

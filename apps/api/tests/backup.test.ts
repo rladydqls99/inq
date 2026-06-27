@@ -72,6 +72,14 @@ describe("backup routes", () => {
       await app.request(`/api/challenges/${challenge.id}/run`, {
         headers: { cookie },
       });
+      await app.request(`/api/challenges/${challenge.id}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
       await prisma.card.delete({ where: { id: card.id } });
 
       const response = await app.request("/api/backup/export", {
@@ -81,6 +89,7 @@ describe("backup routes", () => {
       expect(response.status).toBe(200);
       const backup = await response.json();
       expect(backup.challengeRunSessions).toHaveLength(1);
+      expect(backup.challengeRunSessions[0].cursor).toBe(0);
       expect(backup.challengeRunSessions[0].queue).toEqual([]);
     } finally {
       await cleanup();
