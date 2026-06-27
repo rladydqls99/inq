@@ -19,6 +19,14 @@ export function createApp(options?: {
   const prisma = options?.prisma ?? defaultPrisma;
   const env = options?.env ?? loadEnv();
 
+  app.onError((error, context) => {
+    if (error instanceof SyntaxError) {
+      return context.json({ error: "invalid_json" }, 400);
+    }
+
+    throw error;
+  });
+
   app.get("/api/health", (context) => {
     return context.json({ ok: true });
   });

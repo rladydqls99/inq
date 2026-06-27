@@ -121,6 +121,29 @@ describe("deck and card routes", () => {
     }
   });
 
+  it("returns a bad request error for invalid JSON bodies", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/decks", {
+        method: "POST",
+        body: "{",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({ error: "invalid_json" });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("returns not found when renaming a missing deck", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
