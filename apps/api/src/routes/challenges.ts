@@ -183,7 +183,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       sessionCardId?: string;
       finalResult?: "correct" | "wrong";
     }>();
-    const sessionCardId = body.sessionCardId?.trim();
+    const sessionCardId = trimmedString(body.sessionCardId);
 
     if (!sessionCardId || !isChallengeResult(body.finalResult)) {
       return context.json({ error: "challenge_result_fields_required" }, 400);
