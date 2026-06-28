@@ -21,7 +21,7 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
 
   route.post("/markdown/confirm", async (context) => {
     const body = await context.req.json<{ deckId?: string; markdown?: string }>();
-    const deckId = body.deckId?.trim();
+    const deckId = trimmedString(body.deckId);
 
     if (!deckId || typeof body.markdown !== "string") {
       return context.json({ error: "import_fields_required" }, 400);
@@ -49,4 +49,13 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
   });
 
   return route;
+}
+
+function trimmedString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
