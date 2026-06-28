@@ -136,6 +136,46 @@ describe("PIN auth routes", () => {
     });
   });
 
+  it("rejects non-string PIN fields", async () => {
+    const app = createProtectedTestApp();
+
+    const setupResponse = await app.request("/api/auth/setup-pin", {
+      method: "POST",
+      body: JSON.stringify({ pin: 123 }),
+      headers: { "content-type": "application/json" },
+    });
+    expect(setupResponse.status).toBe(400);
+    await expect(setupResponse.json()).resolves.toEqual({
+      error: "pin_required",
+    });
+
+    await setupPin(app, "1234");
+    const unlockResponse = await app.request("/api/auth/unlock", {
+      method: "POST",
+      body: JSON.stringify({ pin: 123 }),
+      headers: { "content-type": "application/json" },
+    });
+    expect(unlockResponse.status).toBe(400);
+    await expect(unlockResponse.json()).resolves.toEqual({
+      error: "pin_required",
+    });
+
+    const cookie = await unlockAndGetCookie(app, "1234");
+    const changeResponse = await app.request("/api/auth/change-pin", {
+      method: "POST",
+      body: JSON.stringify({
+        currentPin: 123,
+        nextPin: "5678",
+        nextPinConfirm: "5678",
+      }),
+      headers: { "content-type": "application/json", cookie },
+    });
+    expect(changeResponse.status).toBe(400);
+    await expect(changeResponse.json()).resolves.toEqual({
+      error: "pin_fields_required",
+    });
+  });
+
   it("unlocks with the correct PIN and returns an httpOnly cookie", async () => {
     const app = createProtectedTestApp();
     await setupPin(app, "1234");

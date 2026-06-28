@@ -39,7 +39,7 @@ export function createAuthRoutes(options: {
 
   route.post("/setup-pin", async (context) => {
     const body = await context.req.json<{ pin?: string }>();
-    const pin = body.pin?.trim();
+    const pin = trimmedString(body.pin);
 
     if (!pin) {
       return context.json({ error: "pin_required" }, 400);
@@ -56,7 +56,7 @@ export function createAuthRoutes(options: {
 
   route.post("/unlock", async (context) => {
     const body = await context.req.json<{ pin?: string }>();
-    const pin = body.pin?.trim();
+    const pin = trimmedString(body.pin);
 
     if (!pin) {
       return context.json({ error: "pin_required" }, 400);
@@ -108,9 +108,9 @@ export function createAuthRoutes(options: {
       nextPin?: string;
       nextPinConfirm?: string;
     }>();
-    const currentPin = body.currentPin?.trim();
-    const nextPin = body.nextPin?.trim();
-    const nextPinConfirm = body.nextPinConfirm?.trim();
+    const currentPin = trimmedString(body.currentPin);
+    const nextPin = trimmedString(body.nextPin);
+    const nextPinConfirm = trimmedString(body.nextPinConfirm);
 
     if (!currentPin || !nextPin || !nextPinConfirm) {
       return context.json({ error: "pin_fields_required" }, 400);
@@ -174,4 +174,13 @@ function parseSession(cookieValue: string): PinSessionPayload {
   } catch {
     return { createdAt: "", expiresAt: "" };
   }
+}
+
+function trimmedString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
