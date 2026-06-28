@@ -29,8 +29,8 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       deckId?: string;
       reviewIntervalsDays?: number[];
     }>();
-    const name = body.name?.trim();
-    const deckId = body.deckId?.trim();
+    const name = trimmedString(body.name);
+    const deckId = trimmedString(body.deckId);
 
     if (!name || !deckId || !body.reviewIntervalsDays) {
       return context.json({ error: "challenge_fields_required" }, 400);
@@ -71,7 +71,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     const data: Prisma.ChallengeUpdateInput = {};
 
     if (body.name !== undefined) {
-      const name = body.name.trim();
+      const name = trimmedString(body.name);
 
       if (!name) {
         return context.json({ error: "challenge_name_required" }, 400);
@@ -267,6 +267,15 @@ function isValidReviewIntervals(intervals: unknown): intervals is number[] {
     intervals.length > 0 &&
     intervals.every((interval) => Number.isInteger(interval) && interval > 0)
   );
+}
+
+function trimmedString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
 
 function isChallengeResult(result: unknown): result is "correct" | "wrong" {

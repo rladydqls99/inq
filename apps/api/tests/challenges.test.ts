@@ -304,6 +304,57 @@ describe("challenge routes", () => {
     }
   });
 
+  it("rejects non-string challenge names", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "기존 챌린지",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      const createResponse = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: 123,
+          deckId: deck.id,
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(createResponse.status).toBe(400);
+      await expect(createResponse.json()).resolves.toEqual({
+        error: "challenge_fields_required",
+      });
+
+      const patchResponse = await app.request(
+        `/api/challenges/${challenge.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ name: 123 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(patchResponse.status).toBe(400);
+      await expect(patchResponse.json()).resolves.toEqual({
+        error: "challenge_name_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("rejects challenge creation when the target deck does not exist", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
