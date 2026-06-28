@@ -136,11 +136,13 @@ mostly mobile-first, except quiz upload, which is optimized for desktop.
 - `POST /api/auth/setup-pin`
 - `POST /api/auth/unlock`
 - `POST /api/auth/change-pin`
+- `POST /api/auth/lock`
 - `GET /api/decks`
 - `POST /api/decks`
 - `PATCH /api/decks/:deckId`
 - `DELETE /api/decks/:deckId`
 - `GET /api/decks/:deckId/cards`
+- `GET /api/cards/:cardId`
 - `PATCH /api/cards/:cardId`
 - `DELETE /api/cards/:cardId`
 - `GET /api/decks/:deckId/run`
@@ -151,6 +153,7 @@ mostly mobile-first, except quiz upload, which is optimized for desktop.
 - `PATCH /api/challenges/:challengeId`
 - `DELETE /api/challenges/:challengeId`
 - `POST /api/challenges/:challengeId/update`
+- `POST /api/challenges/:challengeId/update-from-deck`
 - `GET /api/challenges/:challengeId/run`
 - `PATCH /api/challenges/:challengeId/run`
 - `POST /api/challenges/:challengeId/results`
