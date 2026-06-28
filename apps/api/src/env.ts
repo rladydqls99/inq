@@ -23,7 +23,7 @@ function readPinSessionTtlSeconds(environment: NodeJS.ProcessEnv): number {
 }
 
 function readSessionSecret(environment: NodeJS.ProcessEnv): string {
-  const value = environment.SESSION_SECRET;
+  const value = environment.SESSION_SECRET?.trim();
 
   if (!value) {
     if (environment.NODE_ENV === "production") {
