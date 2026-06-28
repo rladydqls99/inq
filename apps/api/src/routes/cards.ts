@@ -138,7 +138,7 @@ function isValidQuizSegment(segment: unknown): segment is QuizSegment {
   return (
     candidate.type === "answer" &&
     typeof candidate.id === "string" &&
-    candidate.id.length > 0 &&
+    candidate.id.trim().length > 0 &&
     typeof candidate.value === "string" &&
     candidate.value.trim().length > 0
   );
