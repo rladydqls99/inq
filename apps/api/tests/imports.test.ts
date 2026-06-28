@@ -174,4 +174,41 @@ describe("markdown import routes", () => {
       await cleanup();
     }
   });
+
+  it("rejects non-object markdown import bodies", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+
+      const previewResponse = await app.request("/api/import/markdown/preview", {
+        method: "POST",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(previewResponse.status).toBe(400);
+      await expect(previewResponse.json()).resolves.toEqual({
+        error: "markdown_required",
+      });
+
+      const confirmResponse = await app.request("/api/import/markdown/confirm", {
+        method: "POST",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(confirmResponse.status).toBe(400);
+      await expect(confirmResponse.json()).resolves.toEqual({
+        error: "import_fields_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
 });

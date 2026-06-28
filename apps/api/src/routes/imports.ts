@@ -10,20 +10,22 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
 
   route.post("/markdown/preview", async (context) => {
-    const body = await context.req.json<{ markdown?: string }>();
+    const body = await context.req.json();
+    const markdown = readField(body, "markdown");
 
-    if (typeof body.markdown !== "string") {
+    if (typeof markdown !== "string") {
       return context.json({ error: "markdown_required" }, 400);
     }
 
-    return context.json(previewMarkdownImport(body.markdown));
+    return context.json(previewMarkdownImport(markdown));
   });
 
   route.post("/markdown/confirm", async (context) => {
-    const body = await context.req.json<{ deckId?: string; markdown?: string }>();
-    const deckId = trimmedString(body.deckId);
+    const body = await context.req.json();
+    const deckId = trimmedString(readField(body, "deckId"));
+    const markdown = readField(body, "markdown");
 
-    if (!deckId || typeof body.markdown !== "string") {
+    if (!deckId || typeof markdown !== "string") {
       return context.json({ error: "import_fields_required" }, 400);
     }
 
@@ -38,7 +40,7 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
 
     const result = await confirmMarkdownImport(options.prisma, {
       deckId,
-      markdown: body.markdown,
+      markdown,
     });
 
     if (!result.ok) {
@@ -58,4 +60,12 @@ function trimmedString(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function readField(value: unknown, field: string): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return (value as Record<string, unknown>)[field];
 }
