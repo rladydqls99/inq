@@ -142,8 +142,9 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   route.patch("/:challengeId/run", async (context) => {
     const challengeId = context.req.param("challengeId");
     const body = await context.req.json<{ cursor?: number }>();
+    const cursor = body.cursor;
 
-    if (typeof body.cursor !== "number") {
+    if (typeof cursor !== "number" || !Number.isInteger(cursor)) {
       return context.json({ error: "cursor_required" }, 400);
     }
 
@@ -171,7 +172,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     return context.json(
       await updateChallengeRunCursor(options.prisma, {
         challengeId,
-        cursor: body.cursor,
+        cursor,
       }),
     );
   });
