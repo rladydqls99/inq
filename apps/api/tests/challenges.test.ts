@@ -233,6 +233,35 @@ describe("challenge routes", () => {
     }
   });
 
+  it("rejects challenge creation when deck id is blank", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: "잘못된 챌린지",
+          deckId: "   ",
+          reviewIntervalsDays: [3, 5, 10],
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: "challenge_fields_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("trims challenge names and rejects blank names", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
