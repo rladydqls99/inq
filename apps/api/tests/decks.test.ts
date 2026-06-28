@@ -448,6 +448,19 @@ describe("deck and card routes", () => {
         error: "card_update_fields_required",
       });
 
+      const nonObjectBodyResponse = await app.request(`/api/cards/${card.id}`, {
+        method: "PATCH",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(nonObjectBodyResponse.status).toBe(400);
+      await expect(nonObjectBodyResponse.json()).resolves.toEqual({
+        error: "card_update_fields_required",
+      });
+
       const deleteResponse = await app.request(`/api/cards/${card.id}`, {
         method: "DELETE",
         headers: { cookie },

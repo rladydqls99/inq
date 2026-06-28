@@ -39,20 +39,19 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.patch("/cards/:cardId", async (context) => {
-    const body = await context.req.json<{
-      segments?: QuizSegment[];
-      version?: number;
-    }>();
+    const body = await context.req.json();
+    const segments = readField(body, "segments");
+    const version = readField(body, "version");
 
     if (
-      !body.segments ||
-      typeof body.version !== "number" ||
-      !Number.isInteger(body.version)
+      !segments ||
+      typeof version !== "number" ||
+      !Number.isInteger(version)
     ) {
       return context.json({ error: "card_update_fields_required" }, 400);
     }
 
-    if (!isValidQuizSegments(body.segments)) {
+    if (!isValidQuizSegments(segments)) {
       return context.json({ error: "invalid_card_segments" }, 400);
     }
 
@@ -66,13 +65,13 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "card_not_found" }, 404);
     }
 
-    if (exists.version !== body.version) {
+    if (exists.version !== version) {
       return context.json({ error: "card_version_conflict" }, 409);
     }
 
     const card = await updateCard(options.prisma, cardId, {
-      segments: body.segments,
-      version: body.version,
+      segments,
+      version,
     });
 
     return context.json(toCardResponse(card));
@@ -122,6 +121,14 @@ function isValidQuizSegments(segments: unknown): segments is QuizSegment[] {
     segments.every(isValidQuizSegment) &&
     hasAnswerSegment(segments)
   );
+}
+
+function readField(value: unknown, field: string): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return (value as Record<string, unknown>)[field];
 }
 
 function isValidQuizSegment(segment: unknown): segment is QuizSegment {
