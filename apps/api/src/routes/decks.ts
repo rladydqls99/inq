@@ -18,7 +18,7 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
 
   route.post("/", async (context) => {
     const body = await context.req.json<{ title?: string }>();
-    const title = body.title?.trim();
+    const title = trimmedString(body.title);
 
     if (!title) {
       return context.json({ error: "title_required" }, 400);
@@ -37,7 +37,7 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/:deckId", async (context) => {
     const body = await context.req.json<{ title?: string }>();
-    const title = body.title?.trim();
+    const title = trimmedString(body.title);
 
     if (!title) {
       return context.json({ error: "title_required" }, 400);
@@ -76,6 +76,15 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
   });
 
   return route;
+}
+
+function trimmedString(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmed = value.trim();
+  return trimmed ? trimmed : null;
 }
 
 function toDeckResponse(deck: {
