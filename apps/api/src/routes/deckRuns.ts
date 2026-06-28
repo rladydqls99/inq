@@ -29,8 +29,9 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
   route.patch("/:deckId/run", async (context) => {
     const deckId = context.req.param("deckId");
     const body = await context.req.json<{ cursor?: number }>();
+    const cursor = body.cursor;
 
-    if (typeof body.cursor !== "number") {
+    if (typeof cursor !== "number" || !Number.isInteger(cursor)) {
       return context.json({ error: "cursor_required" }, 400);
     }
 
@@ -44,7 +45,7 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
     }
 
     return context.json(
-      await updateDeckRun(options.prisma, deckId, body.cursor),
+      await updateDeckRun(options.prisma, deckId, cursor),
     );
   });
 
