@@ -93,6 +93,16 @@ export function createAuthRoutes(options: {
   });
 
   route.post("/change-pin", async (context) => {
+    const authorized = await hasActiveSession(
+      context,
+      options.prisma,
+      options.env,
+    );
+
+    if (!authorized) {
+      return context.json({ error: "unauthorized" }, 401);
+    }
+
     const body = await context.req.json<{
       currentPin?: string;
       nextPin?: string;

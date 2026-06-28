@@ -120,6 +120,7 @@ describe("PIN auth routes", () => {
       error: "pin_required",
     });
 
+    const cookie = await unlockAndGetCookie(app, "1234");
     const changeResponse = await app.request("/api/auth/change-pin", {
       method: "POST",
       body: JSON.stringify({
@@ -127,7 +128,7 @@ describe("PIN auth routes", () => {
         nextPin: "   ",
         nextPinConfirm: "   ",
       }),
-      headers: { "content-type": "application/json" },
+      headers: { "content-type": "application/json", cookie },
     });
     expect(changeResponse.status).toBe(400);
     await expect(changeResponse.json()).resolves.toEqual({
@@ -187,6 +188,26 @@ describe("PIN auth routes", () => {
       headers: { "content-type": "application/json" },
     });
     expect(newUnlock.status).toBe(200);
+  });
+
+  it("rejects PIN changes without an active session", async () => {
+    const app = createProtectedTestApp();
+    await setupPin(app, "1234");
+
+    const response = await app.request("/api/auth/change-pin", {
+      method: "POST",
+      body: JSON.stringify({
+        currentPin: "1234",
+        nextPin: "5678",
+        nextPinConfirm: "5678",
+      }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(response.status).toBe(401);
+    await expect(response.json()).resolves.toEqual({
+      error: "unauthorized",
+    });
   });
 
   it("manual lock clears the auth cookie and rejects the old cookie", async () => {
