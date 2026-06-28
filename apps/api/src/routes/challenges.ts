@@ -182,8 +182,9 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       sessionCardId?: string;
       finalResult?: "correct" | "wrong";
     }>();
+    const sessionCardId = body.sessionCardId?.trim();
 
-    if (!body.sessionCardId || !isChallengeResult(body.finalResult)) {
+    if (!sessionCardId || !isChallengeResult(body.finalResult)) {
       return context.json({ error: "challenge_result_fields_required" }, 400);
     }
 
@@ -208,7 +209,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "active_challenge_run_not_found" }, 404);
     }
 
-    const queueCard = findQueueCard(activeSession.queue, body.sessionCardId);
+    const queueCard = findQueueCard(activeSession.queue, sessionCardId);
 
     if (!queueCard) {
       return context.json({ error: "session_card_not_found" }, 404);
@@ -226,7 +227,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     return context.json(
       await submitChallengeRunResult(options.prisma, {
         challengeId,
-        sessionCardId: body.sessionCardId,
+        sessionCardId,
         finalResult: body.finalResult,
       }),
     );
