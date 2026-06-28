@@ -563,6 +563,33 @@ describe("challenge run routes", () => {
     }
   });
 
+  it("rejects non-object challenge result bodies", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { challenge } = await createChallengeFixture(prisma);
+      await getRun(app, challenge.id, cookie);
+
+      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
+        method: "POST",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: "challenge_result_fields_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("returns not found when submitting a result before the challenge run starts", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

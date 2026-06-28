@@ -24,19 +24,16 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.post("/", async (context) => {
-    const body = await context.req.json<{
-      name?: string;
-      deckId?: string;
-      reviewIntervalsDays?: number[];
-    }>();
-    const name = trimmedString(body.name);
-    const deckId = trimmedString(body.deckId);
+    const body = await context.req.json();
+    const name = trimmedString(readField(body, "name"));
+    const deckId = trimmedString(readField(body, "deckId"));
+    const reviewIntervalsDays = readField(body, "reviewIntervalsDays");
 
-    if (!name || !deckId || !body.reviewIntervalsDays) {
+    if (!name || !deckId || !reviewIntervalsDays) {
       return context.json({ error: "challenge_fields_required" }, 400);
     }
 
-    if (!isValidReviewIntervals(body.reviewIntervalsDays)) {
+    if (!isValidReviewIntervals(reviewIntervalsDays)) {
       return context.json({ error: "invalid_review_intervals" }, 400);
     }
 
@@ -52,7 +49,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     const challenge = await createChallenge(options.prisma, {
       name,
       deckId,
-      reviewIntervalsDays: body.reviewIntervalsDays,
+      reviewIntervalsDays,
     });
 
     return context.json(
@@ -63,15 +60,16 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/:challengeId", async (context) => {
     const challengeId = context.req.param("challengeId");
-    const body = await context.req.json<{
-      name?: string;
-      reviewIntervalsDays?: number[];
-    }>();
-    const reviewIntervalsDays = body.reviewIntervalsDays;
+    const body = await context.req.json();
+    const reviewIntervalsDays = readField(body, "reviewIntervalsDays");
     const data: Prisma.ChallengeUpdateInput = {};
 
-    if (body.name !== undefined) {
-      const name = trimmedString(body.name);
+    if (!isRecord(body)) {
+      return context.json({ error: "challenge_fields_required" }, 400);
+    }
+
+    if (readField(body, "name") !== undefined) {
+      const name = trimmedString(readField(body, "name"));
 
       if (!name) {
         return context.json({ error: "challenge_name_required" }, 400);
@@ -179,13 +177,11 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
 
   route.post("/:challengeId/results", async (context) => {
     const challengeId = context.req.param("challengeId");
-    const body = await context.req.json<{
-      sessionCardId?: string;
-      finalResult?: "correct" | "wrong";
-    }>();
-    const sessionCardId = trimmedString(body.sessionCardId);
+    const body = await context.req.json();
+    const sessionCardId = trimmedString(readField(body, "sessionCardId"));
+    const finalResult = readField(body, "finalResult");
 
-    if (!sessionCardId || !isChallengeResult(body.finalResult)) {
+    if (!sessionCardId || !isChallengeResult(finalResult)) {
       return context.json({ error: "challenge_result_fields_required" }, 400);
     }
 
@@ -229,7 +225,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       await submitChallengeRunResult(options.prisma, {
         challengeId,
         sessionCardId,
-        finalResult: body.finalResult,
+        finalResult,
       }),
     );
   });
@@ -276,6 +272,18 @@ function trimmedString(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function readField(value: unknown, field: string): unknown {
+  if (!isRecord(value)) {
+    return undefined;
+  }
+
+  return value[field];
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
 function isChallengeResult(result: unknown): result is "correct" | "wrong" {
