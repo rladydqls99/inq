@@ -355,6 +355,22 @@ describe("deck and card routes", () => {
         error: "card_version_conflict",
       });
 
+      const nonIntegerVersionResponse = await app.request(
+        `/api/cards/${card.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ segments: nextSegments, version: 2.5 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(nonIntegerVersionResponse.status).toBe(400);
+      await expect(nonIntegerVersionResponse.json()).resolves.toEqual({
+        error: "card_update_fields_required",
+      });
+
       const deleteResponse = await app.request(`/api/cards/${card.id}`, {
         method: "DELETE",
         headers: { cookie },

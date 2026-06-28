@@ -44,7 +44,11 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
       version?: number;
     }>();
 
-    if (!body.segments || typeof body.version !== "number") {
+    if (
+      !body.segments ||
+      typeof body.version !== "number" ||
+      !Number.isInteger(body.version)
+    ) {
       return context.json({ error: "card_update_fields_required" }, 400);
     }
 
