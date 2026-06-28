@@ -38,8 +38,8 @@ export function createAuthRoutes(options: {
   });
 
   route.post("/setup-pin", async (context) => {
-    const body = await context.req.json<{ pin?: string }>();
-    const pin = trimmedString(body.pin);
+    const body = await context.req.json();
+    const pin = trimmedString(readField(body, "pin"));
 
     if (!pin) {
       return context.json({ error: "pin_required" }, 400);
@@ -55,8 +55,8 @@ export function createAuthRoutes(options: {
   });
 
   route.post("/unlock", async (context) => {
-    const body = await context.req.json<{ pin?: string }>();
-    const pin = trimmedString(body.pin);
+    const body = await context.req.json();
+    const pin = trimmedString(readField(body, "pin"));
 
     if (!pin) {
       return context.json({ error: "pin_required" }, 400);
@@ -103,14 +103,10 @@ export function createAuthRoutes(options: {
       return context.json({ error: "unauthorized" }, 401);
     }
 
-    const body = await context.req.json<{
-      currentPin?: string;
-      nextPin?: string;
-      nextPinConfirm?: string;
-    }>();
-    const currentPin = trimmedString(body.currentPin);
-    const nextPin = trimmedString(body.nextPin);
-    const nextPinConfirm = trimmedString(body.nextPinConfirm);
+    const body = await context.req.json();
+    const currentPin = trimmedString(readField(body, "currentPin"));
+    const nextPin = trimmedString(readField(body, "nextPin"));
+    const nextPinConfirm = trimmedString(readField(body, "nextPinConfirm"));
 
     if (!currentPin || !nextPin || !nextPinConfirm) {
       return context.json({ error: "pin_fields_required" }, 400);
@@ -183,4 +179,12 @@ function trimmedString(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function readField(value: unknown, field: string): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return (value as Record<string, unknown>)[field];
 }

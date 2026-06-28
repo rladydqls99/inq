@@ -176,6 +176,42 @@ describe("PIN auth routes", () => {
     });
   });
 
+  it("rejects non-object PIN request bodies", async () => {
+    const app = createProtectedTestApp();
+
+    const setupResponse = await app.request("/api/auth/setup-pin", {
+      method: "POST",
+      body: "null",
+      headers: { "content-type": "application/json" },
+    });
+    expect(setupResponse.status).toBe(400);
+    await expect(setupResponse.json()).resolves.toEqual({
+      error: "pin_required",
+    });
+
+    await setupPin(app, "1234");
+    const unlockResponse = await app.request("/api/auth/unlock", {
+      method: "POST",
+      body: "null",
+      headers: { "content-type": "application/json" },
+    });
+    expect(unlockResponse.status).toBe(400);
+    await expect(unlockResponse.json()).resolves.toEqual({
+      error: "pin_required",
+    });
+
+    const cookie = await unlockAndGetCookie(app, "1234");
+    const changeResponse = await app.request("/api/auth/change-pin", {
+      method: "POST",
+      body: "null",
+      headers: { "content-type": "application/json", cookie },
+    });
+    expect(changeResponse.status).toBe(400);
+    await expect(changeResponse.json()).resolves.toEqual({
+      error: "pin_fields_required",
+    });
+  });
+
   it("unlocks with the correct PIN and returns an httpOnly cookie", async () => {
     const app = createProtectedTestApp();
     await setupPin(app, "1234");
