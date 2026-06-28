@@ -118,4 +118,32 @@ describe("markdown import routes", () => {
       await cleanup();
     }
   });
+
+  it("rejects markdown confirm when deck id is blank", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/import/markdown/confirm", {
+        method: "POST",
+        body: JSON.stringify({
+          deckId: "   ",
+          markdown: "훈민정음을 만든 [조선]의 왕은 [세종대왕]이다.",
+        }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: "import_fields_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
 });
