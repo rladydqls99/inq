@@ -139,8 +139,8 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/:challengeId/run", async (context) => {
     const challengeId = context.req.param("challengeId");
-    const body = await context.req.json<{ cursor?: number }>();
-    const cursor = body.cursor;
+    const body = await context.req.json();
+    const cursor = readField(body, "cursor");
 
     if (typeof cursor !== "number" || !Number.isInteger(cursor)) {
       return context.json({ error: "cursor_required" }, 400);

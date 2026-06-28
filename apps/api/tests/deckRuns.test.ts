@@ -185,6 +185,33 @@ describe("deck run routes", () => {
     }
   });
 
+  it("rejects non-object deck run cursor bodies", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      await createCard(prisma, { deckId: deck.id, segments });
+
+      const response = await app.request(`/api/decks/${deck.id}/run`, {
+        method: "PATCH",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(400);
+      await expect(response.json()).resolves.toEqual({
+        error: "cursor_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("records study metadata for the card that was passed", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
