@@ -17,8 +17,8 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.post("/", async (context) => {
-    const body = await context.req.json<{ title?: string }>();
-    const title = trimmedString(body.title);
+    const body = await context.req.json();
+    const title = trimmedString(readField(body, "title"));
 
     if (!title) {
       return context.json({ error: "title_required" }, 400);
@@ -36,8 +36,8 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
   });
 
   route.patch("/:deckId", async (context) => {
-    const body = await context.req.json<{ title?: string }>();
-    const title = trimmedString(body.title);
+    const body = await context.req.json();
+    const title = trimmedString(readField(body, "title"));
 
     if (!title) {
       return context.json({ error: "title_required" }, 400);
@@ -85,6 +85,14 @@ function trimmedString(value: unknown): string | null {
 
   const trimmed = value.trim();
   return trimmed ? trimmed : null;
+}
+
+function readField(value: unknown, field: string): unknown {
+  if (!value || typeof value !== "object" || Array.isArray(value)) {
+    return undefined;
+  }
+
+  return (value as Record<string, unknown>)[field];
 }
 
 function toDeckResponse(deck: {

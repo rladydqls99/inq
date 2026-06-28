@@ -159,6 +159,44 @@ describe("deck and card routes", () => {
     }
   });
 
+  it("rejects non-object deck request bodies", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+
+      const createResponse = await app.request("/api/decks", {
+        method: "POST",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(createResponse.status).toBe(400);
+      await expect(createResponse.json()).resolves.toEqual({
+        error: "title_required",
+      });
+
+      const renameResponse = await app.request(`/api/decks/${deck.id}`, {
+        method: "PATCH",
+        body: "null",
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(renameResponse.status).toBe(400);
+      await expect(renameResponse.json()).resolves.toEqual({
+        error: "title_required",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("returns a bad request error for invalid JSON bodies", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
