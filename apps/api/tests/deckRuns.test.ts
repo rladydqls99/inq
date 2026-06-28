@@ -158,6 +158,36 @@ describe("deck run routes", () => {
     }
   });
 
+  it("records study metadata for the card that was passed", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const card = await createCard(prisma, { deckId: deck.id, segments });
+
+      const response = await app.request(`/api/decks/${deck.id}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+
+      expect(response.status).toBe(200);
+      await expect(
+        prisma.card.findUniqueOrThrow({ where: { id: card.id } }),
+      ).resolves.toMatchObject({
+        studyViewCount: 1,
+        lastStudiedAt: expect.any(Date),
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("clamps deck run state when cards are deleted after progress is saved", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 

@@ -50,11 +50,44 @@ export async function updateDeckRun(
   deckId: string,
   cursor: number,
 ): Promise<DeckRunResponse> {
-  const cardCount = await prisma.card.count({ where: { deckId } });
+  const [runState, cards] = await Promise.all([
+    getDeckRunState(prisma, deckId),
+    prisma.card.findMany({
+      where: { deckId },
+      orderBy: { createdAt: "asc" },
+      select: { id: true },
+    }),
+  ]);
+  const cardCount = cards.length;
   const boundedCursor = Math.min(Math.max(cursor, 0), cardCount);
-  await updateDeckRunCursor(prisma, deckId, {
-    cursor: boundedCursor,
-    completedAt: boundedCursor >= cardCount ? new Date() : null,
+  const now = new Date();
+  const passedCardIds = cards
+    .slice(Math.max(runState.cursor, 0), boundedCursor)
+    .map((card) => card.id);
+
+  await prisma.$transaction(async (transaction) => {
+    if (passedCardIds.length > 0) {
+      await transaction.card.updateMany({
+        where: { id: { in: passedCardIds } },
+        data: {
+          studyViewCount: { increment: 1 },
+          lastStudiedAt: now,
+        },
+      });
+    }
+
+    await transaction.deckRunState.upsert({
+      where: { deckId },
+      create: {
+        deckId,
+        cursor: boundedCursor,
+        completedAt: boundedCursor >= cardCount ? now : null,
+      },
+      update: {
+        cursor: boundedCursor,
+        completedAt: boundedCursor >= cardCount ? now : null,
+      },
+    });
   });
 
   return getDeckRunResponse(prisma, deckId);
