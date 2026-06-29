@@ -65,6 +65,25 @@ describe("CardEditPage", () => {
     expect(await screen.findByText("Saved")).toBeTruthy();
   });
 
+  it("clears the saved state when editing after saving", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/cards/card-1": card(),
+    });
+
+    renderCardEdit();
+
+    const answerInput = await screen.findByLabelText("Answer 1");
+    await user.clear(answerInput);
+    await user.type(answerInput, "대한민국");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+    expect(await screen.findByText("Saved")).toBeTruthy();
+
+    await user.type(screen.getByLabelText("Answer 1"), "!");
+
+    expect(screen.queryByText("Saved")).toBeNull();
+  });
+
   it("disables save when an answer segment is blank", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

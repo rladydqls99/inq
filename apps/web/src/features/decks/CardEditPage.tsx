@@ -60,6 +60,11 @@ export function CardEditPage() {
     }
   }
 
+  function markDirty() {
+    setSaved(false);
+    setSaveError(null);
+  }
+
   return (
     <section className="page">
       <PageHeader title="Edit Card" />
@@ -67,7 +72,12 @@ export function CardEditPage() {
       {!loading && !card ? <div className="list-empty">Card not found</div> : null}
       {card ? (
         <div className="card-edit-page">
-          <CardSegmentEditForm key={card.version} segments={card.segments} onSave={saveCard} />
+          <CardSegmentEditForm
+            key={card.version}
+            segments={card.segments}
+            onDirty={markDirty}
+            onSave={saveCard}
+          />
           {saved ? <div className="save-message">Saved</div> : null}
           {saveError ? <p className="card-editor__error">{saveError}</p> : null}
         </div>

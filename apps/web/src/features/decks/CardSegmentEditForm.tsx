@@ -6,11 +6,13 @@ import { QuizPreview } from "../../components/QuizPreview";
 type CardSegmentEditFormProps = {
   segments: QuizSegment[];
   onSave: (segments: QuizSegment[]) => Promise<void> | void;
+  onDirty?: () => void;
 };
 
 export function CardSegmentEditForm({
   segments,
   onSave,
+  onDirty,
 }: CardSegmentEditFormProps) {
   const [draftSegments, setDraftSegments] = useState<QuizSegment[]>(segments);
   const canSave = draftSegments.every(
@@ -18,6 +20,7 @@ export function CardSegmentEditForm({
   );
 
   function updateSegment(index: number, value: string) {
+    onDirty?.();
     setDraftSegments((current) =>
       current.map((segment, currentIndex) =>
         currentIndex === index ? { ...segment, value } : segment,
