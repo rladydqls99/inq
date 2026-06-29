@@ -59,6 +59,28 @@ describe("CardPlayer", () => {
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
   });
 
+  it("syncs the revealed answer when selected result changes from props", () => {
+    const { rerender } = render(
+      <CardPlayer
+        segments={segments}
+        mode="challenge"
+        selectedResult={null}
+      />,
+    );
+
+    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
+
+    rerender(
+      <CardPlayer
+        segments={segments}
+        mode="challenge"
+        selectedResult="correct"
+      />,
+    );
+
+    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
+  });
+
   it("reveals inline answer in study mode", async () => {
     const user = userEvent.setup();
 

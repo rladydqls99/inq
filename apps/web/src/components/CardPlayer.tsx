@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import type { QuizSegment } from "@inq/shared";
 import {
@@ -27,6 +27,11 @@ export function CardPlayer({
     selectedResult,
   );
   const [studyRevealed, setStudyRevealed] = useState(false);
+
+  useEffect(() => {
+    setLocalResult(selectedResult);
+  }, [selectedResult]);
+
   const revealed = mode === "challenge" ? localResult !== null : studyRevealed;
   const tone: AnswerTone =
     mode === "study" ? "study" : localResult === "wrong" ? "wrong" : "correct";
