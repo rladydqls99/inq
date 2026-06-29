@@ -29,7 +29,7 @@ export function ChallengeListPage() {
 
   async function updateFromDeck(challengeId: string) {
     const result = await apiRequest<{ addedCount: number }>(
-      `/challenges/${challengeId}/update`,
+      `/challenges/${challengeId}/update-from-deck`,
       { method: "POST" },
     );
     setUpdateMessage(`${result.addedCount} cards added`);

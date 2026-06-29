@@ -118,7 +118,7 @@ describe("ChallengeListPage", () => {
     const fetchMock = mockFetchByPath({
       "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
       "/api/decks": [],
-      "/api/challenges/challenge-1/update": { addedCount: 2 },
+      "/api/challenges/challenge-1/update-from-deck": { addedCount: 2 },
     });
 
     render(
@@ -153,7 +153,7 @@ describe("ChallengeListPage", () => {
         ];
       },
       "/api/decks": [],
-      "/api/challenges/challenge-1/update": { addedCount: 2 },
+      "/api/challenges/challenge-1/update-from-deck": { addedCount: 2 },
     });
 
     render(
