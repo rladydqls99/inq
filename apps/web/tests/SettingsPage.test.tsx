@@ -63,6 +63,28 @@ describe("SettingsPage", () => {
     expect(screen.queryByText("Saved")).toBeNull();
   });
 
+  it("shows an error when PIN change fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/auth/change-pin": {
+        body: { error: "invalid_current_pin" },
+        status: 400,
+      },
+      "/api/backup/export": { exportedAt: "2026-06-25T00:00:00.000Z" },
+      "/api/auth/lock": { ok: true },
+    });
+
+    renderSettings();
+
+    await user.type(screen.getByLabelText("Current PIN"), "1234");
+    await user.type(screen.getByLabelText("New PIN"), "5678");
+    await user.type(screen.getByLabelText("Confirm New PIN"), "5678");
+    await user.click(screen.getByRole("button", { name: "Change PIN" }));
+
+    expect(await screen.findByText("PIN을 변경하지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Saved")).toBeNull();
+  });
+
   it("disables PIN change when confirmation does not match", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

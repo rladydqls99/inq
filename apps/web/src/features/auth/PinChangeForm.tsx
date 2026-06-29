@@ -7,6 +7,7 @@ export function PinChangeForm() {
   const [nextPin, setNextPin] = useState("");
   const [nextPinConfirm, setNextPinConfirm] = useState("");
   const [saved, setSaved] = useState(false);
+  const [error, setError] = useState(false);
   const mismatch =
     nextPin.length > 0 &&
     nextPinConfirm.length > 0 &&
@@ -19,26 +20,35 @@ export function PinChangeForm() {
       return;
     }
 
-    await apiRequest("/auth/change-pin", {
-      method: "POST",
-      body: JSON.stringify({ currentPin, nextPin, nextPinConfirm }),
-    });
-    setSaved(true);
+    try {
+      await apiRequest("/auth/change-pin", {
+        method: "POST",
+        body: JSON.stringify({ currentPin, nextPin, nextPinConfirm }),
+      });
+      setSaved(true);
+      setError(false);
+    } catch {
+      setSaved(false);
+      setError(true);
+    }
   }
 
   function updateCurrentPin(value: string) {
     setCurrentPin(value);
     setSaved(false);
+    setError(false);
   }
 
   function updateNextPin(value: string) {
     setNextPin(value);
     setSaved(false);
+    setError(false);
   }
 
   function updateNextPinConfirm(value: string) {
     setNextPinConfirm(value);
     setSaved(false);
+    setError(false);
   }
 
   return (
@@ -78,6 +88,7 @@ export function PinChangeForm() {
         Change PIN
       </button>
       {saved ? <span>Saved</span> : null}
+      {error ? <span>PIN을 변경하지 못했습니다.</span> : null}
     </form>
   );
 }
