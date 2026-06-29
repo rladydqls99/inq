@@ -87,6 +87,25 @@ describe("SettingsPage", () => {
     expect(await screen.findByText("Backup ready")).toBeTruthy();
   });
 
+  it("shows an error when backup export fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/auth/change-pin": { ok: true },
+      "/api/backup/export": {
+        body: { error: "backup_failed" },
+        status: 500,
+      },
+      "/api/auth/lock": { ok: true },
+    });
+
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Export backup" }));
+
+    expect(await screen.findByText("백업을 내보내지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Backup ready")).toBeNull();
+  });
+
   it("locks the app and emits the lock event", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
@@ -118,14 +137,18 @@ function renderSettings() {
   );
 }
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+type MockResponse = unknown | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL) => {
     const path = typeof input === "string" ? input : input.toString();
     const response = responsesByPath[path] ?? {};
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
 
     return Promise.resolve(
-      new Response(JSON.stringify(response), {
-        status: 200,
+      new Response(JSON.stringify(body), {
+        status,
         headers: { "content-type": "application/json" },
       }),
     );
@@ -133,4 +156,16 @@ function mockFetchByPath(responsesByPath: Record<string, unknown>) {
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }
