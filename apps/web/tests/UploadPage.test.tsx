@@ -112,6 +112,49 @@ describe("UploadPage", () => {
     ).toBe(false);
   });
 
+  it("clears the preview and disables creation when markdown changes after validation", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/import/markdown/preview": {
+        parsed: 1,
+        errors: [],
+        previewCards: [
+          {
+            blockIndex: 0,
+            segments: [
+              { type: "text", value: "훈민정음을 만든 " },
+              { type: "answer", id: "answer-1", value: "세종대왕" },
+              { type: "text", value: "이다." },
+            ],
+          },
+        ],
+      },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.click(source);
+    await user.paste("훈민정음을 만든 [세종대왕]이다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+
+    expect(await screen.findByText("1 parsed")).toBeTruthy();
+    expect(
+      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(false);
+
+    await user.type(source, " 수정");
+
+    expect(screen.queryByText("1 parsed")).toBeNull();
+    expect(screen.queryByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeNull();
+    expect(
+      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+  });
+
   it("renders validation errors and disables card creation", async () => {
     const user = userEvent.setup();
     mockFetchByPath({

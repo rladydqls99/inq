@@ -18,6 +18,11 @@ export function UploadPage() {
   const selectDeck = useCallback((deckId: string) => {
     setSelectedDeckId(deckId);
   }, []);
+  const updateMarkdown = useCallback((nextMarkdown: string) => {
+    setMarkdown(nextMarkdown);
+    setPreview(null);
+    setCreatedMessage(null);
+  }, []);
   const canCreate =
     Boolean(selectedDeckId) &&
     preview !== null &&
@@ -58,7 +63,7 @@ export function UploadPage() {
         onSelectDeck={selectDeck}
       />
       <div className="upload-grid">
-        <MarkdownUploadPane markdown={markdown} onChangeMarkdown={setMarkdown} />
+        <MarkdownUploadPane markdown={markdown} onChangeMarkdown={updateMarkdown} />
         <section className="upload-pane" data-testid="upload-preview-pane">
           <h2>Validation and preview</h2>
           <div className="upload-actions">
