@@ -1,12 +1,21 @@
+import { useState } from "react";
+
 import { apiRequest } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
 import { PinChangeForm } from "../auth/PinChangeForm";
 import { BackupExportButton } from "./BackupExportButton";
 
 export function SettingsPage() {
+  const [lockError, setLockError] = useState(false);
+
   async function lock() {
-    await apiRequest("/auth/lock", { method: "POST" });
-    window.dispatchEvent(new Event("inq:locked"));
+    try {
+      await apiRequest("/auth/lock", { method: "POST" });
+      setLockError(false);
+      window.dispatchEvent(new Event("inq:locked"));
+    } catch {
+      setLockError(true);
+    }
   }
 
   return (
@@ -27,6 +36,7 @@ export function SettingsPage() {
             <button type="button" onClick={() => void lock()}>
               Lock
             </button>
+            {lockError ? <span>잠금 처리에 실패했습니다.</span> : null}
           </div>
         </section>
       </div>

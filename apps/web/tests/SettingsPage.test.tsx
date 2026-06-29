@@ -170,6 +170,28 @@ describe("SettingsPage", () => {
     expect(lockListener).toHaveBeenCalledTimes(1);
     window.removeEventListener("inq:locked", lockListener);
   });
+
+  it("shows an error and does not emit lock when locking fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/auth/change-pin": { ok: true },
+      "/api/backup/export": { exportedAt: "2026-06-25T00:00:00.000Z" },
+      "/api/auth/lock": {
+        body: { error: "unauthorized" },
+        status: 401,
+      },
+    });
+    const lockListener = vi.fn();
+    window.addEventListener("inq:locked", lockListener);
+
+    renderSettings();
+
+    await user.click(screen.getByRole("button", { name: "Lock" }));
+
+    expect(await screen.findByText("잠금 처리에 실패했습니다.")).toBeTruthy();
+    expect(lockListener).not.toHaveBeenCalled();
+    window.removeEventListener("inq:locked", lockListener);
+  });
 });
 
 function renderSettings() {
