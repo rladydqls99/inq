@@ -26,6 +26,21 @@ export function PinChangeForm() {
     setSaved(true);
   }
 
+  function updateCurrentPin(value: string) {
+    setCurrentPin(value);
+    setSaved(false);
+  }
+
+  function updateNextPin(value: string) {
+    setNextPin(value);
+    setSaved(false);
+  }
+
+  function updateNextPinConfirm(value: string) {
+    setNextPinConfirm(value);
+    setSaved(false);
+  }
+
   return (
     <form className="pin-change-form" onSubmit={submit}>
       <label>
@@ -34,7 +49,7 @@ export function PinChangeForm() {
           autoComplete="current-password"
           type="password"
           value={currentPin}
-          onChange={(event) => setCurrentPin(event.target.value)}
+          onChange={(event) => updateCurrentPin(event.target.value)}
         />
       </label>
       <label>
@@ -43,7 +58,7 @@ export function PinChangeForm() {
           autoComplete="new-password"
           type="password"
           value={nextPin}
-          onChange={(event) => setNextPin(event.target.value)}
+          onChange={(event) => updateNextPin(event.target.value)}
         />
       </label>
       <label>
@@ -52,7 +67,7 @@ export function PinChangeForm() {
           autoComplete="new-password"
           type="password"
           value={nextPinConfirm}
-          onChange={(event) => setNextPinConfirm(event.target.value)}
+          onChange={(event) => updateNextPinConfirm(event.target.value)}
         />
       </label>
       {mismatch ? <p className="pin-form__error">PIN이 일치하지 않습니다.</p> : null}
