@@ -42,6 +42,31 @@ describe("SettingsPage", () => {
     expect(await screen.findByText("Saved")).toBeTruthy();
   });
 
+  it("disables PIN change when confirmation does not match", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/auth/change-pin": { ok: true },
+      "/api/backup/export": { exportedAt: "2026-06-25T00:00:00.000Z" },
+      "/api/auth/lock": { ok: true },
+    });
+
+    renderSettings();
+
+    await user.type(screen.getByLabelText("Current PIN"), "1234");
+    await user.type(screen.getByLabelText("New PIN"), "5678");
+    await user.type(screen.getByLabelText("Confirm New PIN"), "9999");
+
+    const changeButton = screen.getByRole("button", { name: "Change PIN" });
+    expect(changeButton).toHaveProperty("disabled", true);
+    expect(screen.getByText("PIN이 일치하지 않습니다.")).toBeTruthy();
+
+    await user.click(changeButton);
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/auth/change-pin",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
   it("exports backup data", async () => {
     const user = userEvent.setup();
     vi.spyOn(HTMLAnchorElement.prototype, "click").mockImplementation(() => {});

@@ -7,9 +7,18 @@ export function PinChangeForm() {
   const [nextPin, setNextPin] = useState("");
   const [nextPinConfirm, setNextPinConfirm] = useState("");
   const [saved, setSaved] = useState(false);
+  const mismatch =
+    nextPin.length > 0 &&
+    nextPinConfirm.length > 0 &&
+    nextPin !== nextPinConfirm;
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!currentPin || !nextPin || !nextPinConfirm || mismatch) {
+      return;
+    }
+
     await apiRequest("/auth/change-pin", {
       method: "POST",
       body: JSON.stringify({ currentPin, nextPin, nextPinConfirm }),
@@ -46,7 +55,13 @@ export function PinChangeForm() {
           onChange={(event) => setNextPinConfirm(event.target.value)}
         />
       </label>
-      <button type="submit">Change PIN</button>
+      {mismatch ? <p className="pin-form__error">PIN이 일치하지 않습니다.</p> : null}
+      <button
+        type="submit"
+        disabled={!currentPin || !nextPin || !nextPinConfirm || mismatch}
+      >
+        Change PIN
+      </button>
       {saved ? <span>Saved</span> : null}
     </form>
   );
