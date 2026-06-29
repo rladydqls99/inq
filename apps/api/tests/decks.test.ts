@@ -396,6 +396,28 @@ describe("deck and card routes", () => {
         version: 2,
       });
 
+      const spacedAnswerSegments: QuizSegment[] = [
+        { type: "text", value: "수정된 " },
+        { type: "answer", id: "answer-1", value: "  정답  " },
+      ];
+      const trimmedAnswerResponse = await app.request(`/api/cards/${card.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ segments: spacedAnswerSegments, version: 2 }),
+        headers: {
+          "content-type": "application/json",
+          cookie,
+        },
+      });
+      expect(trimmedAnswerResponse.status).toBe(200);
+      await expect(trimmedAnswerResponse.json()).resolves.toMatchObject({
+        id: card.id,
+        segments: [
+          { type: "text", value: "수정된 " },
+          { type: "answer", id: "answer-1", value: "정답" },
+        ],
+        version: 3,
+      });
+
       for (const invalidSegments of [
         [{ type: "text", value: "정답 없는 카드" }],
         [{ type: "answer", id: "answer-1", value: "" }],
@@ -406,7 +428,7 @@ describe("deck and card routes", () => {
           method: "PATCH",
           body: JSON.stringify({
             segments: invalidSegments,
-            version: 2,
+            version: 3,
           }),
           headers: {
             "content-type": "application/json",
@@ -421,7 +443,7 @@ describe("deck and card routes", () => {
 
       const staleVersionResponse = await app.request(`/api/cards/${card.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ segments: nextSegments, version: 1 }),
+        body: JSON.stringify({ segments: nextSegments, version: 2 }),
         headers: {
           "content-type": "application/json",
           cookie,

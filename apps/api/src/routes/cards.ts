@@ -70,7 +70,7 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     }
 
     const card = await updateCard(options.prisma, cardId, {
-      segments,
+      segments: normalizeQuizSegments(segments),
       version,
     });
 
@@ -129,6 +129,14 @@ function readField(value: unknown, field: string): unknown {
   }
 
   return (value as Record<string, unknown>)[field];
+}
+
+function normalizeQuizSegments(segments: QuizSegment[]): QuizSegment[] {
+  return segments.map((segment) =>
+    segment.type === "answer"
+      ? { ...segment, value: segment.value.trim() }
+      : segment,
+  );
 }
 
 function isValidQuizSegment(segment: unknown): segment is QuizSegment {
