@@ -12,6 +12,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   const [deckId, setDeckId] = useState("");
   const [intervals, setIntervals] = useState("3,5,10");
   const [decks, setDecks] = useState<DeckResponse[]>([]);
+  const parsedIntervals = parseIntervals(intervals);
 
   useEffect(() => {
     let mounted = true;
@@ -31,12 +32,16 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!parsedIntervals) {
+      return;
+    }
+
     await apiRequest("/challenges", {
       method: "POST",
       body: JSON.stringify({
         name,
         deckId,
-        reviewIntervalsDays: parseIntervals(intervals),
+        reviewIntervalsDays: parsedIntervals,
       }),
     });
 
@@ -73,16 +78,22 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
           onChange={(event) => setIntervals(event.target.value)}
         />
       </label>
-      <button type="submit" disabled={!name || !deckId}>
+      <button type="submit" disabled={!name || !deckId || !parsedIntervals}>
         Create
       </button>
     </form>
   );
 }
 
-function parseIntervals(value: string): number[] {
-  return value
-    .split(",")
-    .map((part) => Number(part.trim()))
-    .filter((part) => Number.isFinite(part) && part > 0);
+function parseIntervals(value: string): number[] | null {
+  const parts = value.split(",").map((part) => part.trim());
+
+  if (parts.some((part) => part.length === 0)) {
+    return null;
+  }
+
+  const intervals = parts.map(Number);
+  return intervals.every((interval) => Number.isInteger(interval) && interval > 0)
+    ? intervals
+    : null;
 }
