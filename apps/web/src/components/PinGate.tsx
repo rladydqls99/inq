@@ -51,11 +51,16 @@ export function PinGate({ children }: PinGateProps) {
 
   async function setupPin(pin: string) {
     setError(null);
-    await apiRequest("/auth/setup-pin", {
-      method: "POST",
-      body: JSON.stringify({ pin }),
-    });
-    await unlock(pin);
+
+    try {
+      await apiRequest("/auth/setup-pin", {
+        method: "POST",
+        body: JSON.stringify({ pin }),
+      });
+      await unlock(pin);
+    } catch {
+      setError("PIN을 설정하지 못했습니다.");
+    }
   }
 
   async function unlock(pin: string) {

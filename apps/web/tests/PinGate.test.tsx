@@ -73,6 +73,38 @@ describe("PinGate", () => {
       expect(screen.getByText("Private content")).toBeTruthy();
     });
   });
+
+  it("shows an error when setting the first PIN fails", async () => {
+    const user = userEvent.setup();
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ pinConfigured: false, unlocked: false }), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ error: "pin_already_configured" }), {
+          status: 409,
+          headers: { "content-type": "application/json" },
+        }),
+      );
+    vi.stubGlobal("fetch", fetchMock);
+
+    render(
+      <PinGate>
+        <div>Private content</div>
+      </PinGate>,
+    );
+
+    await user.type(await screen.findByLabelText("PIN"), "1234");
+    await user.type(screen.getByLabelText("Confirm PIN"), "1234");
+    await user.click(screen.getByRole("button", { name: "Set PIN" }));
+
+    expect(await screen.findByText("PIN을 설정하지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Private content")).toBeNull();
+  });
 });
 
 function mockFetch(responses: unknown[]) {
