@@ -1,7 +1,6 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import { PinGate } from "./components/PinGate";
-import { PageHeader } from "./components/PageHeader";
 import { ChallengeListPage } from "./features/challenges/ChallengeListPage";
 import { HomePage } from "./features/challenges/HomePage";
 import { CardEditPage } from "./features/decks/CardEditPage";
@@ -53,14 +52,6 @@ const router = createBrowserRouter([
 
 export function App() {
   return <RouterProvider router={router} />;
-}
-
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <section className="page">
-      <PageHeader title={title} />
-    </section>
-  );
 }
 
 function AuthenticatedRoutes() {
