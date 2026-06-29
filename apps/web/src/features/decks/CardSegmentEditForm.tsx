@@ -13,6 +13,9 @@ export function CardSegmentEditForm({
   onSave,
 }: CardSegmentEditFormProps) {
   const [draftSegments, setDraftSegments] = useState<QuizSegment[]>(segments);
+  const canSave = draftSegments.every(
+    (segment) => segment.type !== "answer" || segment.value.trim().length > 0,
+  );
 
   function updateSegment(index: number, value: string) {
     setDraftSegments((current) =>
@@ -24,6 +27,11 @@ export function CardSegmentEditForm({
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!canSave) {
+      return;
+    }
+
     await onSave(draftSegments);
   }
 
@@ -43,7 +51,9 @@ export function CardSegmentEditForm({
           </label>
         ))}
       </div>
-      <button type="submit">Save</button>
+      <button type="submit" disabled={!canSave}>
+        Save
+      </button>
     </form>
   );
 }

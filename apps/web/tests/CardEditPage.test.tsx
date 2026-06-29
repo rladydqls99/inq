@@ -65,6 +65,27 @@ describe("CardEditPage", () => {
     expect(await screen.findByText("Saved")).toBeTruthy();
   });
 
+  it("disables save when an answer segment is blank", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/cards/card-1": card(),
+    });
+
+    renderCardEdit();
+
+    const answerInput = await screen.findByLabelText("Answer 1");
+    await user.clear(answerInput);
+
+    const saveButton = screen.getByRole("button", { name: "Save" });
+    expect(saveButton).toHaveProperty("disabled", true);
+
+    await user.click(saveButton);
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/cards/card-1",
+      expect.objectContaining({ method: "PATCH" }),
+    );
+  });
+
   it("shows a save error when the card version is stale", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
