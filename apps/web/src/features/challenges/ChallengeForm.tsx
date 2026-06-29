@@ -13,6 +13,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   const [intervals, setIntervals] = useState("3,5,10");
   const [decks, setDecks] = useState<DeckResponse[]>([]);
   const parsedIntervals = parseIntervals(intervals);
+  const trimmedName = name.trim();
 
   useEffect(() => {
     let mounted = true;
@@ -32,14 +33,14 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!parsedIntervals) {
+    if (!trimmedName || !parsedIntervals) {
       return;
     }
 
     await apiRequest("/challenges", {
       method: "POST",
       body: JSON.stringify({
-        name,
+        name: trimmedName,
         deckId,
         reviewIntervalsDays: parsedIntervals,
       }),
@@ -78,7 +79,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
           onChange={(event) => setIntervals(event.target.value)}
         />
       </label>
-      <button type="submit" disabled={!name || !deckId || !parsedIntervals}>
+      <button type="submit" disabled={!trimmedName || !deckId || !parsedIntervals}>
         Create
       </button>
     </form>

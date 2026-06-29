@@ -87,6 +87,32 @@ describe("ChallengeListPage", () => {
     );
   });
 
+  it("disables challenge creation when the name is blank", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/challenges": [],
+      "/api/decks": [{ id: "deck-1", title: "국어", cardCount: 3 }],
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    await user.type(await screen.findByLabelText("Challenge name"), "   ");
+    await user.selectOptions(screen.getByLabelText("Deck"), "deck-1");
+
+    const createButton = screen.getByRole("button", { name: "Create" });
+    expect(createButton).toHaveProperty("disabled", true);
+
+    await user.click(createButton);
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/challenges",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
+
   it("keeps delete and update-from-deck as row actions", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
