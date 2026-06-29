@@ -12,6 +12,7 @@ export function DeckListPage() {
   const [loading, setLoading] = useState(true);
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [renameError, setRenameError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
 
   async function loadDecks() {
@@ -26,6 +27,7 @@ export function DeckListPage() {
   function startRenaming(deck: DeckResponse) {
     setEditingDeckId(deck.id);
     setEditingTitle(deck.title);
+    setRenameError(false);
   }
 
   async function saveDeckTitle(deckId: string) {
@@ -35,13 +37,19 @@ export function DeckListPage() {
       return;
     }
 
-    await apiRequest(`/decks/${deckId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ title }),
-    });
-    setEditingDeckId(null);
-    setEditingTitle("");
-    await loadDecks();
+    setRenameError(false);
+
+    try {
+      await apiRequest(`/decks/${deckId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ title }),
+      });
+      setEditingDeckId(null);
+      setEditingTitle("");
+      await loadDecks();
+    } catch {
+      setRenameError(true);
+    }
   }
 
   async function deleteDeck(deckId: string) {
@@ -59,6 +67,7 @@ export function DeckListPage() {
     <section className="page">
       <PageHeader title="Decks" />
       <DeckForm onCreated={loadDecks} />
+      {renameError ? <div className="list-empty">덱 이름을 저장하지 못했습니다.</div> : null}
       {deleteError ? <div className="list-empty">덱을 삭제하지 못했습니다.</div> : null}
       {loading ? <div className="list-empty">Loading</div> : null}
       {!loading && decks.length === 0 ? <div className="list-empty">No decks</div> : null}
