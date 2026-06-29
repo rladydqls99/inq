@@ -91,16 +91,43 @@ describe("DeckListPage", () => {
       expect.objectContaining({ method: "DELETE" }),
     );
   });
+
+  it("shows an error and keeps the row when deleting a deck fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 2 })],
+      "/api/decks/deck-1": {
+        body: { error: "deck_not_found" },
+        status: 404,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <DeckListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("deck-row-deck-1");
+    await user.click(within(listItem).getByRole("button", { name: "Delete" }));
+
+    expect(await screen.findByText("덱을 삭제하지 못했습니다.")).toBeTruthy();
+    expect(screen.getByTestId("deck-row-deck-1")).toBeTruthy();
+  });
 });
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+type MockResponse = unknown | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL) => {
     const path = typeof input === "string" ? input : input.toString();
     const response = responsesByPath[path] ?? {};
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
 
     return Promise.resolve(
-      new Response(JSON.stringify(response), {
-        status: 200,
+      new Response(JSON.stringify(body), {
+        status,
         headers: { "content-type": "application/json" },
       }),
     );
@@ -118,4 +145,16 @@ function deck(input: { id: string; title: string; cardCount: number }) {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }

@@ -12,6 +12,7 @@ export function DeckListPage() {
   const [loading, setLoading] = useState(true);
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
+  const [deleteError, setDeleteError] = useState(false);
 
   async function loadDecks() {
     setDecks(await apiRequest<DeckResponse[]>("/decks"));
@@ -44,14 +45,21 @@ export function DeckListPage() {
   }
 
   async function deleteDeck(deckId: string) {
-    await apiRequest(`/decks/${deckId}`, { method: "DELETE" });
-    await loadDecks();
+    setDeleteError(false);
+
+    try {
+      await apiRequest(`/decks/${deckId}`, { method: "DELETE" });
+      await loadDecks();
+    } catch {
+      setDeleteError(true);
+    }
   }
 
   return (
     <section className="page">
       <PageHeader title="Decks" />
       <DeckForm onCreated={loadDecks} />
+      {deleteError ? <div className="list-empty">덱을 삭제하지 못했습니다.</div> : null}
       {loading ? <div className="list-empty">Loading</div> : null}
       {!loading && decks.length === 0 ? <div className="list-empty">No decks</div> : null}
       <div className="action-list">
