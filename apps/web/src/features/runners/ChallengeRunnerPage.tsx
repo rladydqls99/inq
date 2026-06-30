@@ -18,6 +18,7 @@ export function ChallengeRunnerPage() {
   const [nextCursorAfterAnswer, setNextCursorAfterAnswer] = useState<number | null>(
     null,
   );
+  const [loadError, setLoadError] = useState(false);
   const [moveError, setMoveError] = useState(false);
   const [resultError, setResultError] = useState(false);
 
@@ -28,15 +29,20 @@ export function ChallengeRunnerPage() {
 
     let mounted = true;
 
-    apiRequest<ChallengeRunState>(`/challenges/${challengeId}/run`).then(
-      (response) => {
+    apiRequest<ChallengeRunState>(`/challenges/${challengeId}/run`)
+      .then((response) => {
         if (mounted) {
           setRunState(response);
           setCursor(response.cursor);
           setSelectedResult(response.cards[response.cursor]?.selectedResult ?? null);
+          setLoadError(false);
         }
-      },
-    );
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -56,6 +62,10 @@ export function ChallengeRunnerPage() {
       window.clearTimeout(timer);
     };
   }, [answeredCard, cursor, nextCursorAfterAnswer, runState, selectedResult]);
+
+  if (loadError) {
+    return <div className="list-empty">챌린지 실행 정보를 불러오지 못했습니다.</div>;
+  }
 
   if (!challengeId || !runState) {
     return <div className="list-empty">Loading</div>;

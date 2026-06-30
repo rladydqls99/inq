@@ -80,6 +80,24 @@ describe("ChallengeRunnerPage", () => {
     });
   });
 
+  it("shows an error when loading a challenge run fails", async () => {
+    mockFetch({ failLoad: true });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("챌린지 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Loading")).toBeNull();
+  });
+
   it("moves past the final card into completed state", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetch({ cardCount: 1 });
@@ -271,6 +289,7 @@ function matchesTextContent(element: Element | null, text: string) {
 function mockFetch(
   options: {
     cardCount?: number;
+    failLoad?: boolean;
     failMove?: boolean;
     failResult?: boolean;
     moveWrongToBack?: boolean;
@@ -291,6 +310,10 @@ function mockFetch(
     }
 
     if (path === "/api/challenges/challenge-1/run") {
+      if (options.failLoad) {
+        return Promise.resolve(jsonResponse({ error: "challenge_not_found" }, 404));
+      }
+
       return Promise.resolve(jsonResponse(state));
     }
 
