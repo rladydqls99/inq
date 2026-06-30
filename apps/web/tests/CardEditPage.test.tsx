@@ -33,6 +33,20 @@ describe("CardEditPage", () => {
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."))).toBeTruthy();
   });
 
+  it("shows an error when loading a card fails", async () => {
+    mockFetchByPath({
+      "/api/cards/card-1": {
+        body: { error: "card_not_found" },
+        status: 404,
+      },
+    });
+
+    renderCardEdit();
+
+    expect(await screen.findByText("카드를 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Card not found")).toBeNull();
+  });
+
   it("saves changed segment values without changing segment structure", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

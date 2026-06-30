@@ -10,6 +10,7 @@ export function CardEditPage() {
   const { cardId } = useParams();
   const [card, setCard] = useState<CardResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -24,6 +25,12 @@ export function CardEditPage() {
       .then((response) => {
         if (mounted) {
           setCard(response);
+          setLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
         }
       })
       .finally(() => {
@@ -69,7 +76,8 @@ export function CardEditPage() {
     <section className="page">
       <PageHeader title="Edit Card" />
       {loading ? <div className="list-empty">Loading</div> : null}
-      {!loading && !card ? <div className="list-empty">Card not found</div> : null}
+      {loadError ? <div className="list-empty">카드를 불러오지 못했습니다.</div> : null}
+      {!loading && !loadError && !card ? <div className="list-empty">Card not found</div> : null}
       {card ? (
         <div className="card-edit-page">
           <CardSegmentEditForm
