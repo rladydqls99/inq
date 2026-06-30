@@ -49,6 +49,25 @@ describe("UploadPage", () => {
     expect(screen.getByLabelText("Deck")).toHaveProperty("value", "created-deck");
   });
 
+  it("shows an error and keeps the title when inline deck creation fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": (_input: RequestInfo | URL, init?: RequestInit) =>
+        init?.method === "POST"
+          ? { body: { error: "invalid_deck_title" }, status: 400 }
+          : [],
+    });
+
+    renderUploadPage();
+
+    const titleInput = await screen.findByLabelText("New deck name");
+    await user.type(titleInput, "한국사");
+    await user.click(screen.getByRole("button", { name: "Create deck" }));
+
+    expect(await screen.findByText("덱을 생성하지 못했습니다.")).toBeTruthy();
+    expect(titleInput).toHaveProperty("value", "한국사");
+  });
+
   it("reads markdown from a selected file into the source pane", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
@@ -307,17 +326,29 @@ function renderUploadPage() {
   );
 }
 
-type MockResponse = unknown | { body: unknown; status: number };
+type MockResponse =
+  | unknown
+  | ((input: RequestInfo | URL, init?: RequestInit) => unknown)
+  | { body: unknown; status: number };
 
 function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
+    const rawResponse = responsesByPath[path] ?? {};
 
-    if (path === "/api/decks" && init?.method === "POST") {
+    if (
+      path === "/api/decks" &&
+      init?.method === "POST" &&
+      typeof rawResponse !== "function" &&
+      !isMockErrorResponse(rawResponse)
+    ) {
       return Promise.resolve(jsonResponse(deck({ id: "created-deck", title: "한국사" })));
     }
 
-    const response = responsesByPath[path] ?? {};
+    const response =
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
     const body = isMockErrorResponse(response) ? response.body : response;
 

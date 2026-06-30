@@ -14,6 +14,7 @@ export function DeckSelectOrCreate({
 }: DeckSelectOrCreateProps) {
   const [decks, setDecks] = useState<DeckResponse[]>([]);
   const [newDeckTitle, setNewDeckTitle] = useState("");
+  const [createError, setCreateError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -37,14 +38,20 @@ export function DeckSelectOrCreate({
   async function createDeck(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    const deck = await apiRequest<DeckResponse>("/decks", {
-      method: "POST",
-      body: JSON.stringify({ title: newDeckTitle }),
-    });
+    setCreateError(false);
 
-    setDecks((current) => [...current, deck]);
-    onSelectDeck(deck.id);
-    setNewDeckTitle("");
+    try {
+      const deck = await apiRequest<DeckResponse>("/decks", {
+        method: "POST",
+        body: JSON.stringify({ title: newDeckTitle }),
+      });
+
+      setDecks((current) => [...current, deck]);
+      onSelectDeck(deck.id);
+      setNewDeckTitle("");
+    } catch {
+      setCreateError(true);
+    }
   }
 
   return (
@@ -67,12 +74,16 @@ export function DeckSelectOrCreate({
           New deck name
           <input
             value={newDeckTitle}
-            onChange={(event) => setNewDeckTitle(event.target.value)}
+            onChange={(event) => {
+              setNewDeckTitle(event.target.value);
+              setCreateError(false);
+            }}
           />
         </label>
         <button type="submit" disabled={!newDeckTitle.trim()}>
           Create deck
         </button>
+        {createError ? <span>덱을 생성하지 못했습니다.</span> : null}
       </form>
     </div>
   );
