@@ -221,7 +221,8 @@ describe("UploadPage", () => {
     renderUploadPage();
 
     const source = await screen.findByLabelText("Markdown source");
-    await user.type(source, "훈민정음을 만든 [세종대왕]이다.");
+    await user.click(source);
+    await user.paste("훈민정음을 만든 [세종대왕]이다.");
     await user.click(screen.getByRole("button", { name: "Validate" }));
 
     expect(await screen.findByText("마크다운을 검증하지 못했습니다.")).toBeTruthy();
