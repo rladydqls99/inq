@@ -12,6 +12,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   const [deckId, setDeckId] = useState("");
   const [intervals, setIntervals] = useState("3,5,10");
   const [decks, setDecks] = useState<DeckResponse[]>([]);
+  const [deckLoadError, setDeckLoadError] = useState(false);
   const [error, setError] = useState(false);
   const parsedIntervals = parseIntervals(intervals);
   const trimmedName = name.trim();
@@ -19,12 +20,19 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   useEffect(() => {
     let mounted = true;
 
-    apiRequest<DeckResponse[]>("/decks").then((response) => {
-      if (mounted) {
-        setDecks(response);
-        setDeckId(response[0]?.id ?? "");
-      }
-    });
+    apiRequest<DeckResponse[]>("/decks")
+      .then((response) => {
+        if (mounted) {
+          setDecks(response);
+          setDeckId(response[0]?.id ?? "");
+          setDeckLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setDeckLoadError(true);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -98,6 +106,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
       <button type="submit" disabled={!trimmedName || !deckId || !parsedIntervals}>
         Create
       </button>
+      {deckLoadError ? <span>덱 목록을 불러오지 못했습니다.</span> : null}
       {error ? <span>챌린지를 생성하지 못했습니다.</span> : null}
     </form>
   );

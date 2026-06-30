@@ -77,6 +77,24 @@ describe("ChallengeListPage", () => {
     );
   });
 
+  it("shows an error when loading decks for challenge creation fails", async () => {
+    mockFetchByPath({
+      "/api/challenges": [],
+      "/api/decks": {
+        body: { error: "deck_list_failed" },
+        status: 500,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("덱 목록을 불러오지 못했습니다.")).toBeTruthy();
+  });
+
   it("shows an error and keeps inputs when creating a challenge fails", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
