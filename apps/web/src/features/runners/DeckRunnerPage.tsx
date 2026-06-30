@@ -12,6 +12,7 @@ export function DeckRunnerPage() {
   const { deckId } = useParams();
   const [runState, setRunState] = useState<DeckRunResponse | null>(null);
   const [cursor, setCursor] = useState(0);
+  const [moveError, setMoveError] = useState(false);
 
   useEffect(() => {
     if (!deckId) {
@@ -67,13 +68,20 @@ export function DeckRunnerPage() {
       Math.max(nextCursor, 0),
       runState.cards.length,
     );
-    const nextRunState = await apiRequest<DeckRunResponse>(`/decks/${deckId}/run`, {
-      method: "PATCH",
-      body: JSON.stringify({ cursor: boundedCursor }),
-    });
 
-    setRunState(nextRunState);
-    setCursor(nextRunState.cursor);
+    setMoveError(false);
+
+    try {
+      const nextRunState = await apiRequest<DeckRunResponse>(`/decks/${deckId}/run`, {
+        method: "PATCH",
+        body: JSON.stringify({ cursor: boundedCursor }),
+      });
+
+      setRunState(nextRunState);
+      setCursor(nextRunState.cursor);
+    } catch {
+      setMoveError(true);
+    }
   }
 
   async function restart() {
@@ -119,6 +127,7 @@ export function DeckRunnerPage() {
         <div className="runner-next">
           <AutoAdvanceTimer seconds={10} />
         </div>
+        {moveError ? <div className="list-empty">카드를 이동하지 못했습니다.</div> : null}
       </div>
     </section>
   );

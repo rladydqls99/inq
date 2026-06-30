@@ -48,6 +48,24 @@ describe("DeckRunnerPage", () => {
     expect(await screen.findByText(matchesTextContent("수도는 ____이다."))).toBeTruthy();
   });
 
+  it("shows an error and keeps the current card when moving fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks/deck-1/run": (_input: RequestInfo | URL, init?: RequestInit) =>
+        init?.method === "PATCH"
+          ? { body: { error: "move_failed" }, status: 500 }
+          : deckRun({ cursor: 0 }),
+    });
+
+    renderDeckRunner();
+
+    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
+    await user.click(screen.getByRole("button", { name: "Next" }));
+
+    expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
+    expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
+  });
+
   it("shows completed state and restarts the deck run", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
@@ -78,26 +96,43 @@ function renderDeckRunner() {
   );
 }
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+type MockResponse =
+  | unknown
+  | ((input: RequestInfo | URL, init?: RequestInit) => unknown)
+  | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
-    const response = responsesByPath[path] ?? responsesByPath["/api/decks/deck-1/run"] ?? {};
+    const rawResponse =
+      responsesByPath[path] ?? responsesByPath["/api/decks/deck-1/run"] ?? {};
+    const response =
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
 
-    if (path === "/api/decks/deck-1/run" && init?.method === "PATCH") {
+    if (
+      path === "/api/decks/deck-1/run" &&
+      init?.method === "PATCH" &&
+      !isMockErrorResponse(response)
+    ) {
       const body = JSON.parse(init.body as string) as { cursor: number };
       return Promise.resolve(jsonResponse(deckRun({ cursor: body.cursor })));
     }
 
-    return Promise.resolve(jsonResponse(response));
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
+
+    return Promise.resolve(jsonResponse(body, status));
   });
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
 
-function jsonResponse(response: unknown) {
+function jsonResponse(response: unknown, status = 200) {
   return new Response(JSON.stringify(response), {
-    status: 200,
+    status,
     headers: { "content-type": "application/json" },
   });
 }
@@ -132,4 +167,16 @@ function matchesTextContent(expected: string) {
   return (_content: string, element: Element | null) =>
     element?.textContent === expected &&
     Array.from(element.children).every((child) => child.textContent !== expected);
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }
