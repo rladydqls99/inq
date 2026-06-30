@@ -232,6 +232,47 @@ describe("UploadPage", () => {
     expect(screen.getByLabelText("Markdown source")).toHaveProperty("value", "");
     expect(screen.queryByText("1 parsed")).toBeNull();
   });
+
+  it("shows an error and keeps source state when import confirmation fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/import/markdown/preview": {
+        parsed: 1,
+        errors: [],
+        previewCards: [
+          {
+            blockIndex: 0,
+            segments: [
+              { type: "text", value: "훈민정음을 만든 " },
+              { type: "answer", id: "answer-1", value: "세종대왕" },
+              { type: "text", value: "이다." },
+            ],
+          },
+        ],
+      },
+      "/api/import/markdown/confirm": {
+        body: { error: "deck_not_found" },
+        status: 404,
+      },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.click(source);
+    await user.paste("훈민정음을 만든 [세종대왕]이다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+    await user.click(await screen.findByRole("button", { name: "Create cards" }));
+
+    expect(await screen.findByText("카드를 생성하지 못했습니다.")).toBeTruthy();
+    expect(screen.getByLabelText("Markdown source")).toHaveProperty(
+      "value",
+      "훈민정음을 만든 [세종대왕]이다.",
+    );
+    expect(screen.getByText("1 parsed")).toBeTruthy();
+    expect(screen.queryByText("1 cards created")).toBeNull();
+  });
 });
 
 function renderUploadPage() {
@@ -242,7 +283,9 @@ function renderUploadPage() {
   );
 }
 
-function mockFetchByPath(responsesByPath: Record<string, unknown>) {
+type MockResponse = unknown | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
 
@@ -250,16 +293,20 @@ function mockFetchByPath(responsesByPath: Record<string, unknown>) {
       return Promise.resolve(jsonResponse(deck({ id: "created-deck", title: "한국사" })));
     }
 
-    return Promise.resolve(jsonResponse(responsesByPath[path] ?? {}));
+    const response = responsesByPath[path] ?? {};
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
+
+    return Promise.resolve(jsonResponse(body, status));
   });
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
 }
 
-function jsonResponse(response: unknown) {
+function jsonResponse(response: unknown, status = 200) {
   return new Response(JSON.stringify(response), {
-    status: 200,
+    status,
     headers: { "content-type": "application/json" },
   });
 }
@@ -278,4 +325,16 @@ function matchesTextContent(expected: string) {
   return (_content: string, element: Element | null) =>
     element?.textContent === expected &&
     Array.from(element.children).every((child) => child.textContent !== expected);
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }

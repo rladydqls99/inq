@@ -15,6 +15,7 @@ export function UploadPage() {
   const [markdown, setMarkdown] = useState("");
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
   const [createdMessage, setCreatedMessage] = useState<string | null>(null);
+  const [createError, setCreateError] = useState(false);
   const selectDeck = useCallback((deckId: string) => {
     setSelectedDeckId(deckId);
   }, []);
@@ -22,6 +23,7 @@ export function UploadPage() {
     setMarkdown(nextMarkdown);
     setPreview(null);
     setCreatedMessage(null);
+    setCreateError(false);
   }, []);
   const canCreate =
     Boolean(selectedDeckId) &&
@@ -31,6 +33,7 @@ export function UploadPage() {
 
   async function validateMarkdown() {
     setCreatedMessage(null);
+    setCreateError(false);
     const response = await apiRequest<ImportPreviewResponse>(
       "/import/markdown/preview",
       {
@@ -42,17 +45,24 @@ export function UploadPage() {
   }
 
   async function confirmImport() {
-    const response = await apiRequest<{ createdCount: number }>(
-      "/import/markdown/confirm",
-      {
-        method: "POST",
-        body: JSON.stringify({ deckId: selectedDeckId, markdown }),
-      },
-    );
+    setCreateError(false);
 
-    setMarkdown("");
-    setPreview(null);
-    setCreatedMessage(`${response.createdCount} cards created`);
+    try {
+      const response = await apiRequest<{ createdCount: number }>(
+        "/import/markdown/confirm",
+        {
+          method: "POST",
+          body: JSON.stringify({ deckId: selectedDeckId, markdown }),
+        },
+      );
+
+      setMarkdown("");
+      setPreview(null);
+      setCreatedMessage(`${response.createdCount} cards created`);
+    } catch {
+      setCreatedMessage(null);
+      setCreateError(true);
+    }
   }
 
   return (
@@ -80,6 +90,7 @@ export function UploadPage() {
             createdMessage={createdMessage}
             onConfirm={confirmImport}
           />
+          {createError ? <div className="import-summary is-error">카드를 생성하지 못했습니다.</div> : null}
           <ImportValidationSummary preview={preview} />
           <ImportErrorList errors={preview?.errors ?? []} />
           <ImportPreviewList cards={preview?.previewCards ?? []} />
