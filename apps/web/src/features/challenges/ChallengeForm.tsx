@@ -12,6 +12,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   const [deckId, setDeckId] = useState("");
   const [intervals, setIntervals] = useState("3,5,10");
   const [decks, setDecks] = useState<DeckResponse[]>([]);
+  const [error, setError] = useState(false);
   const parsedIntervals = parseIntervals(intervals);
   const trimmedName = name.trim();
 
@@ -37,17 +38,23 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
       return;
     }
 
-    await apiRequest("/challenges", {
-      method: "POST",
-      body: JSON.stringify({
-        name: trimmedName,
-        deckId,
-        reviewIntervalsDays: parsedIntervals,
-      }),
-    });
+    setError(false);
 
-    setName("");
-    await onCreated();
+    try {
+      await apiRequest("/challenges", {
+        method: "POST",
+        body: JSON.stringify({
+          name: trimmedName,
+          deckId,
+          reviewIntervalsDays: parsedIntervals,
+        }),
+      });
+
+      setName("");
+      await onCreated();
+    } catch {
+      setError(true);
+    }
   }
 
   return (
@@ -56,14 +63,20 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
         Challenge name
         <input
           value={name}
-          onChange={(event) => setName(event.target.value)}
+          onChange={(event) => {
+            setName(event.target.value);
+            setError(false);
+          }}
         />
       </label>
       <label>
         Deck
         <select
           value={deckId}
-          onChange={(event) => setDeckId(event.target.value)}
+          onChange={(event) => {
+            setDeckId(event.target.value);
+            setError(false);
+          }}
         >
           {decks.map((deck) => (
             <option key={deck.id} value={deck.id}>
@@ -76,12 +89,16 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
         Intervals
         <input
           value={intervals}
-          onChange={(event) => setIntervals(event.target.value)}
+          onChange={(event) => {
+            setIntervals(event.target.value);
+            setError(false);
+          }}
         />
       </label>
       <button type="submit" disabled={!trimmedName || !deckId || !parsedIntervals}>
         Create
       </button>
+      {error ? <span>챌린지를 생성하지 못했습니다.</span> : null}
     </form>
   );
 }

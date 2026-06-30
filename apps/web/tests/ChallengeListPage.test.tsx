@@ -59,6 +59,34 @@ describe("ChallengeListPage", () => {
     );
   });
 
+  it("shows an error and keeps inputs when creating a challenge fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/challenges": (_input: RequestInfo | URL, init?: RequestInit) =>
+        init?.method === "POST"
+          ? { body: { error: "deck_not_found" }, status: 404 }
+          : [],
+      "/api/decks": [{ id: "deck-1", title: "국어", cardCount: 3 }],
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const nameInput = await screen.findByLabelText("Challenge name");
+    await user.type(nameInput, "새 챌린지");
+    await user.selectOptions(screen.getByLabelText("Deck"), "deck-1");
+    await user.clear(screen.getByLabelText("Intervals"));
+    await user.type(screen.getByLabelText("Intervals"), "2,4,8");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    expect(await screen.findByText("챌린지를 생성하지 못했습니다.")).toBeTruthy();
+    expect(nameInput).toHaveProperty("value", "새 챌린지");
+    expect(screen.getByLabelText("Intervals")).toHaveProperty("value", "2,4,8");
+  });
+
   it("disables challenge creation when intervals contain invalid parts", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
@@ -280,19 +308,22 @@ describe("ChallengeListPage", () => {
   });
 });
 
-type MockResponse = unknown | (() => unknown) | { body: unknown; status: number };
+type MockResponse =
+  | unknown
+  | ((input: RequestInfo | URL, init?: RequestInit) => unknown)
+  | { body: unknown; status: number };
 
 function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
 
-    const response = responsesByPath[path] ?? {};
+    const rawResponse = responsesByPath[path] ?? {};
+    const response =
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
-    const body = isMockErrorResponse(response)
-      ? response.body
-      : typeof response === "function"
-        ? response()
-        : response;
+    const body = isMockErrorResponse(response) ? response.body : response;
 
     if (
       path === "/api/challenges/challenge-1" &&
