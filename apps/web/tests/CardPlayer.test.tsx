@@ -39,7 +39,7 @@ describe("CardPlayer", () => {
     expect(onNext).toHaveBeenCalledTimes(1);
   });
 
-  it("reveals inline answer after selecting a challenge result", async () => {
+  it("keeps the answer hidden until the selected challenge result is saved", async () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
 
@@ -56,7 +56,7 @@ describe("CardPlayer", () => {
     await user.click(screen.getByRole("button", { name: "Correct" }));
 
     expect(onResult).toHaveBeenCalledWith("correct");
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
+    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
   });
 
   it("syncs the revealed answer when selected result changes from props", () => {
