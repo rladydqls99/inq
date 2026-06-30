@@ -29,6 +29,24 @@ describe("ChallengeListPage", () => {
     expect(row.getAttribute("href")).toBe("/challenges/challenge-1/run");
   });
 
+  it("shows an error when loading challenges fails", async () => {
+    mockFetchByPath({
+      "/api/challenges": {
+        body: { error: "challenge_list_failed" },
+        status: 500,
+      },
+      "/api/decks": [],
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("챌린지 목록을 불러오지 못했습니다.")).toBeTruthy();
+  });
+
   it("creates a challenge with default intervals", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

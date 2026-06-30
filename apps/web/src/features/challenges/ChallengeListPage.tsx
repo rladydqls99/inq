@@ -8,6 +8,7 @@ import { ChallengeListItem } from "./ChallengeListItem";
 
 export function ChallengeListPage() {
   const [challenges, setChallenges] = useState<ChallengeResponse[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
   const [updateError, setUpdateError] = useState(false);
   const [editingChallengeId, setEditingChallengeId] = useState<string | null>(
@@ -18,7 +19,13 @@ export function ChallengeListPage() {
   const [deleteError, setDeleteError] = useState(false);
 
   async function loadChallenges() {
-    setChallenges(await apiRequest<ChallengeResponse[]>("/challenges"));
+    setLoadError(false);
+
+    try {
+      setChallenges(await apiRequest<ChallengeResponse[]>("/challenges"));
+    } catch {
+      setLoadError(true);
+    }
   }
 
   useEffect(() => {
@@ -84,6 +91,7 @@ export function ChallengeListPage() {
     <section className="page">
       <PageHeader title="Challenges" />
       <ChallengeForm onCreated={loadChallenges} />
+      {loadError ? <div className="list-empty">챌린지 목록을 불러오지 못했습니다.</div> : null}
       {updateMessage ? <div className="list-empty">{updateMessage}</div> : null}
       {updateError ? <div className="list-empty">챌린지를 업데이트하지 못했습니다.</div> : null}
       {renameError ? <div className="list-empty">챌린지 이름을 저장하지 못했습니다.</div> : null}
