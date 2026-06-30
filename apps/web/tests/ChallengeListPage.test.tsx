@@ -171,6 +171,30 @@ describe("ChallengeListPage", () => {
     expect(await within(listItem).findByText("2/12")).toBeTruthy();
   });
 
+  it("shows an error when updating a challenge from deck fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
+      "/api/decks": [],
+      "/api/challenges/challenge-1/update-from-deck": {
+        body: { error: "challenge_not_found" },
+        status: 404,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    await user.click(within(listItem).getByRole("button", { name: "Update from deck" }));
+
+    expect(await screen.findByText("챌린지를 업데이트하지 못했습니다.")).toBeTruthy();
+    expect(within(listItem).getByText("2/10")).toBeTruthy();
+  });
+
   it("renames a challenge from the row actions", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
@@ -201,7 +225,9 @@ describe("ChallengeListPage", () => {
   });
 });
 
-function mockFetchByPath(responsesByPath: Record<string, unknown | (() => unknown)>) {
+type MockResponse = unknown | (() => unknown) | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
 
@@ -218,11 +244,16 @@ function mockFetchByPath(responsesByPath: Record<string, unknown | (() => unknow
     }
 
     const response = responsesByPath[path] ?? {};
-    const body = typeof response === "function" ? response() : response;
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response)
+      ? response.body
+      : typeof response === "function"
+        ? response()
+        : response;
 
     return Promise.resolve(
       new Response(JSON.stringify(body), {
-        status: 200,
+        status,
         headers: { "content-type": "application/json" },
       }),
     );
@@ -255,4 +286,16 @@ function challenge(input: { id: string; name: string; totalCards?: number }) {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }

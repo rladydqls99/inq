@@ -9,6 +9,7 @@ import { ChallengeListItem } from "./ChallengeListItem";
 export function ChallengeListPage() {
   const [challenges, setChallenges] = useState<ChallengeResponse[]>([]);
   const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [updateError, setUpdateError] = useState(false);
   const [editingChallengeId, setEditingChallengeId] = useState<string | null>(
     null,
   );
@@ -28,12 +29,19 @@ export function ChallengeListPage() {
   }
 
   async function updateFromDeck(challengeId: string) {
-    const result = await apiRequest<{ addedCount: number }>(
-      `/challenges/${challengeId}/update-from-deck`,
-      { method: "POST" },
-    );
-    setUpdateMessage(`${result.addedCount} cards added`);
-    await loadChallenges();
+    setUpdateError(false);
+
+    try {
+      const result = await apiRequest<{ addedCount: number }>(
+        `/challenges/${challengeId}/update-from-deck`,
+        { method: "POST" },
+      );
+      setUpdateMessage(`${result.addedCount} cards added`);
+      await loadChallenges();
+    } catch {
+      setUpdateMessage(null);
+      setUpdateError(true);
+    }
   }
 
   function startEditing(challenge: ChallengeResponse) {
@@ -62,6 +70,7 @@ export function ChallengeListPage() {
       <PageHeader title="Challenges" />
       <ChallengeForm onCreated={loadChallenges} />
       {updateMessage ? <div className="list-empty">{updateMessage}</div> : null}
+      {updateError ? <div className="list-empty">챌린지를 업데이트하지 못했습니다.</div> : null}
       <div className="action-list">
         {challenges.map((challenge) => (
           <div
