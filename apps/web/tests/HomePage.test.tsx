@@ -80,14 +80,27 @@ describe("HomePage", () => {
 
     expect(await screen.findByText("No challenges")).toBeTruthy();
   });
+
+  it("shows an error when loading challenges fails", async () => {
+    mockFetch({ error: "challenge_list_failed" }, 500);
+
+    render(
+      <MemoryRouter>
+        <HomePage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("챌린지를 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Loading")).toBeNull();
+  });
 });
 
-function mockFetch(response: unknown) {
+function mockFetch(response: unknown, status = 200) {
   vi.stubGlobal(
     "fetch",
     vi.fn().mockResolvedValue(
       new Response(JSON.stringify(response), {
-        status: 200,
+        status,
         headers: { "content-type": "application/json" },
       }),
     ),

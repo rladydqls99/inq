@@ -8,6 +8,7 @@ import { ChallengeListItem } from "./ChallengeListItem";
 export function HomePage() {
   const [challenges, setChallenges] = useState<ChallengeResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -16,6 +17,12 @@ export function HomePage() {
       .then((response) => {
         if (mounted) {
           setChallenges(response.filter((challenge) => challenge.status === "active"));
+          setLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
         }
       })
       .finally(() => {
@@ -39,10 +46,11 @@ export function HomePage() {
     <section className="page">
       <PageHeader title="Home" />
       {loading ? <div className="list-empty">Loading</div> : null}
-      {!loading && sortedChallenges.length === 0 ? (
+      {loadError ? <div className="list-empty">챌린지를 불러오지 못했습니다.</div> : null}
+      {!loading && !loadError && sortedChallenges.length === 0 ? (
         <div className="list-empty">No challenges</div>
       ) : null}
-      {!loading && sortedChallenges.length > 0 && !hasDueCards ? (
+      {!loading && !loadError && sortedChallenges.length > 0 && !hasDueCards ? (
         <div className="list-empty">No due cards</div>
       ) : null}
       <div className="action-list">
