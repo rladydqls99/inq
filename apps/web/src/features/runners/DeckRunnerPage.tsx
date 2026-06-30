@@ -13,6 +13,7 @@ export function DeckRunnerPage() {
   const [runState, setRunState] = useState<DeckRunResponse | null>(null);
   const [cursor, setCursor] = useState(0);
   const [moveError, setMoveError] = useState(false);
+  const [restartError, setRestartError] = useState(false);
 
   useEffect(() => {
     if (!deckId) {
@@ -89,12 +90,18 @@ export function DeckRunnerPage() {
       return;
     }
 
-    const nextRunState = await apiRequest<DeckRunResponse>(
-      `/decks/${deckId}/run/restart`,
-      { method: "POST" },
-    );
-    setRunState(nextRunState);
-    setCursor(nextRunState.cursor);
+    setRestartError(false);
+
+    try {
+      const nextRunState = await apiRequest<DeckRunResponse>(
+        `/decks/${deckId}/run/restart`,
+        { method: "POST" },
+      );
+      setRunState(nextRunState);
+      setCursor(nextRunState.cursor);
+    } catch {
+      setRestartError(true);
+    }
   }
 
   if (completed || !currentCard) {
@@ -108,6 +115,7 @@ export function DeckRunnerPage() {
               Restart
             </button>
           </div>
+          {restartError ? <div className="list-empty">덱을 다시 시작하지 못했습니다.</div> : null}
         </div>
       </section>
     );

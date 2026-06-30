@@ -84,6 +84,28 @@ describe("DeckRunnerPage", () => {
     );
     expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
   });
+
+  it("shows an error and stays completed when restarting fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({
+        cursor: 2,
+        completedAt: "2026-06-25T00:00:00.000Z",
+      }),
+      "/api/decks/deck-1/run/restart": {
+        body: { error: "restart_failed" },
+        status: 500,
+      },
+    });
+
+    renderDeckRunner();
+
+    expect(await screen.findByText("Completed")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "Restart" }));
+
+    expect(await screen.findByText("덱을 다시 시작하지 못했습니다.")).toBeTruthy();
+    expect(screen.getByText("Completed")).toBeTruthy();
+  });
 });
 
 function renderDeckRunner() {
