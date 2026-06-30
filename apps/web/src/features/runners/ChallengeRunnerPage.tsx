@@ -18,6 +18,7 @@ export function ChallengeRunnerPage() {
   const [nextCursorAfterAnswer, setNextCursorAfterAnswer] = useState<number | null>(
     null,
   );
+  const [resultError, setResultError] = useState(false);
 
   useEffect(() => {
     if (!challengeId) {
@@ -75,22 +76,29 @@ export function ChallengeRunnerPage() {
       return;
     }
 
-    setSelectedResult(result);
-    const response = await apiRequest<{ runState: ChallengeRunState }>(
-      `/challenges/${challengeId}/results`,
-      {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: currentCard.sessionCardId,
-          finalResult: result,
-        }),
-      },
-    );
-    setRunState(response.runState);
-    setAnsweredCard(currentCard);
-    setNextCursorAfterAnswer(
-      nextCursorForAnsweredCard(response.runState, currentCard.sessionCardId, cursor),
-    );
+    setResultError(false);
+
+    try {
+      const response = await apiRequest<{ runState: ChallengeRunState }>(
+        `/challenges/${challengeId}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: currentCard.sessionCardId,
+            finalResult: result,
+          }),
+        },
+      );
+      setSelectedResult(result);
+      setRunState(response.runState);
+      setAnsweredCard(currentCard);
+      setNextCursorAfterAnswer(
+        nextCursorForAnsweredCard(response.runState, currentCard.sessionCardId, cursor),
+      );
+    } catch {
+      setSelectedResult(null);
+      setResultError(true);
+    }
   }
 
   async function moveTo(nextCursor: number) {
@@ -113,6 +121,7 @@ export function ChallengeRunnerPage() {
 
     setAnsweredCard(null);
     setNextCursorAfterAnswer(null);
+    setResultError(false);
     setRunState(nextRunState);
     setCursor(nextRunState.cursor);
     setSelectedResult(
@@ -133,6 +142,7 @@ export function ChallengeRunnerPage() {
           onNext={() => void moveTo(nextCursorAfterAnswer ?? cursor + 1)}
           onResult={(result) => void submitResult(result)}
         />
+        {resultError ? <div className="list-empty">결과를 저장하지 못했습니다.</div> : null}
         {selectedResult ? (
           <div className="runner-next">
             <AutoAdvanceTimer seconds={5} />

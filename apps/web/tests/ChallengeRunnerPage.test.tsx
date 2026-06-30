@@ -156,6 +156,35 @@ describe("ChallengeRunnerPage", () => {
     ).toBeTruthy();
   });
 
+  it("shows an error and keeps the card unanswered when saving a result fails", async () => {
+    const user = userEvent.setup();
+    mockFetch({ failResult: true });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+    await user.click(screen.getByRole("button", { name: "Correct" }));
+
+    expect(await screen.findByText("결과를 저장하지 못했습니다.")).toBeTruthy();
+    expect(
+      screen.getByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+      ),
+    ).toBeTruthy();
+    expect(screen.queryByText("5s")).toBeNull();
+  });
+
   it("automatically advances five seconds after a result is selected", async () => {
     const fetchMock = mockFetch();
 
@@ -209,7 +238,13 @@ function matchesTextContent(element: Element | null, text: string) {
   return Array.from(element.children).every((child) => child.textContent !== text);
 }
 
-function mockFetch(options: { cardCount?: number; moveWrongToBack?: boolean } = {}) {
+function mockFetch(
+  options: {
+    cardCount?: number;
+    failResult?: boolean;
+    moveWrongToBack?: boolean;
+  } = {},
+) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
     const state = runState(options);
@@ -225,6 +260,10 @@ function mockFetch(options: { cardCount?: number; moveWrongToBack?: boolean } = 
     }
 
     if (path === "/api/challenges/challenge-1/results" && init?.method === "POST") {
+      if (options.failResult) {
+        return Promise.resolve(jsonResponse({ error: "result_failed" }, 500));
+      }
+
       return Promise.resolve(
         jsonResponse({
           runState: options.moveWrongToBack ? moveFirstCardToBack(state) : state,
@@ -250,9 +289,9 @@ function moveFirstCardToBack(state: ReturnType<typeof runState>) {
   };
 }
 
-function jsonResponse(body: unknown) {
+function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
-    status: 200,
+    status,
     headers: { "content-type": "application/json" },
   });
 }
