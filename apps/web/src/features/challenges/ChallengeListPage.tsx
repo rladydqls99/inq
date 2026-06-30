@@ -15,6 +15,7 @@ export function ChallengeListPage() {
   );
   const [editingName, setEditingName] = useState("");
   const [renameError, setRenameError] = useState(false);
+  const [deleteError, setDeleteError] = useState(false);
 
   async function loadChallenges() {
     setChallenges(await apiRequest<ChallengeResponse[]>("/challenges"));
@@ -25,8 +26,14 @@ export function ChallengeListPage() {
   }, []);
 
   async function deleteChallenge(challengeId: string) {
-    await apiRequest(`/challenges/${challengeId}`, { method: "DELETE" });
-    await loadChallenges();
+    setDeleteError(false);
+
+    try {
+      await apiRequest(`/challenges/${challengeId}`, { method: "DELETE" });
+      await loadChallenges();
+    } catch {
+      setDeleteError(true);
+    }
   }
 
   async function updateFromDeck(challengeId: string) {
@@ -80,6 +87,7 @@ export function ChallengeListPage() {
       {updateMessage ? <div className="list-empty">{updateMessage}</div> : null}
       {updateError ? <div className="list-empty">챌린지를 업데이트하지 못했습니다.</div> : null}
       {renameError ? <div className="list-empty">챌린지 이름을 저장하지 못했습니다.</div> : null}
+      {deleteError ? <div className="list-empty">챌린지를 삭제하지 못했습니다.</div> : null}
       <div className="action-list">
         {challenges.map((challenge) => (
           <div

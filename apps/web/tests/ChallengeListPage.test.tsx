@@ -254,6 +254,30 @@ describe("ChallengeListPage", () => {
       "기말고사",
     );
   });
+
+  it("shows an error and keeps the row when deleting a challenge fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
+      "/api/decks": [],
+      "/api/challenges/challenge-1": {
+        body: { error: "challenge_not_found" },
+        status: 404,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    await user.click(within(listItem).getByRole("button", { name: "Delete" }));
+
+    expect(await screen.findByText("챌린지를 삭제하지 못했습니다.")).toBeTruthy();
+    expect(screen.getByTestId("challenge-row-challenge-1")).toBeTruthy();
+  });
 });
 
 type MockResponse = unknown | (() => unknown) | { body: unknown; status: number };
