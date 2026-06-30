@@ -27,6 +27,19 @@ describe("UploadPage", () => {
     expect(screen.getByTestId("upload-preview-pane")).toBeTruthy();
   });
 
+  it("shows an error when loading upload decks fails", async () => {
+    mockFetchByPath({
+      "/api/decks": {
+        body: { error: "deck_list_failed" },
+        status: 500,
+      },
+    });
+
+    renderUploadPage();
+
+    expect(await screen.findByText("덱 목록을 불러오지 못했습니다.")).toBeTruthy();
+  });
+
   it("creates a deck inline and selects it", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

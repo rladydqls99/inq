@@ -14,21 +14,29 @@ export function DeckSelectOrCreate({
 }: DeckSelectOrCreateProps) {
   const [decks, setDecks] = useState<DeckResponse[]>([]);
   const [newDeckTitle, setNewDeckTitle] = useState("");
+  const [loadError, setLoadError] = useState(false);
   const [createError, setCreateError] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
-    apiRequest<DeckResponse[]>("/decks").then((response) => {
-      if (!mounted) {
-        return;
-      }
+    apiRequest<DeckResponse[]>("/decks")
+      .then((response) => {
+        if (!mounted) {
+          return;
+        }
 
-      setDecks(response);
-      if (!selectedDeckId && response[0]) {
-        onSelectDeck(response[0].id);
-      }
-    });
+        setDecks(response);
+        setLoadError(false);
+        if (!selectedDeckId && response[0]) {
+          onSelectDeck(response[0].id);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -85,6 +93,7 @@ export function DeckSelectOrCreate({
         </button>
         {createError ? <span>덱을 생성하지 못했습니다.</span> : null}
       </form>
+      {loadError ? <div className="import-summary is-error">덱 목록을 불러오지 못했습니다.</div> : null}
     </div>
   );
 }
