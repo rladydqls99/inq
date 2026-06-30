@@ -12,6 +12,7 @@ export function DeckRunnerPage() {
   const { deckId } = useParams();
   const [runState, setRunState] = useState<DeckRunResponse | null>(null);
   const [cursor, setCursor] = useState(0);
+  const [loadError, setLoadError] = useState(false);
   const [moveError, setMoveError] = useState(false);
   const [restartError, setRestartError] = useState(false);
 
@@ -22,12 +23,19 @@ export function DeckRunnerPage() {
 
     let mounted = true;
 
-    apiRequest<DeckRunResponse>(`/decks/${deckId}/run`).then((response) => {
-      if (mounted) {
-        setRunState(response);
-        setCursor(response.cursor);
-      }
-    });
+    apiRequest<DeckRunResponse>(`/decks/${deckId}/run`)
+      .then((response) => {
+        if (mounted) {
+          setRunState(response);
+          setCursor(response.cursor);
+          setLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
+        }
+      });
 
     return () => {
       mounted = false;
@@ -52,6 +60,10 @@ export function DeckRunnerPage() {
       onPrevious: () => void moveTo(cursor - 1),
     });
   }, [cursor, runState]);
+
+  if (loadError) {
+    return <div className="list-empty">덱 실행 정보를 불러오지 못했습니다.</div>;
+  }
 
   if (!deckId || !runState) {
     return <div className="list-empty">Loading</div>;

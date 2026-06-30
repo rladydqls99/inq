@@ -27,6 +27,20 @@ describe("DeckRunnerPage", () => {
     expect(screen.getByText("10s")).toBeTruthy();
   });
 
+  it("shows an error when loading a deck run fails", async () => {
+    mockFetchByPath({
+      "/api/decks/deck-1/run": {
+        body: { error: "deck_not_found" },
+        status: 404,
+      },
+    });
+
+    renderDeckRunner();
+
+    expect(await screen.findByText("덱 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Loading")).toBeNull();
+  });
+
   it("persists the cursor when moving to the next card", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
