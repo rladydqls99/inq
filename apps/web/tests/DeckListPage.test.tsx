@@ -53,6 +53,29 @@ describe("DeckListPage", () => {
     );
   });
 
+  it("shows an error and keeps the title when creating a deck fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": {
+        body: { error: "invalid_deck_title" },
+        status: 400,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <DeckListPage />
+      </MemoryRouter>,
+    );
+
+    const titleInput = await screen.findByLabelText("Deck name");
+    await user.type(titleInput, "영어");
+    await user.click(screen.getByRole("button", { name: "Create" }));
+
+    expect(await screen.findByText("덱을 생성하지 못했습니다.")).toBeTruthy();
+    expect(titleInput).toHaveProperty("value", "영어");
+  });
+
   it("keeps manage, rename, and delete as row actions", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

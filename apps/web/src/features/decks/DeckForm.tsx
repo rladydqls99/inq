@@ -8,28 +8,42 @@ type DeckFormProps = {
 
 export function DeckForm({ onCreated }: DeckFormProps) {
   const [title, setTitle] = useState("");
+  const [error, setError] = useState(false);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    await apiRequest("/decks", {
-      method: "POST",
-      body: JSON.stringify({ title }),
-    });
+    setError(false);
 
-    setTitle("");
-    await onCreated();
+    try {
+      await apiRequest("/decks", {
+        method: "POST",
+        body: JSON.stringify({ title }),
+      });
+
+      setTitle("");
+      await onCreated();
+    } catch {
+      setError(true);
+    }
   }
 
   return (
     <form className="compact-form" onSubmit={submit}>
       <label>
         Deck name
-        <input value={title} onChange={(event) => setTitle(event.target.value)} />
+        <input
+          value={title}
+          onChange={(event) => {
+            setTitle(event.target.value);
+            setError(false);
+          }}
+        />
       </label>
       <button type="submit" disabled={!title.trim()}>
         Create
       </button>
+      {error ? <span>덱을 생성하지 못했습니다.</span> : null}
     </form>
   );
 }
