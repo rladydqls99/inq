@@ -185,6 +185,36 @@ describe("ChallengeRunnerPage", () => {
     expect(screen.queryByText("5s")).toBeNull();
   });
 
+  it("shows an error and keeps the answered card when moving fails", async () => {
+    const user = userEvent.setup();
+    mockFetch({ failMove: true });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+    await user.click(screen.getByRole("button", { name: "Correct" }));
+    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+
+    expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
+    expect(
+      screen.getByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
+      ),
+    ).toBeTruthy();
+  });
+
   it("automatically advances five seconds after a result is selected", async () => {
     const fetchMock = mockFetch();
 
@@ -241,6 +271,7 @@ function matchesTextContent(element: Element | null, text: string) {
 function mockFetch(
   options: {
     cardCount?: number;
+    failMove?: boolean;
     failResult?: boolean;
     moveWrongToBack?: boolean;
   } = {},
@@ -250,6 +281,10 @@ function mockFetch(
     const state = runState(options);
 
     if (path === "/api/challenges/challenge-1/run" && init?.method === "PATCH") {
+      if (options.failMove) {
+        return Promise.resolve(jsonResponse({ error: "move_failed" }, 500));
+      }
+
       const body = JSON.parse(init.body as string) as { cursor: number };
       const nextState = options.moveWrongToBack ? moveFirstCardToBack(state) : state;
       return Promise.resolve(jsonResponse({ ...nextState, cursor: body.cursor }));

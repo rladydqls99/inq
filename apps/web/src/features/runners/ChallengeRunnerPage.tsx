@@ -18,6 +18,7 @@ export function ChallengeRunnerPage() {
   const [nextCursorAfterAnswer, setNextCursorAfterAnswer] = useState<number | null>(
     null,
   );
+  const [moveError, setMoveError] = useState(false);
   const [resultError, setResultError] = useState(false);
 
   useEffect(() => {
@@ -77,6 +78,7 @@ export function ChallengeRunnerPage() {
     }
 
     setResultError(false);
+    setMoveError(false);
 
     try {
       const response = await apiRequest<{ runState: ChallengeRunState }>(
@@ -111,22 +113,28 @@ export function ChallengeRunnerPage() {
       runState.cards.length,
     );
 
-    const nextRunState = await apiRequest<ChallengeRunState>(
-      `/challenges/${runState.challengeId}/run`,
-      {
-        method: "PATCH",
-        body: JSON.stringify({ cursor: boundedCursor }),
-      },
-    );
+    setMoveError(false);
 
-    setAnsweredCard(null);
-    setNextCursorAfterAnswer(null);
-    setResultError(false);
-    setRunState(nextRunState);
-    setCursor(nextRunState.cursor);
-    setSelectedResult(
-      nextRunState.cards[nextRunState.cursor]?.selectedResult ?? null,
-    );
+    try {
+      const nextRunState = await apiRequest<ChallengeRunState>(
+        `/challenges/${runState.challengeId}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: boundedCursor }),
+        },
+      );
+
+      setAnsweredCard(null);
+      setNextCursorAfterAnswer(null);
+      setResultError(false);
+      setRunState(nextRunState);
+      setCursor(nextRunState.cursor);
+      setSelectedResult(
+        nextRunState.cards[nextRunState.cursor]?.selectedResult ?? null,
+      );
+    } catch {
+      setMoveError(true);
+    }
   }
 
   return (
@@ -143,6 +151,7 @@ export function ChallengeRunnerPage() {
           onResult={(result) => void submitResult(result)}
         />
         {resultError ? <div className="list-empty">결과를 저장하지 못했습니다.</div> : null}
+        {moveError ? <div className="list-empty">카드를 이동하지 못했습니다.</div> : null}
         {selectedResult ? (
           <div className="runner-next">
             <AutoAdvanceTimer seconds={5} />
