@@ -14,6 +14,7 @@ export function ChallengeListPage() {
     null,
   );
   const [editingName, setEditingName] = useState("");
+  const [renameError, setRenameError] = useState(false);
 
   async function loadChallenges() {
     setChallenges(await apiRequest<ChallengeResponse[]>("/challenges"));
@@ -47,6 +48,7 @@ export function ChallengeListPage() {
   function startEditing(challenge: ChallengeResponse) {
     setEditingChallengeId(challenge.id);
     setEditingName(challenge.name);
+    setRenameError(false);
   }
 
   async function saveChallengeName(challengeId: string) {
@@ -56,13 +58,19 @@ export function ChallengeListPage() {
       return;
     }
 
-    await apiRequest(`/challenges/${challengeId}`, {
-      method: "PATCH",
-      body: JSON.stringify({ name }),
-    });
-    setEditingChallengeId(null);
-    setEditingName("");
-    await loadChallenges();
+    setRenameError(false);
+
+    try {
+      await apiRequest(`/challenges/${challengeId}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name }),
+      });
+      setEditingChallengeId(null);
+      setEditingName("");
+      await loadChallenges();
+    } catch {
+      setRenameError(true);
+    }
   }
 
   return (
@@ -71,6 +79,7 @@ export function ChallengeListPage() {
       <ChallengeForm onCreated={loadChallenges} />
       {updateMessage ? <div className="list-empty">{updateMessage}</div> : null}
       {updateError ? <div className="list-empty">챌린지를 업데이트하지 못했습니다.</div> : null}
+      {renameError ? <div className="list-empty">챌린지 이름을 저장하지 못했습니다.</div> : null}
       <div className="action-list">
         {challenges.map((challenge) => (
           <div

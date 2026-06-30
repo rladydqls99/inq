@@ -223,6 +223,37 @@ describe("ChallengeListPage", () => {
       }),
     );
   });
+
+  it("shows an error and keeps editing when renaming a challenge fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
+      "/api/decks": [],
+      "/api/challenges/challenge-1": {
+        body: { error: "challenge_not_found" },
+        status: 404,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <ChallengeListPage />
+      </MemoryRouter>,
+    );
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    await user.click(within(listItem).getByRole("button", { name: "Edit" }));
+    const nameInput = within(listItem).getByLabelText("Challenge name");
+    await user.clear(nameInput);
+    await user.type(nameInput, "기말고사");
+    await user.click(within(listItem).getByRole("button", { name: "Save" }));
+
+    expect(await screen.findByText("챌린지 이름을 저장하지 못했습니다.")).toBeTruthy();
+    expect(within(listItem).getByLabelText("Challenge name")).toHaveProperty(
+      "value",
+      "기말고사",
+    );
+  });
 });
 
 type MockResponse = unknown | (() => unknown) | { body: unknown; status: number };
@@ -231,7 +262,19 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
 
-    if (path === "/api/challenges/challenge-1" && init?.method === "PATCH") {
+    const response = responsesByPath[path] ?? {};
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response)
+      ? response.body
+      : typeof response === "function"
+        ? response()
+        : response;
+
+    if (
+      path === "/api/challenges/challenge-1" &&
+      init?.method === "PATCH" &&
+      !isMockErrorResponse(response)
+    ) {
       return Promise.resolve(
         new Response(
           JSON.stringify(challenge({ id: "challenge-1", name: "기말고사" })),
@@ -242,14 +285,6 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
         ),
       );
     }
-
-    const response = responsesByPath[path] ?? {};
-    const status = isMockErrorResponse(response) ? response.status : 200;
-    const body = isMockErrorResponse(response)
-      ? response.body
-      : typeof response === "function"
-        ? response()
-        : response;
 
     return Promise.resolve(
       new Response(JSON.stringify(body), {
