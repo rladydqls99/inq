@@ -29,6 +29,24 @@ describe("DeckListPage", () => {
     expect(row.textContent).toContain("7 cards");
   });
 
+  it("shows an error when loading decks fails", async () => {
+    mockFetchByPath({
+      "/api/decks": {
+        body: { error: "deck_list_failed" },
+        status: 500,
+      },
+    });
+
+    render(
+      <MemoryRouter>
+        <DeckListPage />
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("덱 목록을 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Loading")).toBeNull();
+  });
+
   it("creates a deck and reloads the list", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

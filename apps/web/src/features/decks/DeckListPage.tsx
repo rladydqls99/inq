@@ -10,14 +10,22 @@ import { DeckForm } from "./DeckForm";
 export function DeckListPage() {
   const [decks, setDecks] = useState<DeckResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
   const [editingTitle, setEditingTitle] = useState("");
   const [renameError, setRenameError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
 
   async function loadDecks() {
-    setDecks(await apiRequest<DeckResponse[]>("/decks"));
-    setLoading(false);
+    setLoadError(false);
+
+    try {
+      setDecks(await apiRequest<DeckResponse[]>("/decks"));
+    } catch {
+      setLoadError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   useEffect(() => {
@@ -69,6 +77,7 @@ export function DeckListPage() {
       <DeckForm onCreated={loadDecks} />
       {renameError ? <div className="list-empty">덱 이름을 저장하지 못했습니다.</div> : null}
       {deleteError ? <div className="list-empty">덱을 삭제하지 못했습니다.</div> : null}
+      {loadError ? <div className="list-empty">덱 목록을 불러오지 못했습니다.</div> : null}
       {loading ? <div className="list-empty">Loading</div> : null}
       {!loading && decks.length === 0 ? <div className="list-empty">No decks</div> : null}
       <div className="action-list">
