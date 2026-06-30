@@ -37,6 +37,20 @@ describe("DeckDetailPage", () => {
     );
   });
 
+  it("shows an error when loading cards fails", async () => {
+    mockFetchByPath({
+      "/api/decks/deck-1/cards": {
+        body: { error: "card_list_failed" },
+        status: 500,
+      },
+    });
+
+    renderDeckDetail();
+
+    expect(await screen.findByText("카드 목록을 불러오지 못했습니다.")).toBeTruthy();
+    expect(screen.queryByText("Loading")).toBeNull();
+  });
+
   it("deletes a card from the deck detail list", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

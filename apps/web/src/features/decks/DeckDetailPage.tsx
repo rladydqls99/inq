@@ -9,6 +9,7 @@ export function DeckDetailPage() {
   const { deckId } = useParams();
   const [cards, setCards] = useState<CardResponse[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [deleteError, setDeleteError] = useState(false);
 
   useEffect(() => {
@@ -22,6 +23,12 @@ export function DeckDetailPage() {
       .then((response) => {
         if (mounted) {
           setCards(response);
+          setLoadError(false);
+        }
+      })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(true);
         }
       })
       .finally(() => {
@@ -50,8 +57,9 @@ export function DeckDetailPage() {
     <section className="page">
       <PageHeader title="Deck Cards" />
       {loading ? <div className="list-empty">Loading</div> : null}
+      {loadError ? <div className="list-empty">카드 목록을 불러오지 못했습니다.</div> : null}
       {deleteError ? <div className="list-empty">카드를 삭제하지 못했습니다.</div> : null}
-      {!loading && cards.length === 0 ? <div className="list-empty">No cards</div> : null}
+      {!loading && !loadError && cards.length === 0 ? <div className="list-empty">No cards</div> : null}
       <div className="card-editor-list">
         {cards.map((card) => (
           <article key={card.id} className="card-editor">
