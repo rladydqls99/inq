@@ -16,6 +16,7 @@ export function UploadPage() {
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
   const [createdMessage, setCreatedMessage] = useState<string | null>(null);
   const [createError, setCreateError] = useState(false);
+  const [validationError, setValidationError] = useState(false);
   const selectDeck = useCallback((deckId: string) => {
     setSelectedDeckId(deckId);
   }, []);
@@ -24,6 +25,7 @@ export function UploadPage() {
     setPreview(null);
     setCreatedMessage(null);
     setCreateError(false);
+    setValidationError(false);
   }, []);
   const canCreate =
     Boolean(selectedDeckId) &&
@@ -34,14 +36,21 @@ export function UploadPage() {
   async function validateMarkdown() {
     setCreatedMessage(null);
     setCreateError(false);
-    const response = await apiRequest<ImportPreviewResponse>(
-      "/import/markdown/preview",
-      {
-        method: "POST",
-        body: JSON.stringify({ markdown }),
-      },
-    );
-    setPreview(response);
+    setValidationError(false);
+
+    try {
+      const response = await apiRequest<ImportPreviewResponse>(
+        "/import/markdown/preview",
+        {
+          method: "POST",
+          body: JSON.stringify({ markdown }),
+        },
+      );
+      setPreview(response);
+    } catch {
+      setPreview(null);
+      setValidationError(true);
+    }
   }
 
   async function confirmImport() {
@@ -91,6 +100,7 @@ export function UploadPage() {
             onConfirm={confirmImport}
           />
           {createError ? <div className="import-summary is-error">카드를 생성하지 못했습니다.</div> : null}
+          {validationError ? <div className="import-summary is-error">마크다운을 검증하지 못했습니다.</div> : null}
           <ImportValidationSummary preview={preview} />
           <ImportErrorList errors={preview?.errors ?? []} />
           <ImportPreviewList cards={preview?.previewCards ?? []} />

@@ -189,6 +189,30 @@ describe("UploadPage", () => {
     ).toBe(true);
   });
 
+  it("shows an error when markdown validation request fails", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+      "/api/import/markdown/preview": {
+        body: { error: "preview_failed" },
+        status: 500,
+      },
+    });
+
+    renderUploadPage();
+
+    const source = await screen.findByLabelText("Markdown source");
+    await user.type(source, "훈민정음을 만든 [세종대왕]이다.");
+    await user.click(screen.getByRole("button", { name: "Validate" }));
+
+    expect(await screen.findByText("마크다운을 검증하지 못했습니다.")).toBeTruthy();
+    expect(
+      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
+    expect(screen.queryByText("1 parsed")).toBeNull();
+  });
+
   it("confirms import with the original markdown and clears source state", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
