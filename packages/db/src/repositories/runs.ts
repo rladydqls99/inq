@@ -1,4 +1,4 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "../client";
 
 export async function getDeckRunState(prisma: PrismaClient, deckId: string) {
   return prisma.deckRunState.upsert({

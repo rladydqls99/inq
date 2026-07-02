@@ -12,13 +12,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Enable Corepack
-        run: corepack enable
+      - name: Setup mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
 
-      - name: Setup Node
+      - name: Setup pnpm cache
         uses: actions/setup-node@v4
         with:
-          node-version-file: .nvmrc
           cache: pnpm
 
       - name: Install dependencies

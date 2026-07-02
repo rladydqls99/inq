@@ -1,4 +1,4 @@
-import type { Prisma, PrismaClient } from "@prisma/client";
+import type { Prisma, PrismaClient } from "../client";
 import type { QuizSegment } from "@inq/shared";
 
 export async function createCard(

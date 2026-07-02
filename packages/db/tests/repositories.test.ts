@@ -4,10 +4,10 @@ import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { PrismaClient } from "@prisma/client";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
+import { createPrismaClient, type PrismaClient } from "../src/client";
 import {
   createCard,
   listCardsByDeck,
@@ -40,13 +40,7 @@ let prisma: PrismaClient;
 
 beforeEach(() => {
   const databaseUrl = createMigratedDatabaseUrl();
-  prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: databaseUrl,
-      },
-    },
-  });
+  prisma = createPrismaClient(databaseUrl);
 });
 
 afterEach(async () => {

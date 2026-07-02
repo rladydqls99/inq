@@ -1,5 +1,6 @@
 FROM node:22-alpine AS deps
 
+RUN apk add --no-cache python3 make g++
 RUN corepack enable
 WORKDIR /app
 
@@ -33,4 +34,4 @@ ENV NODE_ENV=production
 COPY --from=build /app /app
 
 EXPOSE 3000
-CMD ["sh", "-c", "pnpm --filter @inq/db prisma migrate deploy && pnpm --filter @inq/api start"]
+CMD ["sh", "-c", "pnpm db:migrate && pnpm --filter @inq/api start"]

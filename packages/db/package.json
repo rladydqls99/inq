@@ -9,6 +9,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && tsc -p tsconfig.json",
+    "db:ensure": "node scripts/ensure-sqlite-database.mjs",
     "prisma": "prisma",
     "test": "vitest run tests",
     "typecheck": "tsc -p tsconfig.json --noEmit"
@@ -16,12 +17,13 @@
   "devDependencies": {
     "@types/node": "^25.9.4",
     "dotenv": "^16.6.1",
-    "prisma": "^6.19.3",
+    "prisma": "^7.8.0",
     "typescript": "^5.9.3",
     "vitest": "^4.0.15"
   },
   "dependencies": {
     "@inq/shared": "workspace:*",
-    "@prisma/client": "^6.19.3"
+    "@prisma/adapter-better-sqlite3": "7.8.0",
+    "@prisma/client": "^7.8.0"
   }
 }

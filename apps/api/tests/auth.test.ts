@@ -7,7 +7,7 @@ import { fileURLToPath } from "node:url";
 import { Hono } from "hono";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { PrismaClient } from "@inq/db";
+import { createPrismaClient, type PrismaClient } from "@inq/db";
 import { createApp } from "../src/app";
 import { authMiddleware } from "../src/middleware/auth";
 
@@ -20,13 +20,7 @@ const testEnv = {
 let prisma: PrismaClient;
 
 beforeEach(() => {
-  prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: createMigratedDatabaseUrl(),
-      },
-    },
-  });
+  prisma = createPrismaClient(createMigratedDatabaseUrl());
 });
 
 afterEach(async () => {

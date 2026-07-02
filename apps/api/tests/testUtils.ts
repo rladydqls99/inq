@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 
 import type { Hono } from "hono";
 
-import { PrismaClient } from "@inq/db";
+import { createPrismaClient } from "@inq/db";
 
 const testDirname = dirname(fileURLToPath(import.meta.url));
 const testEnv = {
@@ -30,13 +30,7 @@ export async function createTestPrisma() {
     stdio: ["pipe", "pipe", "pipe"],
   });
 
-  const prisma = new PrismaClient({
-    datasources: {
-      db: {
-        url: `file:${databasePath}`,
-      },
-    },
-  });
+  const prisma = createPrismaClient(`file:${databasePath}`);
 
   return {
     prisma,

@@ -4,13 +4,14 @@ Personal PIN-protected quiz PWA.
 
 ## Requirements
 
-- Node.js 22 (`.nvmrc`)
-- pnpm 10.29.1
+- mise
+- Node.js 22 and pnpm 10.29.1 from `mise.toml`
 - Docker, for production-style Nginx/API deployment
 
 ## Local Development
 
 ```bash
+mise install
 pnpm install --frozen-lockfile
 pnpm db:generate
 DATABASE_URL="file:./dev.db" pnpm db:migrate
