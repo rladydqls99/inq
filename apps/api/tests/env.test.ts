@@ -26,4 +26,20 @@ describe("loadEnv", () => {
       }).pinSessionTtlSeconds,
     ).toBe(86400);
   });
+
+  it("uses INITIAL_PIN and falls back to 0000", () => {
+    expect(
+      loadEnv({
+        SESSION_SECRET: "test-secret",
+        INITIAL_PIN: "2468",
+      }).initialPin,
+    ).toBe("2468");
+    expect(loadEnv({ SESSION_SECRET: "test-secret" }).initialPin).toBe("0000");
+    expect(
+      loadEnv({
+        SESSION_SECRET: "test-secret",
+        INITIAL_PIN: "   ",
+      }).initialPin,
+    ).toBe("0000");
+  });
 });

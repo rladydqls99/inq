@@ -23,10 +23,10 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.type(screen.getByLabelText("Current PIN"), "1234");
-    await user.type(screen.getByLabelText("New PIN"), "5678");
-    await user.type(screen.getByLabelText("Confirm New PIN"), "5678");
-    await user.click(screen.getByRole("button", { name: "Change PIN" }));
+    await user.type(screen.getByLabelText("현재 PIN"), "1234");
+    await user.type(screen.getByLabelText("새 PIN"), "5678");
+    await user.type(screen.getByLabelText("새 PIN 확인"), "5678");
+    await user.click(screen.getByRole("button", { name: "PIN 변경" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/auth/change-pin",
@@ -39,7 +39,7 @@ describe("SettingsPage", () => {
         }),
       }),
     );
-    expect(await screen.findByText("Saved")).toBeTruthy();
+    expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
   });
 
   it("clears the saved state when editing PIN fields after a change", async () => {
@@ -52,15 +52,15 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.type(screen.getByLabelText("Current PIN"), "1234");
-    await user.type(screen.getByLabelText("New PIN"), "5678");
-    await user.type(screen.getByLabelText("Confirm New PIN"), "5678");
-    await user.click(screen.getByRole("button", { name: "Change PIN" }));
-    expect(await screen.findByText("Saved")).toBeTruthy();
+    await user.type(screen.getByLabelText("현재 PIN"), "1234");
+    await user.type(screen.getByLabelText("새 PIN"), "5678");
+    await user.type(screen.getByLabelText("새 PIN 확인"), "5678");
+    await user.click(screen.getByRole("button", { name: "PIN 변경" }));
+    expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
 
-    await user.type(screen.getByLabelText("New PIN"), "9");
+    await user.type(screen.getByLabelText("새 PIN"), "9");
 
-    expect(screen.queryByText("Saved")).toBeNull();
+    expect(screen.queryByText("저장되었습니다.")).toBeNull();
   });
 
   it("shows an error when PIN change fails", async () => {
@@ -76,13 +76,13 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.type(screen.getByLabelText("Current PIN"), "1234");
-    await user.type(screen.getByLabelText("New PIN"), "5678");
-    await user.type(screen.getByLabelText("Confirm New PIN"), "5678");
-    await user.click(screen.getByRole("button", { name: "Change PIN" }));
+    await user.type(screen.getByLabelText("현재 PIN"), "1234");
+    await user.type(screen.getByLabelText("새 PIN"), "5678");
+    await user.type(screen.getByLabelText("새 PIN 확인"), "5678");
+    await user.click(screen.getByRole("button", { name: "PIN 변경" }));
 
     expect(await screen.findByText("PIN을 변경하지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Saved")).toBeNull();
+    expect(screen.queryByText("저장되었습니다.")).toBeNull();
   });
 
   it("disables PIN change when confirmation does not match", async () => {
@@ -95,11 +95,11 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.type(screen.getByLabelText("Current PIN"), "1234");
-    await user.type(screen.getByLabelText("New PIN"), "5678");
-    await user.type(screen.getByLabelText("Confirm New PIN"), "9999");
+    await user.type(screen.getByLabelText("현재 PIN"), "1234");
+    await user.type(screen.getByLabelText("새 PIN"), "5678");
+    await user.type(screen.getByLabelText("새 PIN 확인"), "9999");
 
-    const changeButton = screen.getByRole("button", { name: "Change PIN" });
+    const changeButton = screen.getByRole("button", { name: "PIN 변경" });
     expect(changeButton).toHaveProperty("disabled", true);
     expect(screen.getByText("PIN이 일치하지 않습니다.")).toBeTruthy();
 
@@ -121,13 +121,13 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Export backup" }));
+    await user.click(screen.getByRole("button", { name: "백업 내보내기" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/backup/export",
       expect.objectContaining({ credentials: "include" }),
     );
-    expect(await screen.findByText("Backup ready")).toBeTruthy();
+    expect(await screen.findByText("백업 파일이 준비되었습니다.")).toBeTruthy();
   });
 
   it("shows an error when backup export fails", async () => {
@@ -143,10 +143,10 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Export backup" }));
+    await user.click(screen.getByRole("button", { name: "백업 내보내기" }));
 
     expect(await screen.findByText("백업을 내보내지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Backup ready")).toBeNull();
+    expect(screen.queryByText("백업 파일이 준비되었습니다.")).toBeNull();
   });
 
   it("locks the app and emits the lock event", async () => {
@@ -161,7 +161,7 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Lock" }));
+    await user.click(screen.getByRole("button", { name: "잠그기" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/auth/lock",
@@ -186,7 +186,7 @@ describe("SettingsPage", () => {
 
     renderSettings();
 
-    await user.click(screen.getByRole("button", { name: "Lock" }));
+    await user.click(screen.getByRole("button", { name: "잠그기" }));
 
     expect(await screen.findByText("잠금 처리에 실패했습니다.")).toBeTruthy();
     expect(lockListener).not.toHaveBeenCalled();

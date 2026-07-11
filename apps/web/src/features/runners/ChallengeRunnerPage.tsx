@@ -68,7 +68,7 @@ export function ChallengeRunnerPage() {
   }
 
   if (!challengeId || !runState) {
-    return <div className="list-empty">Loading</div>;
+    return <div className="list-empty">불러오는 중입니다.</div>;
   }
 
   const currentCard = answeredCard ?? runState.cards[cursor];
@@ -76,8 +76,8 @@ export function ChallengeRunnerPage() {
   if (!currentCard || runState.status === "completed") {
     return (
       <section className="page">
-        <PageHeader title="Challenge Run" />
-        <div className="list-empty">Completed</div>
+        <PageHeader title="챌린지 학습" />
+        <div className="list-empty">완료되었습니다.</div>
       </section>
     );
   }
@@ -149,7 +149,7 @@ export function ChallengeRunnerPage() {
 
   return (
     <section className="page">
-      <PageHeader title="Challenge Run" />
+      <PageHeader title="챌린지 학습" />
       <div className="runner-surface">
         <CardPlayer
           key={currentCard.sessionCardId}
@@ -169,7 +169,7 @@ export function ChallengeRunnerPage() {
               type="button"
               onClick={() => void moveTo(nextCursorAfterAnswer ?? cursor + 1)}
             >
-              Next
+              다음
             </button>
           </div>
         ) : null}

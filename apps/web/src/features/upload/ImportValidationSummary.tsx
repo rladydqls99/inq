@@ -6,16 +6,16 @@ type ImportValidationSummaryProps = {
 
 export function ImportValidationSummary({ preview }: ImportValidationSummaryProps) {
   if (!preview) {
-    return <div className="list-empty">Add markdown to preview cards.</div>;
+    return <div className="list-empty">마크다운을 입력하고 검증해 주세요.</div>;
   }
 
   if (preview.errors.length > 0) {
     return (
       <div className="import-summary is-error">
-        {preview.errors.length} errors
+        오류 {preview.errors.length}개
       </div>
     );
   }
 
-  return <div className="import-summary">{preview.parsed} parsed</div>;
+  return <div className="import-summary">{preview.parsed}장 검증 완료</div>;
 }

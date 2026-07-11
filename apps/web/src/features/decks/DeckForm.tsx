@@ -31,7 +31,7 @@ export function DeckForm({ onCreated }: DeckFormProps) {
   return (
     <form className="compact-form" onSubmit={submit}>
       <label>
-        Deck name
+          덱 이름
         <input
           value={title}
           onChange={(event) => {
@@ -41,7 +41,7 @@ export function DeckForm({ onCreated }: DeckFormProps) {
         />
       </label>
       <button type="submit" disabled={!title.trim()}>
-        Create
+        만들기
       </button>
       {error ? <span>덱을 생성하지 못했습니다.</span> : null}
     </form>

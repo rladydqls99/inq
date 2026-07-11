@@ -1,14 +1,17 @@
 export type ApiEnv = {
   sessionSecret: string;
   pinSessionTtlSeconds: number;
+  initialPin: string;
 };
 
 const DEFAULT_PIN_SESSION_TTL_SECONDS = 60 * 60 * 24;
+const DEFAULT_INITIAL_PIN = "0000";
 
 export function loadEnv(environment = process.env): ApiEnv {
   return {
     sessionSecret: readSessionSecret(environment),
     pinSessionTtlSeconds: readPinSessionTtlSeconds(environment),
+    initialPin: readInitialPin(environment),
   };
 }
 
@@ -34,4 +37,10 @@ function readSessionSecret(environment: NodeJS.ProcessEnv): string {
   }
 
   return value;
+}
+
+function readInitialPin(environment: NodeJS.ProcessEnv): string {
+  const value = environment.INITIAL_PIN?.trim();
+
+  return value || DEFAULT_INITIAL_PIN;
 }

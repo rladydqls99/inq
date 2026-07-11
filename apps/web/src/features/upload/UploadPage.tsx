@@ -67,7 +67,7 @@ export function UploadPage() {
 
       setMarkdown("");
       setPreview(null);
-      setCreatedMessage(`${response.createdCount} cards created`);
+      setCreatedMessage(`${response.createdCount}장의 카드를 만들었습니다.`);
     } catch {
       setCreatedMessage(null);
       setCreateError(true);
@@ -76,34 +76,33 @@ export function UploadPage() {
 
   return (
     <section className="upload-page">
-      <PageHeader title="Upload" />
+      <PageHeader title="업로드" />
       <DeckSelectOrCreate
         selectedDeckId={selectedDeckId}
         onSelectDeck={selectDeck}
       />
       <div className="upload-grid">
-        <MarkdownUploadPane markdown={markdown} onChangeMarkdown={updateMarkdown} />
+        <MarkdownUploadPane
+          markdown={markdown}
+          errors={preview?.errors ?? []}
+          canValidate={Boolean(markdown.trim())}
+          onChangeMarkdown={updateMarkdown}
+          onValidate={validateMarkdown}
+        />
         <section className="upload-pane" data-testid="upload-preview-pane">
-          <h2>Validation and preview</h2>
-          <div className="upload-actions">
-            <button
-              type="button"
-              disabled={!markdown.trim()}
-              onClick={() => void validateMarkdown()}
-            >
-              Validate
-            </button>
-          </div>
-          <ImportConfirmBar
-            canCreate={canCreate}
-            createdMessage={createdMessage}
-            onConfirm={confirmImport}
-          />
+          <h2>검증 결과와 미리보기</h2>
           {createError ? <div className="import-summary is-error">카드를 생성하지 못했습니다.</div> : null}
           {validationError ? <div className="import-summary is-error">마크다운을 검증하지 못했습니다.</div> : null}
           <ImportValidationSummary preview={preview} />
           <ImportErrorList errors={preview?.errors ?? []} />
           <ImportPreviewList cards={preview?.previewCards ?? []} />
+          <div className="upload-confirm-slot">
+            <ImportConfirmBar
+              canCreate={canCreate}
+              createdMessage={createdMessage}
+              onConfirm={confirmImport}
+            />
+          </div>
         </section>
       </div>
     </section>

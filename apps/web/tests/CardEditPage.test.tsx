@@ -20,13 +20,13 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    expect(((await screen.findByLabelText("Text 1")) as HTMLTextAreaElement).value).toBe(
+    expect(((await screen.findByLabelText("본문 1")) as HTMLTextAreaElement).value).toBe(
       "훈민정음을 만든 ",
     );
-    expect((screen.getByLabelText("Answer 1") as HTMLTextAreaElement).value).toBe(
+    expect((screen.getByLabelText("정답 1") as HTMLTextAreaElement).value).toBe(
       "조선",
     );
-    expect((screen.getByLabelText("Answer 2") as HTMLTextAreaElement).value).toBe(
+    expect((screen.getByLabelText("정답 2") as HTMLTextAreaElement).value).toBe(
       "세종대왕",
     );
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____의 왕은 ____이다."))).toBeTruthy();
@@ -44,7 +44,7 @@ describe("CardEditPage", () => {
     renderCardEdit();
 
     expect(await screen.findByText("카드를 불러오지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Card not found")).toBeNull();
+    expect(screen.queryByText("카드를 찾을 수 없습니다.")).toBeNull();
   });
 
   it("saves changed segment values without changing segment structure", async () => {
@@ -55,10 +55,10 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("Answer 1");
+    const answerInput = await screen.findByLabelText("정답 1");
     await user.clear(answerInput);
     await user.type(answerInput, "대한민국");
-    await user.click(screen.getByRole("button", { name: "Save" }));
+    await user.click(screen.getByRole("button", { name: "저장" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/cards/card-1",
@@ -76,7 +76,7 @@ describe("CardEditPage", () => {
         }),
       }),
     );
-    expect(await screen.findByText("Saved")).toBeTruthy();
+    expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
   });
 
   it("clears the saved state when editing after saving", async () => {
@@ -87,15 +87,15 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("Answer 1");
+    const answerInput = await screen.findByLabelText("정답 1");
     await user.clear(answerInput);
     await user.type(answerInput, "대한민국");
-    await user.click(screen.getByRole("button", { name: "Save" }));
-    expect(await screen.findByText("Saved")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "저장" }));
+    expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
 
-    await user.type(screen.getByLabelText("Answer 1"), "!");
+    await user.type(screen.getByLabelText("정답 1"), "!");
 
-    expect(screen.queryByText("Saved")).toBeNull();
+    expect(screen.queryByText("저장되었습니다.")).toBeNull();
   });
 
   it("disables save when an answer segment is blank", async () => {
@@ -106,10 +106,10 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("Answer 1");
+    const answerInput = await screen.findByLabelText("정답 1");
     await user.clear(answerInput);
 
-    const saveButton = screen.getByRole("button", { name: "Save" });
+    const saveButton = screen.getByRole("button", { name: "저장" });
     expect(saveButton).toHaveProperty("disabled", true);
 
     await user.click(saveButton);
@@ -130,13 +130,13 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("Answer 1");
+    const answerInput = await screen.findByLabelText("정답 1");
     await user.clear(answerInput);
     await user.type(answerInput, "대한민국");
-    fireEvent.click(screen.getByRole("button", { name: "Save" }));
+    fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
     expect(await screen.findByText("카드가 이미 변경되었습니다. 다시 열어 주세요.")).toBeTruthy();
-    expect(screen.queryByText("Saved")).toBeNull();
+    expect(screen.queryByText("저장되었습니다.")).toBeNull();
   });
 });
 

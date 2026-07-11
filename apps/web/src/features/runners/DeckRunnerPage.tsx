@@ -66,7 +66,7 @@ export function DeckRunnerPage() {
   }
 
   if (!deckId || !runState) {
-    return <div className="list-empty">Loading</div>;
+    return <div className="list-empty">불러오는 중입니다.</div>;
   }
 
   const currentCard = runState.cards[cursor];
@@ -119,12 +119,12 @@ export function DeckRunnerPage() {
   if (completed || !currentCard) {
     return (
       <section className="page">
-        <PageHeader title="Deck Run" />
+        <PageHeader title="덱 학습" />
         <div className="runner-surface">
-          <div className="list-empty">Completed</div>
+          <div className="list-empty">완료되었습니다.</div>
           <div className="runner-next">
             <button type="button" onClick={() => void restart()}>
-              Restart
+              다시 시작
             </button>
           </div>
           {restartError ? <div className="list-empty">덱을 다시 시작하지 못했습니다.</div> : null}
@@ -135,7 +135,7 @@ export function DeckRunnerPage() {
 
   return (
     <section className="page">
-      <PageHeader title="Deck Run" />
+      <PageHeader title="덱 학습" />
       <div className="runner-surface">
         <CardPlayer
           key={currentCard.cardId}

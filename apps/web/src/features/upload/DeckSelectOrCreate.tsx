@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import type { DeckResponse } from "@inq/shared";
 import { apiRequest } from "../../api/client";
+import { DeckCreateModal } from "../decks/DeckCreateModal";
 
 type DeckSelectOrCreateProps = {
   selectedDeckId: string;
@@ -13,9 +14,8 @@ export function DeckSelectOrCreate({
   onSelectDeck,
 }: DeckSelectOrCreateProps) {
   const [decks, setDecks] = useState<DeckResponse[]>([]);
-  const [newDeckTitle, setNewDeckTitle] = useState("");
   const [loadError, setLoadError] = useState(false);
-  const [createError, setCreateError] = useState(false);
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -43,33 +43,15 @@ export function DeckSelectOrCreate({
     };
   }, [onSelectDeck]);
 
-  async function createDeck(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setCreateError(false);
-
-    try {
-      const deck = await apiRequest<DeckResponse>("/decks", {
-        method: "POST",
-        body: JSON.stringify({ title: newDeckTitle }),
-      });
-
-      setDecks((current) => [...current, deck]);
-      onSelectDeck(deck.id);
-      setNewDeckTitle("");
-    } catch {
-      setCreateError(true);
-    }
-  }
-
   return (
     <div className="deck-select-create">
       <label>
-        Deck
+        덱 선택
         <select
           value={selectedDeckId}
           onChange={(event) => onSelectDeck(event.target.value)}
         >
+          {decks.length === 0 ? <option value="">등록된 덱 없음</option> : null}
           {decks.map((deck) => (
             <option key={deck.id} value={deck.id}>
               {deck.title}
@@ -77,23 +59,19 @@ export function DeckSelectOrCreate({
           ))}
         </select>
       </label>
-      <form className="deck-create-form" onSubmit={createDeck}>
-        <label>
-          New deck name
-          <input
-            value={newDeckTitle}
-            onChange={(event) => {
-              setNewDeckTitle(event.target.value);
-              setCreateError(false);
-            }}
-          />
-        </label>
-        <button type="submit" disabled={!newDeckTitle.trim()}>
-          Create deck
-        </button>
-        {createError ? <span>덱을 생성하지 못했습니다.</span> : null}
-      </form>
+      <button type="button" className="secondary-button" onClick={() => setCreateOpen(true)}>
+        덱 만들기
+      </button>
       {loadError ? <div className="import-summary is-error">덱 목록을 불러오지 못했습니다.</div> : null}
+      {createOpen ? (
+        <DeckCreateModal
+          onClose={() => setCreateOpen(false)}
+          onCreated={(deck) => {
+            setDecks((current) => [...current, deck]);
+            onSelectDeck(deck.id);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

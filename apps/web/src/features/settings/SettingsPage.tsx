@@ -20,21 +20,21 @@ export function SettingsPage() {
 
   return (
     <section className="page">
-      <PageHeader title="Settings" />
+      <PageHeader title="설정" />
       <div className="settings-sections">
         <section className="settings-section">
           <h2>PIN</h2>
           <PinChangeForm />
         </section>
         <section className="settings-section">
-          <h2>Backup</h2>
+          <h2>백업</h2>
           <BackupExportButton />
         </section>
         <section className="settings-section">
-          <h2>Lock</h2>
+          <h2>잠금</h2>
           <div className="settings-action">
             <button type="button" onClick={() => void lock()}>
-              Lock
+              잠그기
             </button>
             {lockError ? <span>잠금 처리에 실패했습니다.</span> : null}
           </div>

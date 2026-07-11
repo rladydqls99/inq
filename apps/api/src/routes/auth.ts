@@ -7,6 +7,7 @@ import { SESSION_COOKIE_NAME } from "../middleware/auth";
 import {
   changePin,
   createSessionPayload,
+  ensureInitialPin,
   invalidateSessions,
   isSessionValid,
   setupFirstPin,
@@ -21,7 +22,10 @@ export function createAuthRoutes(options: {
   const route = new Hono();
 
   route.get("/status", async (context) => {
-    const settings = await options.prisma.pinSettings.findFirst();
+    const settings = await ensureInitialPin(
+      options.prisma,
+      options.env.initialPin || "0000",
+    );
     const cookieValue = await getSignedCookie(
       context,
       options.env.sessionSecret,

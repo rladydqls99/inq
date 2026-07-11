@@ -42,7 +42,7 @@ describe("ChallengeRunnerPage", () => {
       ),
     ).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "Correct" }));
+    await user.click(screen.getByRole("button", { name: "맞음" }));
 
     expect(
       screen.getByText((_, element) =>
@@ -61,7 +61,7 @@ describe("ChallengeRunnerPage", () => {
       }),
     );
 
-    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    const nextButtons = screen.getAllByRole("button", { name: "다음" });
     await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/run",
@@ -95,7 +95,7 @@ describe("ChallengeRunnerPage", () => {
     );
 
     expect(await screen.findByText("챌린지 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Loading")).toBeNull();
+    expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
   it("moves past the final card into completed state", async () => {
@@ -116,8 +116,8 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "Correct" }));
-    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    await user.click(screen.getByRole("button", { name: "맞음" }));
+    const nextButtons = screen.getAllByRole("button", { name: "다음" });
     await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -127,7 +127,7 @@ describe("ChallengeRunnerPage", () => {
         body: JSON.stringify({ cursor: 1 }),
       }),
     );
-    expect(await screen.findByText("Completed")).toBeTruthy();
+    expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
   });
 
   it("keeps the answered wrong card visible before advancing to the next queue card", async () => {
@@ -148,7 +148,7 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "Wrong" }));
+    await user.click(screen.getByRole("button", { name: "틀림" }));
 
     expect(
       screen.getByText((_, element) =>
@@ -157,7 +157,7 @@ describe("ChallengeRunnerPage", () => {
     ).toBeTruthy();
     await screen.findByText("5s");
 
-    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    const nextButtons = screen.getAllByRole("button", { name: "다음" });
     await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -192,7 +192,7 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "Correct" }));
+    await user.click(screen.getByRole("button", { name: "맞음" }));
 
     expect(await screen.findByText("결과를 저장하지 못했습니다.")).toBeTruthy();
     expect(
@@ -221,8 +221,8 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "Correct" }));
-    const nextButtons = screen.getAllByRole("button", { name: "Next" });
+    await user.click(screen.getByRole("button", { name: "맞음" }));
+    const nextButtons = screen.getAllByRole("button", { name: "다음" });
     await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
@@ -252,7 +252,7 @@ describe("ChallengeRunnerPage", () => {
     );
 
     vi.useFakeTimers();
-    fireEvent.click(screen.getByRole("button", { name: "Correct" }));
+    fireEvent.click(screen.getByRole("button", { name: "맞음" }));
 
     await act(async () => {
       await Promise.resolve();

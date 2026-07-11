@@ -29,6 +29,21 @@ export async function setupFirstPin(prisma: PrismaClient, pin: string) {
   return { ok: true as const };
 }
 
+export async function ensureInitialPin(prisma: PrismaClient, pin: string) {
+  const existing = await prisma.pinSettings.findFirst();
+
+  if (existing) {
+    return existing;
+  }
+
+  return prisma.pinSettings.create({
+    data: {
+      pinHash: await hashPin(pin),
+      sessionsInvalidatedAt: new Date(),
+    },
+  });
+}
+
 export async function verifyPin(prisma: PrismaClient, pin: string) {
   const settings = await prisma.pinSettings.findFirst();
 

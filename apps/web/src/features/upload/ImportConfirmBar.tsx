@@ -12,7 +12,7 @@ export function ImportConfirmBar({
   return (
     <div className="upload-actions">
       <button type="button" disabled={!canCreate} onClick={() => void onConfirm()}>
-        Create cards
+        카드 만들기
       </button>
       {createdMessage ? <span>{createdMessage}</span> : null}
     </div>

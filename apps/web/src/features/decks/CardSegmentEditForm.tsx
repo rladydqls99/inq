@@ -45,8 +45,8 @@ export function CardSegmentEditForm({
         {draftSegments.map((segment, index) => (
           <label key={`${segment.type}-${index}`}>
             {segment.type === "answer"
-              ? `Answer ${countSegments(draftSegments, index, "answer")}`
-              : `Text ${countSegments(draftSegments, index, "text")}`}
+              ? `정답 ${countSegments(draftSegments, index, "answer")}`
+              : `본문 ${countSegments(draftSegments, index, "text")}`}
             <textarea
               value={segment.value}
               onChange={(event) => updateSegment(index, event.target.value)}
@@ -55,7 +55,7 @@ export function CardSegmentEditForm({
         ))}
       </div>
       <button type="submit" disabled={!canSave}>
-        Save
+        저장
       </button>
     </form>
   );

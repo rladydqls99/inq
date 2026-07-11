@@ -5,16 +5,19 @@ import { apiRequest } from "../../api/client";
 
 type ChallengeFormProps = {
   onCreated: () => Promise<void> | void;
+  presetDeckId?: string;
 };
 
-export function ChallengeForm({ onCreated }: ChallengeFormProps) {
+export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
   const [name, setName] = useState("");
-  const [deckId, setDeckId] = useState("");
-  const [intervals, setIntervals] = useState("3,5,10");
+  const [deckId, setDeckId] = useState(presetDeckId ?? "");
+  const [intervalOne, setIntervalOne] = useState("3");
+  const [intervalTwo, setIntervalTwo] = useState("5");
+  const [intervalThree, setIntervalThree] = useState("10");
   const [decks, setDecks] = useState<DeckResponse[]>([]);
   const [deckLoadError, setDeckLoadError] = useState(false);
   const [error, setError] = useState(false);
-  const parsedIntervals = parseIntervals(intervals);
+  const parsedIntervals = parseIntervals([intervalOne, intervalTwo, intervalThree]);
   const trimmedName = name.trim();
 
   useEffect(() => {
@@ -24,7 +27,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
       .then((response) => {
         if (mounted) {
           setDecks(response);
-          setDeckId(response[0]?.id ?? "");
+          setDeckId(presetDeckId ?? response[0]?.id ?? "");
           setDeckLoadError(false);
         }
       })
@@ -37,7 +40,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [presetDeckId]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -68,7 +71,7 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   return (
     <form className="challenge-form" onSubmit={submit}>
       <label>
-        Challenge name
+        챌린지 이름
         <input
           value={name}
           onChange={(event) => {
@@ -78,9 +81,10 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
         />
       </label>
       <label>
-        Deck
+        덱
         <select
           value={deckId}
+          disabled={Boolean(presetDeckId)}
           onChange={(event) => {
             setDeckId(event.target.value);
             setError(false);
@@ -93,18 +97,43 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
           ))}
         </select>
       </label>
-      <label>
-        Intervals
-        <input
-          value={intervals}
-          onChange={(event) => {
-            setIntervals(event.target.value);
-            setError(false);
-          }}
-        />
-      </label>
+      <div className="interval-grid" aria-label="챌린지 주기">
+        <label>
+          첫 번째 주기(일)
+          <input
+            inputMode="numeric"
+            value={intervalOne}
+            onChange={(event) => {
+              setIntervalOne(event.target.value);
+              setError(false);
+            }}
+          />
+        </label>
+        <label>
+          두 번째 주기(일)
+          <input
+            inputMode="numeric"
+            value={intervalTwo}
+            onChange={(event) => {
+              setIntervalTwo(event.target.value);
+              setError(false);
+            }}
+          />
+        </label>
+        <label>
+          세 번째 주기(일)
+          <input
+            inputMode="numeric"
+            value={intervalThree}
+            onChange={(event) => {
+              setIntervalThree(event.target.value);
+              setError(false);
+            }}
+          />
+        </label>
+      </div>
       <button type="submit" disabled={!trimmedName || !deckId || !parsedIntervals}>
-        Create
+        등록하기
       </button>
       {deckLoadError ? <span>덱 목록을 불러오지 못했습니다.</span> : null}
       {error ? <span>챌린지를 생성하지 못했습니다.</span> : null}
@@ -112,8 +141,8 @@ export function ChallengeForm({ onCreated }: ChallengeFormProps) {
   );
 }
 
-function parseIntervals(value: string): number[] | null {
-  const parts = value.split(",").map((part) => part.trim());
+function parseIntervals(values: string[]): number[] | null {
+  const parts = values.map((part) => part.trim());
 
   if (parts.some((part) => part.length === 0)) {
     return null;

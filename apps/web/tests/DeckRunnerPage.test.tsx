@@ -22,7 +22,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Show answer" }));
+    await user.click(screen.getByRole("button", { name: "정답 보기" }));
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
     expect(screen.getByText("10s")).toBeTruthy();
   });
@@ -38,7 +38,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     expect(await screen.findByText("덱 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Loading")).toBeNull();
+    expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
   it("persists the cursor when moving to the next card", async () => {
@@ -50,7 +50,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "다음" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1/run",
@@ -74,7 +74,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "다음" }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
@@ -89,8 +89,8 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    expect(await screen.findByText("Completed")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Restart" }));
+    expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "다시 시작" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1/run/restart",
@@ -114,11 +114,11 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    expect(await screen.findByText("Completed")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "Restart" }));
+    expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "다시 시작" }));
 
     expect(await screen.findByText("덱을 다시 시작하지 못했습니다.")).toBeTruthy();
-    expect(screen.getByText("Completed")).toBeTruthy();
+    expect(screen.getByText("완료되었습니다.")).toBeTruthy();
   });
 });
 

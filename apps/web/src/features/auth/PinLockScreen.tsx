@@ -23,7 +23,7 @@ export function PinLockScreen({ error, onSubmit }: PinLockScreenProps) {
   return (
     <main className="pin-screen">
       <form className="pin-form" onSubmit={submit}>
-        <h1>Unlock</h1>
+        <h1>잠금 해제</h1>
         <label>
           PIN
           <input
@@ -36,7 +36,7 @@ export function PinLockScreen({ error, onSubmit }: PinLockScreenProps) {
         </label>
         {error ? <p className="pin-form__error">{error}</p> : null}
         <button type="submit" disabled={submitting || pin.length === 0}>
-          Unlock
+          열기
         </button>
       </form>
     </main>

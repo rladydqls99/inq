@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen, within } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -12,99 +13,78 @@ describe("HomePage", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows active challenges sorted by nearest due date", async () => {
-    mockFetch([
-      challenge({
-        id: "later",
-        name: "나중",
-        nextDueAt: "2026-06-30T00:00:00.000Z",
-      }),
-      challenge({
-        id: "soon",
-        name: "먼저",
-        nextDueAt: "2026-06-24T00:00:00.000Z",
-      }),
-    ]);
+  it("shows active challenges first and decks below", async () => {
+    mockFetchByPath({
+      "/api/challenges": [
+        challenge({ id: "later", name: "나중", nextDueAt: "2026-06-30T00:00:00.000Z" }),
+        challenge({ id: "soon", name: "먼저", nextDueAt: "2026-06-24T00:00:00.000Z" }),
+      ],
+      "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 3 })],
+    });
 
-    render(
-      <MemoryRouter>
-        <HomePage />
-      </MemoryRouter>,
-    );
+    renderHomePage();
 
-    const items = await screen.findAllByRole("link");
-    expect(items.map((item) => within(item).getByRole("heading").textContent)).toEqual([
-      "먼저",
-      "나중",
-    ]);
-    expect(items[0]?.getAttribute("href")).toBe("/challenges/soon/run");
+    expect(await screen.findByRole("link", { name: /먼저/ })).toBeTruthy();
+    expect(
+      screen
+        .getAllByRole("link", { name: /국어/ })
+        .some((link) => link.getAttribute("href") === "/decks/deck-1/manage"),
+    ).toBe(true);
   });
 
-  it("keeps currently due challenges before future due challenges", async () => {
-    mockFetch([
-      challenge({
-        id: "future",
-        name: "미래",
-        dueCount: 0,
-        nextDueAt: "2026-06-24T00:00:00.000Z",
-      }),
-      challenge({
-        id: "due-now",
-        name: "지금",
-        dueCount: 1,
-        nextDueAt: null,
-      }),
-    ]);
+  it("shows empty states and opens deck creation from home", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/challenges": [],
+      "/api/decks": [],
+    });
 
-    render(
-      <MemoryRouter>
-        <HomePage />
-      </MemoryRouter>,
-    );
+    renderHomePage();
 
-    const items = await screen.findAllByRole("link");
-    expect(items.map((item) => within(item).getByRole("heading").textContent)).toEqual([
-      "지금",
-      "미래",
-    ]);
+    expect(await screen.findByText("등록된 챌린지가 없습니다.")).toBeTruthy();
+    expect(screen.getByText("등록된 덱이 없습니다.")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "덱 생성하기" }));
+    expect(await screen.findByRole("dialog", { name: "덱 만들기" })).toBeTruthy();
   });
 
-  it("shows empty state when there are no challenges", async () => {
-    mockFetch([]);
+  it("shows an error when loading home data fails", async () => {
+    mockFetchByPath({
+      "/api/challenges": { body: { error: "failed" }, status: 500 },
+      "/api/decks": [],
+    });
 
-    render(
-      <MemoryRouter>
-        <HomePage />
-      </MemoryRouter>,
-    );
+    renderHomePage();
 
-    expect(await screen.findByText("No challenges")).toBeTruthy();
-  });
-
-  it("shows an error when loading challenges fails", async () => {
-    mockFetch({ error: "challenge_list_failed" }, 500);
-
-    render(
-      <MemoryRouter>
-        <HomePage />
-      </MemoryRouter>,
-    );
-
-    expect(await screen.findByText("챌린지를 불러오지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Loading")).toBeNull();
+    expect(await screen.findByText("홈 정보를 불러오지 못했습니다.")).toBeTruthy();
   });
 });
 
-function mockFetch(response: unknown, status = 200) {
-  vi.stubGlobal(
-    "fetch",
-    vi.fn().mockResolvedValue(
-      new Response(JSON.stringify(response), {
+function renderHomePage() {
+  render(
+    <MemoryRouter>
+      <HomePage />
+    </MemoryRouter>,
+  );
+}
+
+type MockResponse = unknown | { body: unknown; status: number };
+
+function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
+  const fetchMock = vi.fn((input: RequestInfo | URL) => {
+    const path = typeof input === "string" ? input : input.toString();
+    const response = responsesByPath[path] ?? {};
+    const status = isMockErrorResponse(response) ? response.status : 200;
+    const body = isMockErrorResponse(response) ? response.body : response;
+
+    return Promise.resolve(
+      new Response(JSON.stringify(body), {
         status,
         headers: { "content-type": "application/json" },
       }),
-    ),
-  );
+    );
+  });
+
+  vi.stubGlobal("fetch", fetchMock);
 }
 
 function challenge(input: {
@@ -135,4 +115,26 @@ function challenge(input: {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
+}
+
+function deck(input: { id: string; title: string; cardCount: number }) {
+  return {
+    id: input.id,
+    title: input.title,
+    cardCount: input.cardCount,
+    createdAt: "2026-06-22T00:00:00.000Z",
+    updatedAt: "2026-06-22T00:00:00.000Z",
+  };
+}
+
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
+  return (
+    Boolean(response) &&
+    typeof response === "object" &&
+    response !== null &&
+    "body" in response &&
+    "status" in response
+  );
 }

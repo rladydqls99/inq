@@ -55,21 +55,26 @@ export function DeckDetailPage() {
 
   return (
     <section className="page">
-      <PageHeader title="Deck Cards" />
-      {loading ? <div className="list-empty">Loading</div> : null}
+      <PageHeader title="덱 카드" />
+      {deckId ? (
+        <Link className="primary-link-button" to={`/decks/${deckId}/run`}>
+          학습 시작
+        </Link>
+      ) : null}
+      {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
       {loadError ? <div className="list-empty">카드 목록을 불러오지 못했습니다.</div> : null}
       {deleteError ? <div className="list-empty">카드를 삭제하지 못했습니다.</div> : null}
-      {!loading && !loadError && cards.length === 0 ? <div className="list-empty">No cards</div> : null}
+      {!loading && !loadError && cards.length === 0 ? <div className="list-empty">등록된 카드가 없습니다.</div> : null}
       <div className="card-editor-list">
         {cards.map((card) => (
           <article key={card.id} className="card-editor">
             <p className="card-editor__revealed">{getRevealedText(card.segments)}</p>
             <div className="card-editor__actions">
               <Link className="row-action-link" to={`/cards/${card.id}/edit`}>
-                Edit card
+                카드 수정
               </Link>
               <button type="button" onClick={() => void deleteCard(card.id)}>
-                Delete card
+                카드 삭제
               </button>
             </div>
           </article>

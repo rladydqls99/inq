@@ -91,6 +91,21 @@ export type ChallengeResponse = {
   updatedAt: string;
 };
 
+export type ChallengeCardResponse = {
+  id: string;
+  challengeId: string;
+  cardId: string;
+  segments: QuizSegment[];
+  stage: number;
+  challengeViewCount: number;
+  dueAt: string | null;
+  lastChallengedAt: string | null;
+  result: ChallengeResult | null;
+  completedAt: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ImportPreviewRequest = {
   markdown: string;
 };

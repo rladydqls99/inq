@@ -14,7 +14,7 @@ export function ImportPreviewList({ cards }: ImportPreviewListProps) {
     <div className="import-preview-list">
       {cards.map((card) => (
         <article key={card.blockIndex} className="import-preview-card">
-          <span>Block {card.blockIndex + 1}</span>
+          <span>{card.blockIndex + 1}번째 카드</span>
           <QuizPreview segments={card.segments} />
         </article>
       ))}

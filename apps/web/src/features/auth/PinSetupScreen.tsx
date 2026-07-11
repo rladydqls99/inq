@@ -30,7 +30,7 @@ export function PinSetupScreen({ error, onSubmit }: PinSetupScreenProps) {
   return (
     <main className="pin-screen">
       <form className="pin-form" onSubmit={submit}>
-        <h1>Set PIN</h1>
+        <h1>PIN 설정</h1>
         <label>
           PIN
           <input
@@ -42,7 +42,7 @@ export function PinSetupScreen({ error, onSubmit }: PinSetupScreenProps) {
           />
         </label>
         <label>
-          Confirm PIN
+          PIN 확인
           <input
             autoComplete="new-password"
             inputMode="numeric"
@@ -57,7 +57,7 @@ export function PinSetupScreen({ error, onSubmit }: PinSetupScreenProps) {
           type="submit"
           disabled={submitting || pin.length === 0 || confirm.length === 0 || mismatch}
         >
-          Set PIN
+          설정하기
         </button>
       </form>
     </main>

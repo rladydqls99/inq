@@ -12,6 +12,7 @@ const testDirname = dirname(fileURLToPath(import.meta.url));
 const testEnv = {
   sessionSecret: "test-secret",
   pinSessionTtlSeconds: 60,
+  initialPin: "1234",
 };
 
 export async function createTestPrisma() {

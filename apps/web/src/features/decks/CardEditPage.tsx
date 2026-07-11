@@ -74,10 +74,10 @@ export function CardEditPage() {
 
   return (
     <section className="page">
-      <PageHeader title="Edit Card" />
-      {loading ? <div className="list-empty">Loading</div> : null}
+      <PageHeader title="카드 수정" />
+      {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
       {loadError ? <div className="list-empty">카드를 불러오지 못했습니다.</div> : null}
-      {!loading && !loadError && !card ? <div className="list-empty">Card not found</div> : null}
+      {!loading && !loadError && !card ? <div className="list-empty">카드를 찾을 수 없습니다.</div> : null}
       {card ? (
         <div className="card-edit-page">
           <CardSegmentEditForm
@@ -86,7 +86,7 @@ export function CardEditPage() {
             onDirty={markDirty}
             onSave={saveCard}
           />
-          {saved ? <div className="save-message">Saved</div> : null}
+          {saved ? <div className="save-message">저장되었습니다.</div> : null}
           {saveError ? <p className="card-editor__error">{saveError}</p> : null}
         </div>
       ) : null}

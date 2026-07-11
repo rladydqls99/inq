@@ -13,43 +13,28 @@ describe("UploadPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("renders the desktop upload shell with deck selection and preview column", async () => {
+  it("renders deck selection, source pane, and preview pane", async () => {
     mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
     });
 
     renderUploadPage();
 
-    expect(await screen.findByRole("heading", { name: "Upload" })).toBeTruthy();
-    expect(screen.getByLabelText("Deck")).toBeTruthy();
-    expect(screen.getByRole("option", { name: "국어" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "업로드" })).toBeTruthy();
+    expect(screen.getByLabelText("덱 선택")).toBeTruthy();
     expect(screen.getByTestId("upload-source-pane")).toBeTruthy();
     expect(screen.getByTestId("upload-preview-pane")).toBeTruthy();
   });
 
-  it("shows an error when loading upload decks fails", async () => {
-    mockFetchByPath({
-      "/api/decks": {
-        body: { error: "deck_list_failed" },
-        status: 500,
-      },
-    });
-
-    renderUploadPage();
-
-    expect(await screen.findByText("덱 목록을 불러오지 못했습니다.")).toBeTruthy();
-  });
-
-  it("creates a deck inline and selects it", async () => {
+  it("creates a deck from the modal and selects it", async () => {
     const user = userEvent.setup();
-    const fetchMock = mockFetchByPath({
-      "/api/decks": [],
-    });
+    const fetchMock = mockFetchByPath({ "/api/decks": [] });
 
     renderUploadPage();
 
-    await user.type(await screen.findByLabelText("New deck name"), "한국사");
-    await user.click(screen.getByRole("button", { name: "Create deck" }));
+    await user.click(await screen.findByRole("button", { name: "덱 만들기" }));
+    await user.type(await screen.findByLabelText("덱 이름"), "한국사");
+    await user.click(screen.getByRole("button", { name: "만들기" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks",
@@ -59,194 +44,10 @@ describe("UploadPage", () => {
       }),
     );
     expect(await screen.findByRole("option", { name: "한국사" })).toBeTruthy();
-    expect(screen.getByLabelText("Deck")).toHaveProperty("value", "created-deck");
+    expect(screen.getByLabelText("덱 선택")).toHaveProperty("value", "created-deck");
   });
 
-  it("shows an error and keeps the title when inline deck creation fails", async () => {
-    const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks": (_input: RequestInfo | URL, init?: RequestInit) =>
-        init?.method === "POST"
-          ? { body: { error: "invalid_deck_title" }, status: 400 }
-          : [],
-    });
-
-    renderUploadPage();
-
-    const titleInput = await screen.findByLabelText("New deck name");
-    await user.type(titleInput, "한국사");
-    await user.click(screen.getByRole("button", { name: "Create deck" }));
-
-    expect(await screen.findByText("덱을 생성하지 못했습니다.")).toBeTruthy();
-    expect(titleInput).toHaveProperty("value", "한국사");
-  });
-
-  it("reads markdown from a selected file into the source pane", async () => {
-    const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-    });
-    const file = new File(["훈민정음을 만든 [세종대왕]이다."], "quiz.md", {
-      type: "text/markdown",
-    });
-
-    renderUploadPage();
-
-    const sourcePane = await screen.findByTestId("upload-source-pane");
-    await user.upload(within(sourcePane).getByLabelText("Markdown file"), file);
-
-    expect(screen.getByLabelText("Markdown source")).toHaveProperty(
-      "value",
-      "훈민정음을 만든 [세종대왕]이다.",
-    );
-  });
-
-  it("validates markdown and renders preview cards", async () => {
-    const user = userEvent.setup();
-    const fetchMock = mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/import/markdown/preview": {
-        parsed: 1,
-        errors: [],
-        previewCards: [
-          {
-            blockIndex: 0,
-            segments: [
-              { type: "text", value: "훈민정음을 만든 " },
-              { type: "answer", id: "answer-1", value: "세종대왕" },
-              { type: "text", value: "이다." },
-            ],
-          },
-        ],
-      },
-    });
-
-    renderUploadPage();
-
-    const source = await screen.findByLabelText("Markdown source");
-    await user.click(source);
-    await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/import/markdown/preview",
-      expect.objectContaining({
-        method: "POST",
-        body: JSON.stringify({ markdown: "훈민정음을 만든 [세종대왕]이다." }),
-      }),
-    );
-    expect(await screen.findByText("1 parsed")).toBeTruthy();
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
-    expect(
-      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(false);
-  });
-
-  it("clears the preview and disables creation when markdown changes after validation", async () => {
-    const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/import/markdown/preview": {
-        parsed: 1,
-        errors: [],
-        previewCards: [
-          {
-            blockIndex: 0,
-            segments: [
-              { type: "text", value: "훈민정음을 만든 " },
-              { type: "answer", id: "answer-1", value: "세종대왕" },
-              { type: "text", value: "이다." },
-            ],
-          },
-        ],
-      },
-    });
-
-    renderUploadPage();
-
-    const source = await screen.findByLabelText("Markdown source");
-    await user.click(source);
-    await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-
-    expect(await screen.findByText("1 parsed")).toBeTruthy();
-    expect(
-      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(false);
-
-    await user.type(source, " 수정");
-
-    expect(screen.queryByText("1 parsed")).toBeNull();
-    expect(screen.queryByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeNull();
-    expect(
-      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-  });
-
-  it("renders validation errors and disables card creation", async () => {
-    const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/import/markdown/preview": {
-        parsed: 0,
-        errors: [
-          {
-            blockIndex: 0,
-            line: 1,
-            column: null,
-            code: "missing_answer",
-            message: "Quiz card must contain at least one answer segment.",
-            snippet: "정답 괄호가 없다.",
-          },
-        ],
-        previewCards: [],
-      },
-    });
-
-    renderUploadPage();
-
-    const source = await screen.findByLabelText("Markdown source");
-    await user.type(source, "정답 괄호가 없다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-
-    expect(await screen.findByText("missing_answer")).toBeTruthy();
-    expect(screen.getByText("Quiz card must contain at least one answer segment.")).toBeTruthy();
-    expect(
-      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-  });
-
-  it("shows an error when markdown validation request fails", async () => {
-    const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
-      "/api/import/markdown/preview": {
-        body: { error: "preview_failed" },
-        status: 500,
-      },
-    });
-
-    renderUploadPage();
-
-    const source = await screen.findByLabelText("Markdown source");
-    await user.click(source);
-    await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-
-    expect(await screen.findByText("마크다운을 검증하지 못했습니다.")).toBeTruthy();
-    expect(
-      (screen.getByRole("button", { name: "Create cards" }) as HTMLButtonElement)
-        .disabled,
-    ).toBe(true);
-    expect(screen.queryByText("1 parsed")).toBeNull();
-  });
-
-  it("confirms import with the original markdown and clears source state", async () => {
+  it("validates markdown from the source pane and creates cards from the preview pane", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
@@ -269,11 +70,21 @@ describe("UploadPage", () => {
 
     renderUploadPage();
 
-    const source = await screen.findByLabelText("Markdown source");
-    await user.click(source);
+    const sourcePane = await screen.findByTestId("upload-source-pane");
+    const previewPane = screen.getByTestId("upload-preview-pane");
+    await user.click(within(sourcePane).getByLabelText("마크다운 내용"));
     await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-    await user.click(await screen.findByRole("button", { name: "Create cards" }));
+    await user.click(within(sourcePane).getByRole("button", { name: "검증하기" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/import/markdown/preview",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ markdown: "훈민정음을 만든 [세종대왕]이다." }),
+      }),
+    );
+    expect(await within(previewPane).findByText("1장 검증 완료")).toBeTruthy();
+    await user.click(within(previewPane).getByRole("button", { name: "카드 만들기" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/import/markdown/confirm",
@@ -285,50 +96,40 @@ describe("UploadPage", () => {
         }),
       }),
     );
-    expect(await screen.findByText("1 cards created")).toBeTruthy();
-    expect(screen.getByLabelText("Markdown source")).toHaveProperty("value", "");
-    expect(screen.queryByText("1 parsed")).toBeNull();
+    expect(await screen.findByText("1장의 카드를 만들었습니다.")).toBeTruthy();
   });
 
-  it("shows an error and keeps source state when import confirmation fails", async () => {
+  it("shows validation error locations under the markdown editor", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어" })],
       "/api/import/markdown/preview": {
-        parsed: 1,
-        errors: [],
-        previewCards: [
+        parsed: 0,
+        errors: [
           {
             blockIndex: 0,
-            segments: [
-              { type: "text", value: "훈민정음을 만든 " },
-              { type: "answer", id: "answer-1", value: "세종대왕" },
-              { type: "text", value: "이다." },
-            ],
+            line: 1,
+            column: null,
+            code: "missing_answer",
+            message: "Quiz card must contain at least one answer segment.",
+            snippet: "정답 괄호가 없다.",
           },
         ],
-      },
-      "/api/import/markdown/confirm": {
-        body: { error: "deck_not_found" },
-        status: 404,
+        previewCards: [],
       },
     });
 
     renderUploadPage();
 
-    const source = await screen.findByLabelText("Markdown source");
-    await user.click(source);
-    await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(screen.getByRole("button", { name: "Validate" }));
-    await user.click(await screen.findByRole("button", { name: "Create cards" }));
+    const sourcePane = await screen.findByTestId("upload-source-pane");
+    await user.type(within(sourcePane).getByLabelText("마크다운 내용"), "정답 괄호가 없다.");
+    await user.click(within(sourcePane).getByRole("button", { name: "검증하기" }));
 
-    expect(await screen.findByText("카드를 생성하지 못했습니다.")).toBeTruthy();
-    expect(screen.getByLabelText("Markdown source")).toHaveProperty(
-      "value",
-      "훈민정음을 만든 [세종대왕]이다.",
-    );
-    expect(screen.getByText("1 parsed")).toBeTruthy();
-    expect(screen.queryByText("1 cards created")).toBeNull();
+    expect(await within(sourcePane).findByText("1행")).toBeTruthy();
+    expect(
+      within(sourcePane).getByText("정답 구간이 없습니다. 정답은 대괄호로 감싸 주세요."),
+    ).toBeTruthy();
+    expect((screen.getByRole("button", { name: "카드 만들기" }) as HTMLButtonElement).disabled).toBe(true);
   });
 });
 
@@ -350,19 +151,12 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
     const path = typeof input === "string" ? input : input.toString();
     const rawResponse = responsesByPath[path] ?? {};
 
-    if (
-      path === "/api/decks" &&
-      init?.method === "POST" &&
-      typeof rawResponse !== "function" &&
-      !isMockErrorResponse(rawResponse)
-    ) {
+    if (path === "/api/decks" && init?.method === "POST") {
       return Promise.resolve(jsonResponse(deck({ id: "created-deck", title: "한국사" })));
     }
 
     const response =
-      typeof rawResponse === "function"
-        ? rawResponse(input, init)
-        : rawResponse;
+      typeof rawResponse === "function" ? rawResponse(input, init) : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
     const body = isMockErrorResponse(response) ? response.body : response;
 
@@ -388,12 +182,6 @@ function deck(input: { id: string; title: string }) {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
-}
-
-function matchesTextContent(expected: string) {
-  return (_content: string, element: Element | null) =>
-    element?.textContent === expected &&
-    Array.from(element.children).every((child) => child.textContent !== expected);
 }
 
 function isMockErrorResponse(

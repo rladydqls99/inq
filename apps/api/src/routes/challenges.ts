@@ -1,6 +1,7 @@
 import { Hono, type Context } from "hono";
 
 import type { Prisma, PrismaClient } from "@inq/db";
+import type { ChallengeCardResponse, QuizSegment } from "@inq/shared";
 import {
   createChallenge,
   updateChallengeFromDeck,
@@ -116,6 +117,26 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     }
 
     return context.body(null, 204);
+  });
+
+  route.get("/:challengeId/cards", async (context) => {
+    const challengeId = context.req.param("challengeId");
+    const challenge = await options.prisma.challenge.findUnique({
+      where: { id: challengeId },
+      select: { id: true },
+    });
+
+    if (!challenge) {
+      return context.json({ error: "challenge_not_found" }, 404);
+    }
+
+    const cardStates = await options.prisma.challengeCardState.findMany({
+      where: { challengeId },
+      include: { card: true },
+      orderBy: { createdAt: "asc" },
+    });
+
+    return context.json(cardStates.map(toChallengeCardResponse));
   });
 
   route.get("/:challengeId/run", async (context) => {
@@ -255,6 +276,36 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   route.post("/:challengeId/update-from-deck", updateChallengeFromDeckHandler);
 
   return route;
+}
+
+function toChallengeCardResponse(state: {
+  id: string;
+  challengeId: string;
+  cardId: string;
+  card: { segments: unknown };
+  stage: number;
+  challengeViewCount: number;
+  dueAt: Date | null;
+  lastChallengedAt: Date | null;
+  result: string | null;
+  completedAt: Date | null;
+  createdAt: Date;
+  updatedAt: Date;
+}): ChallengeCardResponse {
+  return {
+    id: state.id,
+    challengeId: state.challengeId,
+    cardId: state.cardId,
+    segments: state.card.segments as QuizSegment[],
+    stage: state.stage,
+    challengeViewCount: state.challengeViewCount,
+    dueAt: state.dueAt?.toISOString() ?? null,
+    lastChallengedAt: state.lastChallengedAt?.toISOString() ?? null,
+    result: state.result as ChallengeCardResponse["result"],
+    completedAt: state.completedAt?.toISOString() ?? null,
+    createdAt: state.createdAt.toISOString(),
+    updatedAt: state.updatedAt.toISOString(),
+  };
 }
 
 function isValidReviewIntervals(intervals: unknown): intervals is number[] {

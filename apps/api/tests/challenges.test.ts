@@ -545,11 +545,68 @@ describe("challenge routes", () => {
       await cleanup();
     }
   });
+
+  it("lists cards registered to a challenge", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const card = await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "중간고사",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/cards`,
+        { headers: { cookie } },
+      );
+
+      expect(response.status).toBe(200);
+      await expect(response.json()).resolves.toMatchObject([
+        {
+          challengeId: challenge.id,
+          cardId: card.id,
+          segments,
+          stage: 0,
+          challengeViewCount: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+      ]);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("returns not found when listing cards for a missing challenge", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      const response = await app.request("/api/challenges/missing/cards", {
+        headers: { cookie },
+      });
+
+      expect(response.status).toBe(404);
+      await expect(response.json()).resolves.toEqual({
+        error: "challenge_not_found",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
 });
 
 function testEnv() {
   return {
     sessionSecret: "test-secret",
     pinSessionTtlSeconds: 60,
+    initialPin: "1234",
   };
 }

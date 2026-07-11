@@ -281,6 +281,71 @@ textarea {
   font-weight: 700;
 }
 
+.home-section {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 17px;
+  font-weight: 820;
+  letter-spacing: 0;
+}
+
+.section-heading a,
+.primary-link-button {
+  color: #166534;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.primary-link-button {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  margin-top: 12px;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #166534;
+  color: #fff;
+}
+
+.empty-action {
+  display: grid;
+  gap: 10px;
+  margin-top: 18px;
+  color: #62625d;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.empty-action p {
+  margin: 0;
+}
+
+.empty-action button,
+.secondary-button {
+  justify-self: start;
+  min-height: 38px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 780;
+}
+
 .challenge-form,
 .compact-form {
   display: grid;
@@ -342,8 +407,82 @@ textarea {
 
 .challenge-row,
 .deck-row {
+  position: relative;
   display: grid;
   gap: 6px;
+}
+
+.challenge-row .action-list-item,
+.deck-row .action-list-item {
+  padding-right: 48px;
+}
+
+.action-menu {
+  position: absolute;
+  top: 10px;
+  right: 8px;
+}
+
+.icon-button {
+  display: inline-grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  background: #fff;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.action-menu__panel {
+  position: absolute;
+  top: 38px;
+  right: 0;
+  z-index: 10;
+  display: grid;
+  min-width: 144px;
+  border: 1px solid #d2d2ca;
+  border-radius: 8px;
+  padding: 6px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgb(0 0 0 / 12%);
+}
+
+.action-menu__panel button {
+  min-height: 36px;
+  border: 0;
+  border-radius: 6px;
+  padding: 0 10px;
+  background: transparent;
+  color: #171717;
+  cursor: pointer;
+  font-weight: 760;
+  text-align: left;
+}
+
+.action-menu__panel button:hover {
+  background: #f2f2ed;
+}
+
+.floating-add-button {
+  position: fixed;
+  right: max(18px, calc((100vw - 720px) / 2 + 18px));
+  bottom: 84px;
+  z-index: 20;
+  display: grid;
+  width: 54px;
+  height: 54px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  background: #166534;
+  color: #fff;
+  cursor: pointer;
+  font-size: 30px;
+  font-weight: 720;
+  line-height: 1;
 }
 
 .row-actions {
@@ -360,6 +499,52 @@ textarea {
   border: 1px solid #e2e2da;
   border-radius: 8px;
   background: #f8f8f4;
+}
+
+.interval-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.form-error {
+  color: #b91c1c;
+  font-size: 13px;
+  font-weight: 760;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgb(23 23 23 / 40%);
+}
+
+.modal {
+  display: grid;
+  width: min(100%, 420px);
+  gap: 14px;
+  border-radius: 8px;
+  padding: 16px;
+  background: #fff;
+  box-shadow: 0 18px 50px rgb(0 0 0 / 18%);
+}
+
+.modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.modal__header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 820;
+  letter-spacing: 0;
 }
 
 .row-action-link {
@@ -430,6 +615,15 @@ textarea {
   color: #166534;
   font-size: 13px;
   font-weight: 800;
+}
+
+.card-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #62625d;
+  font-size: 12px;
+  font-weight: 780;
 }
 
 .card-editor__error {
@@ -609,7 +803,39 @@ textarea {
 
 .upload-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
+}
+
+.upload-confirm-slot {
+  align-self: end;
+  margin-top: auto;
+  padding-top: 10px;
+}
+
+.has-markdown-errors {
+  border-color: #b91c1c;
+  box-shadow: inset 4px 0 0 #ef4444;
+}
+
+.markdown-error-locations {
+  display: grid;
+  gap: 8px;
+}
+
+.markdown-error-location {
+  display: grid;
+  gap: 4px;
+  border-left: 4px solid #ef4444;
+  border-radius: 6px;
+  padding: 8px 10px;
+  background: #fef2f2;
+  color: #7f1d1d;
+  font-size: 13px;
+}
+
+.markdown-error-location code {
+  white-space: pre-wrap;
 }
 
 .import-summary {
@@ -666,7 +892,8 @@ textarea {
 @media (max-width: 860px) {
   .deck-select-create,
   .deck-create-form,
-  .upload-grid {
+  .upload-grid,
+  .interval-grid {
     grid-template-columns: 1fr;
   }
 }

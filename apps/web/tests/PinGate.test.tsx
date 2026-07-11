@@ -12,7 +12,7 @@ describe("PinGate", () => {
     vi.restoreAllMocks();
   });
 
-  it("shows setup screen when no PIN is configured", async () => {
+  it("shows lock screen even if the status reports no configured PIN", async () => {
     mockFetch([{ pinConfigured: false, unlocked: false }]);
 
     render(
@@ -21,7 +21,7 @@ describe("PinGate", () => {
       </PinGate>,
     );
 
-    expect(await screen.findByRole("heading", { name: "Set PIN" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "잠금 해제" })).toBeTruthy();
     expect(screen.queryByText("Private content")).toBeNull();
   });
 
@@ -49,7 +49,7 @@ describe("PinGate", () => {
     expect(await screen.findByText("Private content")).toBeTruthy();
     window.dispatchEvent(new Event("inq:locked"));
 
-    expect(await screen.findByRole("heading", { name: "Unlock" })).toBeTruthy();
+    expect(await screen.findByRole("heading", { name: "잠금 해제" })).toBeTruthy();
     expect(screen.queryByText("Private content")).toBeNull();
   });
 
@@ -67,26 +67,26 @@ describe("PinGate", () => {
     );
 
     await user.type(await screen.findByLabelText("PIN"), "1234");
-    await user.click(screen.getByRole("button", { name: "Unlock" }));
+    await user.click(screen.getByRole("button", { name: "열기" }));
 
     await waitFor(() => {
       expect(screen.getByText("Private content")).toBeTruthy();
     });
   });
 
-  it("shows an error when setting the first PIN fails", async () => {
+  it("shows an error when unlocking fails", async () => {
     const user = userEvent.setup();
     const fetchMock = vi
       .fn()
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ pinConfigured: false, unlocked: false }), {
+        new Response(JSON.stringify({ pinConfigured: true, unlocked: false }), {
           status: 200,
           headers: { "content-type": "application/json" },
         }),
       )
       .mockResolvedValueOnce(
-        new Response(JSON.stringify({ error: "pin_already_configured" }), {
-          status: 409,
+        new Response(JSON.stringify({ error: "invalid_pin" }), {
+          status: 401,
           headers: { "content-type": "application/json" },
         }),
       );
@@ -99,10 +99,9 @@ describe("PinGate", () => {
     );
 
     await user.type(await screen.findByLabelText("PIN"), "1234");
-    await user.type(screen.getByLabelText("Confirm PIN"), "1234");
-    await user.click(screen.getByRole("button", { name: "Set PIN" }));
+    await user.click(screen.getByRole("button", { name: "열기" }));
 
-    expect(await screen.findByText("PIN을 설정하지 못했습니다.")).toBeTruthy();
+    expect(await screen.findByText("PIN을 확인해 주세요.")).toBeTruthy();
     expect(screen.queryByText("Private content")).toBeNull();
   });
 });

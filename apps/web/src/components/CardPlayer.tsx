@@ -43,25 +43,25 @@ export function CardPlayer({
 
       <div className="card-player__controls">
         <button type="button" onClick={onPrevious}>
-          Previous
+          이전
         </button>
         <button type="button" onClick={onNext}>
-          Next
+          다음
         </button>
       </div>
 
       {mode === "challenge" ? (
         <div className="card-player__result-controls">
           <button type="button" onClick={() => selectResult("wrong")}>
-            Wrong
+            틀림
           </button>
           <button type="button" onClick={() => selectResult("correct")}>
-            Correct
+            맞음
           </button>
         </div>
       ) : (
         <button type="button" onClick={() => setStudyRevealed(true)}>
-          Show answer
+          정답 보기
         </button>
       )}
     </section>

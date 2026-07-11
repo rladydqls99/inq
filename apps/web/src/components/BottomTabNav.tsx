@@ -2,15 +2,15 @@ import { BookOpen, Flag, Home, Settings } from "lucide-react";
 import { NavLink } from "react-router-dom";
 
 const tabs = [
-  { to: "/", label: "Home", icon: Home },
-  { to: "/challenges", label: "Challenges", icon: Flag },
-  { to: "/decks", label: "Decks", icon: BookOpen },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/", label: "홈", icon: Home },
+  { to: "/challenges", label: "챌린지", icon: Flag },
+  { to: "/decks", label: "덱", icon: BookOpen },
+  { to: "/settings", label: "설정", icon: Settings },
 ];
 
 export function BottomTabNav() {
   return (
-    <nav className="bottom-tab-nav" aria-label="Main navigation">
+    <nav className="bottom-tab-nav" aria-label="주요 메뉴">
       {tabs.map((tab) => {
         const Icon = tab.icon;
 

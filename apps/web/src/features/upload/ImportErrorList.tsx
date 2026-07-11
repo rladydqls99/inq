@@ -1,4 +1,5 @@
 import type { ImportValidationError } from "@inq/shared";
+import { importErrorMessage } from "./importErrorMessages";
 
 type ImportErrorListProps = {
   errors: ImportValidationError[];
@@ -19,12 +20,12 @@ export function ImportErrorList({ errors }: ImportErrorListProps) {
           <div className="import-error__meta">
             <span>{error.code}</span>
             <span>
-              Block {error.blockIndex + 1}
-              {error.line ? `, line ${error.line}` : ""}
-              {error.column ? `, column ${error.column}` : ""}
+              {error.blockIndex + 1}번째 카드
+              {error.line ? `, ${error.line}행` : ""}
+              {error.column ? `, ${error.column}열` : ""}
             </span>
           </div>
-          <p>{error.message}</p>
+          <p>{importErrorMessage(error)}</p>
           {error.snippet ? <code>{error.snippet}</code> : null}
         </article>
       ))}

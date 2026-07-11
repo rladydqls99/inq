@@ -32,8 +32,8 @@ describe("CardPlayer", () => {
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "Previous" }));
-    await user.click(screen.getByRole("button", { name: "Next" }));
+    await user.click(screen.getByRole("button", { name: "이전" }));
+    await user.click(screen.getByRole("button", { name: "다음" }));
 
     expect(onPrevious).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
@@ -53,7 +53,7 @@ describe("CardPlayer", () => {
 
     expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "Correct" }));
+    await user.click(screen.getByRole("button", { name: "맞음" }));
 
     expect(onResult).toHaveBeenCalledWith("correct");
     expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
@@ -86,7 +86,7 @@ describe("CardPlayer", () => {
 
     render(<CardPlayer segments={segments} mode="study" />);
 
-    await user.click(screen.getByRole("button", { name: "Show answer" }));
+    await user.click(screen.getByRole("button", { name: "정답 보기" }));
 
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
   });

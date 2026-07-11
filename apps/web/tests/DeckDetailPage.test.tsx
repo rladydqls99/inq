@@ -32,7 +32,7 @@ describe("DeckDetailPage", () => {
     renderDeckDetail();
 
     expect(await screen.findByText("훈민정음을 만든 조선의 왕은 세종대왕이다.")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Edit card" }).getAttribute("href")).toBe(
+    expect(screen.getByRole("link", { name: "카드 수정" }).getAttribute("href")).toBe(
       "/cards/card-1/edit",
     );
   });
@@ -48,7 +48,7 @@ describe("DeckDetailPage", () => {
     renderDeckDetail();
 
     expect(await screen.findByText("카드 목록을 불러오지 못했습니다.")).toBeTruthy();
-    expect(screen.queryByText("Loading")).toBeNull();
+    expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
   it("deletes a card from the deck detail list", async () => {
@@ -64,7 +64,7 @@ describe("DeckDetailPage", () => {
 
     expect(cardItem).not.toBeNull();
     await user.click(
-      within(cardItem as HTMLElement).getByRole("button", { name: "Delete card" }),
+      within(cardItem as HTMLElement).getByRole("button", { name: "카드 삭제" }),
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -91,7 +91,7 @@ describe("DeckDetailPage", () => {
 
     expect(cardItem).not.toBeNull();
     await user.click(
-      within(cardItem as HTMLElement).getByRole("button", { name: "Delete card" }),
+      within(cardItem as HTMLElement).getByRole("button", { name: "카드 삭제" }),
     );
 
     expect(await screen.findByText("카드를 삭제하지 못했습니다.")).toBeTruthy();

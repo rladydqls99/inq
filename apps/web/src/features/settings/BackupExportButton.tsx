@@ -33,9 +33,9 @@ export function BackupExportButton() {
   return (
     <div className="settings-action">
       <button type="button" onClick={() => void exportBackup()}>
-        Export backup
+        백업 내보내기
       </button>
-      {exported ? <span>Backup ready</span> : null}
+      {exported ? <span>백업 파일이 준비되었습니다.</span> : null}
       {error ? <span>백업을 내보내지 못했습니다.</span> : null}
     </div>
   );

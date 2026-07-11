@@ -54,7 +54,7 @@ export function PinChangeForm() {
   return (
     <form className="pin-change-form" onSubmit={submit}>
       <label>
-        Current PIN
+        현재 PIN
         <input
           autoComplete="current-password"
           type="password"
@@ -63,7 +63,7 @@ export function PinChangeForm() {
         />
       </label>
       <label>
-        New PIN
+        새 PIN
         <input
           autoComplete="new-password"
           type="password"
@@ -72,7 +72,7 @@ export function PinChangeForm() {
         />
       </label>
       <label>
-        Confirm New PIN
+        새 PIN 확인
         <input
           autoComplete="new-password"
           type="password"
@@ -85,9 +85,9 @@ export function PinChangeForm() {
         type="submit"
         disabled={!currentPin || !nextPin || !nextPinConfirm || mismatch}
       >
-        Change PIN
+        PIN 변경
       </button>
-      {saved ? <span>Saved</span> : null}
+      {saved ? <span>저장되었습니다.</span> : null}
       {error ? <span>PIN을 변경하지 못했습니다.</span> : null}
     </form>
   );

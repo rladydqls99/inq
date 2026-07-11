@@ -15,6 +15,7 @@ const testDirname = dirname(fileURLToPath(import.meta.url));
 const testEnv = {
   sessionSecret: "test-secret",
   pinSessionTtlSeconds: 60,
+  initialPin: "1234",
 };
 
 let prisma: PrismaClient;
@@ -55,11 +56,10 @@ describe("PIN auth routes", () => {
     const initialResponse = await app.request("/api/auth/status");
     expect(initialResponse.status).toBe(200);
     await expect(initialResponse.json()).resolves.toEqual({
-      pinConfigured: false,
+      pinConfigured: true,
       unlocked: false,
     });
 
-    await setupPin(app, "1234");
     const cookie = await unlockAndGetCookie(app, "1234");
     const unlockedResponse = await app.request("/api/auth/status", {
       headers: { cookie },
