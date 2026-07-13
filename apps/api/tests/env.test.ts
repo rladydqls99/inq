@@ -12,6 +12,15 @@ describe("loadEnv", () => {
     ).toThrow("SESSION_SECRET is required");
   });
 
+  it("requires an initial PIN in production", () => {
+    expect(() =>
+      loadEnv({
+        NODE_ENV: "production",
+        SESSION_SECRET: "test-secret",
+      }),
+    ).toThrow("INITIAL_PIN is required");
+  });
+
   it("falls back to the default PIN session TTL for invalid values", () => {
     expect(
       loadEnv({
@@ -41,5 +50,21 @@ describe("loadEnv", () => {
         INITIAL_PIN: "   ",
       }).initialPin,
     ).toBe("0000");
+  });
+
+  it("enables secure cookies and reads PIN rate-limit settings in production", () => {
+    expect(
+      loadEnv({
+        NODE_ENV: "production",
+        SESSION_SECRET: "test-secret",
+        INITIAL_PIN: "2468",
+        PIN_MAX_ATTEMPTS: "7",
+        PIN_LOCKOUT_SECONDS: "120",
+      }),
+    ).toMatchObject({
+      secureCookies: true,
+      pinMaxAttempts: 7,
+      pinLockoutSeconds: 120,
+    });
   });
 });

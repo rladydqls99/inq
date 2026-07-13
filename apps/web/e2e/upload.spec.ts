@@ -36,14 +36,14 @@ test("desktop upload previews and confirms valid markdown", async ({ page }) => 
   });
 
   await page.goto("/upload");
-  await page.getByLabel("Markdown source").fill("훈민정음을 만든 [세종대왕]이다.");
-  await page.getByRole("button", { name: "Validate" }).click();
+  await page.getByLabel("마크다운 내용").fill("훈민정음을 만든 [세종대왕]이다.");
+  await page.getByRole("button", { name: "검증하기" }).click();
 
-  await expect(page.getByText("1 parsed")).toBeVisible();
+  await expect(page.getByText("1장 검증 완료")).toBeVisible();
   await expect(page.getByText("훈민정음을 만든 ____이다.")).toBeVisible();
-  await page.getByRole("button", { name: "Create cards" }).click();
-  await expect(page.getByText("1 cards created")).toBeVisible();
-  await expect(page.getByLabel("Markdown source")).toHaveValue("");
+  await page.getByRole("button", { name: "카드 만들기" }).click();
+  await expect(page.getByText("1장의 카드를 만들었습니다.")).toBeVisible();
+  await expect(page.getByLabel("마크다운 내용")).toHaveValue("");
 });
 
 test("desktop upload shows validation errors", async ({ page }) => {
@@ -75,11 +75,11 @@ test("desktop upload shows validation errors", async ({ page }) => {
   });
 
   await page.goto("/upload");
-  await page.getByLabel("Markdown source").fill("정답 괄호가 없다.");
-  await page.getByRole("button", { name: "Validate" }).click();
+  await page.getByLabel("마크다운 내용").fill("정답 괄호가 없다.");
+  await page.getByRole("button", { name: "검증하기" }).click();
 
   await expect(page.getByText("missing_answer")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Create cards" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "카드 만들기" })).toBeDisabled();
 });
 
 async function mockUnlocked(page: import("@playwright/test").Page) {

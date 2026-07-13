@@ -157,7 +157,7 @@ export function ChallengeRunnerPage() {
           currentIndex={cursor}
           totalCards={runState.cards.length}
           selectedResult={selectedResult}
-          autoAdvanceSeconds={answeredCard && selectedResult ? 5 : undefined}
+          {...(answeredCard && selectedResult ? { autoAdvanceSeconds: 5 } : {})}
           canPrevious={cursor > 0}
           canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}

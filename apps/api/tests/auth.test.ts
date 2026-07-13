@@ -16,6 +16,9 @@ const testEnv = {
   sessionSecret: "test-secret",
   pinSessionTtlSeconds: 60,
   initialPin: "1234",
+  secureCookies: false,
+  pinMaxAttempts: 10,
+  pinLockoutSeconds: 300,
 };
 
 let prisma: PrismaClient;
@@ -223,6 +226,51 @@ describe("PIN auth routes", () => {
     expect(cookie?.toLowerCase()).toContain("httponly");
   });
 
+  it("marks production auth cookies as secure", async () => {
+    const app = createProtectedTestApp({ ...testEnv, secureCookies: true });
+    await app.request("/api/auth/status");
+
+    const response = await app.request("/api/auth/unlock", {
+      method: "POST",
+      body: JSON.stringify({ pin: "1234" }),
+      headers: { "content-type": "application/json" },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("set-cookie")?.toLowerCase()).toContain("secure");
+  });
+
+  it("rate limits repeated invalid PIN attempts per client", async () => {
+    const app = createProtectedTestApp({
+      ...testEnv,
+      pinMaxAttempts: 2,
+      pinLockoutSeconds: 60,
+    });
+    await setupPin(app, "1234");
+    const headers = {
+      "content-type": "application/json",
+      "x-forwarded-for": "203.0.113.7",
+    };
+
+    const firstResponse = await app.request("/api/auth/unlock", {
+      method: "POST",
+      body: JSON.stringify({ pin: "wrong" }),
+      headers,
+    });
+    expect(firstResponse.status).toBe(401);
+
+    const limitedResponse = await app.request("/api/auth/unlock", {
+      method: "POST",
+      body: JSON.stringify({ pin: "wrong" }),
+      headers,
+    });
+    expect(limitedResponse.status).toBe(429);
+    expect(limitedResponse.headers.get("retry-after")).toBe("60");
+    await expect(limitedResponse.json()).resolves.toEqual({
+      error: "too_many_attempts",
+    });
+  });
+
   it("changes PIN and invalidates old sessions", async () => {
     const app = createProtectedTestApp();
     await setupPin(app, "1234");
@@ -345,14 +393,14 @@ async function unlockAndGetCookie(
   return cookie ?? "";
 }
 
-function createProtectedTestApp() {
-  const app = createApp({ prisma, env: testEnv });
+function createProtectedTestApp(env = testEnv) {
+  const app = createApp({ prisma, env });
 
   app.use(
     "/api/test/protected",
     authMiddleware({
       prisma,
-      env: testEnv,
+      env,
     }),
   );
   app.get("/api/test/protected", (context) => context.json({ ok: true }));

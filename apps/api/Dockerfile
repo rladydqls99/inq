@@ -19,7 +19,7 @@ RUN pnpm --filter @inq/db prisma generate
 RUN pnpm --filter @inq/web build
 RUN pnpm --filter @inq/api build
 
-FROM nginx:1.27-alpine AS web
+FROM nginx:stable-alpine AS web
 
 COPY --from=build /app/apps/web/dist /usr/share/nginx/html
 COPY deploy/nginx.conf /etc/nginx/conf.d/default.conf

@@ -13,6 +13,9 @@ const testEnv = {
   sessionSecret: "test-secret",
   pinSessionTtlSeconds: 60,
   initialPin: "1234",
+  secureCookies: false,
+  pinMaxAttempts: 10,
+  pinLockoutSeconds: 300,
 };
 
 export async function createTestPrisma() {

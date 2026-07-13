@@ -16,14 +16,22 @@ test("mobile bottom tabs route between main screens", async ({ page }) => {
   });
 
   await page.goto("/");
-  await expect(page.getByRole("heading", { name: "Home" })).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "주요 메뉴" }),
+  ).toBeVisible();
 
-  await page.getByRole("link", { name: /Challenges/ }).click();
-  await expect(page.getByRole("heading", { name: "Challenges" })).toBeVisible();
+  await page.getByRole("link", { name: "챌린지", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "챌린지", exact: true }),
+  ).toBeVisible();
 
-  await page.getByRole("link", { name: /Decks/ }).click();
-  await expect(page.getByRole("heading", { name: "Decks" })).toBeVisible();
+  await page.getByRole("link", { name: "덱", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "덱", exact: true }),
+  ).toBeVisible();
 
-  await page.getByRole("link", { name: /Settings/ }).click();
-  await expect(page.getByRole("heading", { name: "Settings" })).toBeVisible();
+  await page.getByRole("link", { name: "설정", exact: true }).click();
+  await expect(
+    page.getByRole("heading", { name: "설정", exact: true }),
+  ).toBeVisible();
 });

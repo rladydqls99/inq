@@ -10,6 +10,6 @@ test("direct desktop upload URL is protected by the PIN gate", async ({ page }) 
 
   await page.goto("/upload");
 
-  await expect(page.getByRole("heading", { name: "Unlock" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "Upload" })).toHaveCount(0);
+  await expect(page.getByRole("heading", { name: "잠금 해제" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "업로드" })).toHaveCount(0);
 });

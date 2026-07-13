@@ -12,6 +12,7 @@
       "@prisma/client",
       "@prisma/engines",
       "better-sqlite3",
+      "esbuild",
       "prisma"
     ]
   },
@@ -20,6 +21,9 @@
     "db:generate": "pnpm --filter @inq/db prisma generate",
     "db:migrate": "pnpm --filter @inq/db db:ensure && pnpm --filter @inq/db prisma migrate deploy",
     "docker:build": "docker compose -f deploy/docker-compose.prod.yml build",
+    "docker:deploy:build": "docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.edge.yml build",
+    "docker:deploy:down": "docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.edge.yml down",
+    "docker:deploy:up": "docker compose -f deploy/docker-compose.prod.yml -f deploy/docker-compose.edge.yml up -d",
     "docker:down": "docker compose -f deploy/docker-compose.prod.yml down",
     "docker:up": "docker compose -f deploy/docker-compose.prod.yml up",
     "test": "pnpm -r test",
