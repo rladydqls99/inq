@@ -89,13 +89,18 @@ export function UploadPage() {
           onChangeMarkdown={updateMarkdown}
           onValidate={validateMarkdown}
         />
-        <section className="upload-pane" data-testid="upload-preview-pane">
-          <h2>검증 결과와 미리보기</h2>
-          {createError ? <div className="import-summary is-error">카드를 생성하지 못했습니다.</div> : null}
-          {validationError ? <div className="import-summary is-error">마크다운을 검증하지 못했습니다.</div> : null}
-          <ImportValidationSummary preview={preview} />
-          <ImportErrorList errors={preview?.errors ?? []} />
-          <ImportPreviewList cards={preview?.previewCards ?? []} />
+        <section className="upload-pane upload-pane--preview" data-testid="upload-preview-pane">
+          <header className="upload-pane__header">
+            <h2>검증 결과와 미리보기</h2>
+            <p>검증된 카드를 확인한 뒤 선택한 덱에 추가하세요.</p>
+          </header>
+          <div className="upload-preview-content">
+            {createError ? <div className="import-summary is-error">카드를 생성하지 못했습니다.</div> : null}
+            {validationError ? <div className="import-summary is-error">마크다운을 검증하지 못했습니다.</div> : null}
+            <ImportValidationSummary preview={preview} />
+            <ImportErrorList errors={preview?.errors ?? []} />
+            <ImportPreviewList cards={preview?.previewCards ?? []} />
+          </div>
           <div className="upload-confirm-slot">
             <ImportConfirmBar
               canCreate={canCreate}

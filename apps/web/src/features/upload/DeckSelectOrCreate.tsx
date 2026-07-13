@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Plus } from "lucide-react";
 
 import type { DeckResponse } from "@inq/shared";
 import { apiRequest } from "../../api/client";
@@ -45,8 +46,8 @@ export function DeckSelectOrCreate({
 
   return (
     <div className="deck-select-create">
-      <label>
-        덱 선택
+      <label className="deck-select-create__field">
+        <span>덱 선택</span>
         <select
           value={selectedDeckId}
           onChange={(event) => onSelectDeck(event.target.value)}
@@ -60,6 +61,7 @@ export function DeckSelectOrCreate({
         </select>
       </label>
       <button type="button" className="secondary-button" onClick={() => setCreateOpen(true)}>
+        <Plus aria-hidden="true" size={18} strokeWidth={2.25} />
         덱 만들기
       </button>
       {loadError ? <div className="import-summary is-error">덱 목록을 불러오지 못했습니다.</div> : null}
