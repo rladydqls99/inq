@@ -7,15 +7,17 @@ type QuizTextRendererProps = {
   segments: QuizSegment[];
   mode: QuizTextMode;
   tone?: AnswerTone;
+  className?: string;
 };
 
 export function QuizTextRenderer({
   segments,
   mode,
   tone = "neutral",
+  className,
 }: QuizTextRendererProps) {
   return (
-    <p className="quiz-text">
+    <p className={["quiz-text", className].filter(Boolean).join(" ")}>
       {segments.map((segment, index) => {
         if (segment.type === "text") {
           return <span key={`text-${index}`}>{segment.value}</span>;

@@ -1946,7 +1946,91 @@ textarea {
 .card-editor-list {
   display: grid;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 24px;
+}
+
+.card-list-header {
+  display: grid;
+  gap: 8px;
+  padding: 4px 0 24px;
+  border-bottom: 1px solid var(--inq-line);
+}
+
+.card-list-header__context,
+.card-list-header__copy p {
+  margin: 0;
+  color: var(--inq-ink-soft);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-leading);
+}
+
+.card-list-header__main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 16px;
+}
+
+.card-list-header__copy {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.card-list-header__copy h1 {
+  margin: 0;
+  color: var(--inq-ink);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-leading);
+  letter-spacing: var(--text-title-tracking);
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
+.card-list-header__start {
+  display: inline-flex;
+  min-height: 48px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  padding: 0 18px;
+  background: var(--inq-ink);
+  color: var(--inq-canvas);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-leading);
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-list-header__start:focus-visible {
+  outline: 3px solid var(--inq-highlight-strong);
+  outline-offset: 3px;
+}
+
+.card-list-header__start:active {
+  transform: scale(0.98);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .card-list-header__start:hover {
+    background: var(--inq-ink-soft);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card-list-header__start {
+    transition: none;
+  }
+
+  .card-list-header__start:active {
+    transform: none;
+  }
 }
 
 .card-editor {
@@ -1968,6 +2052,10 @@ textarea {
   overflow-wrap: anywhere;
   text-wrap: pretty;
   white-space: pre-line;
+}
+
+.card-editor__revealed .quiz-text__answer {
+  padding: 1px 4px 2px;
 }
 
 .card-editor textarea {

@@ -31,7 +31,11 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    expect(await screen.findByText("훈민정음을 만든 조선의 왕은 세종대왕이다.")).toBeTruthy();
+    expect(
+      await findByTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."),
+    ).toBeTruthy();
+    expect(screen.getByRole("heading", { name: "국어" })).toBeTruthy();
+    expect(screen.getByText("조선").className).toContain("is-study");
     expect(screen.getByRole("link", { name: "카드 수정" }).getAttribute("href")).toBe(
       "/cards/card-1/edit",
     );
@@ -59,7 +63,7 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    const listItem = await screen.findByText("훈민정음을 만든 왕은 세종대왕이다.");
+    const listItem = await findByTextContent("훈민정음을 만든 왕은 세종대왕이다.");
     const cardItem = listItem.closest("article");
 
     expect(cardItem).not.toBeNull();
@@ -71,7 +75,7 @@ describe("DeckDetailPage", () => {
       "/api/cards/card-1",
       expect.objectContaining({ method: "DELETE" }),
     );
-    expect(screen.queryByText("훈민정음을 만든 왕은 세종대왕이다.")).toBeNull();
+    expect(queryByTextContent("훈민정음을 만든 왕은 세종대왕이다.")).toBeNull();
   });
 
   it("shows an error and keeps the card when deleting a card fails", async () => {
@@ -86,7 +90,7 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    const listItem = await screen.findByText("훈민정음을 만든 왕은 세종대왕이다.");
+    const listItem = await findByTextContent("훈민정음을 만든 왕은 세종대왕이다.");
     const cardItem = listItem.closest("article");
 
     expect(cardItem).not.toBeNull();
@@ -95,7 +99,7 @@ describe("DeckDetailPage", () => {
     );
 
     expect(await screen.findByText("카드를 삭제하지 못했습니다.")).toBeTruthy();
-    expect(screen.getByText("훈민정음을 만든 왕은 세종대왕이다.")).toBeTruthy();
+    expect(queryByTextContent("훈민정음을 만든 왕은 세종대왕이다.")).toBeTruthy();
   });
 });
 
@@ -114,7 +118,19 @@ type MockResponse = unknown | { body: unknown; status: number };
 function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
-    const response = responsesByPath[path] ?? {};
+    const response =
+      responsesByPath[path] ??
+      (path === "/api/decks"
+        ? [
+            {
+              id: "deck-1",
+              title: "국어",
+              cardCount: 1,
+              createdAt: "2026-06-22T00:00:00.000Z",
+              updatedAt: "2026-06-22T00:00:00.000Z",
+            },
+          ]
+        : {});
 
     if (
       path === "/api/cards/card-1" &&
@@ -174,4 +190,20 @@ function isMockErrorResponse(
     "body" in response &&
     "status" in response
   );
+}
+
+function findByTextContent(text: string) {
+  return screen.findByText((_, element) => matchesTextContent(element, text));
+}
+
+function queryByTextContent(text: string) {
+  return screen.queryByText((_, element) => matchesTextContent(element, text));
+}
+
+function matchesTextContent(element: Element | null, text: string) {
+  if (element?.textContent !== text) {
+    return false;
+  }
+
+  return Array.from(element.children).every((child) => child.textContent !== text);
 }
