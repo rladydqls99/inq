@@ -3,7 +3,6 @@ import { useParams } from "react-router-dom";
 
 import type { ChallengeRunCard, ChallengeRunState } from "@inq/shared";
 import { apiRequest } from "../../api/client";
-import { AutoAdvanceTimer } from "../../components/AutoAdvanceTimer";
 import { CardPlayer } from "../../components/CardPlayer";
 import { PageHeader } from "../../components/PageHeader";
 
@@ -155,24 +154,18 @@ export function ChallengeRunnerPage() {
           key={currentCard.sessionCardId}
           mode="challenge"
           segments={currentCard.segments}
+          currentIndex={cursor}
+          totalCards={runState.cards.length}
           selectedResult={selectedResult}
+          autoAdvanceSeconds={answeredCard && selectedResult ? 5 : undefined}
+          canPrevious={cursor > 0}
+          canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(nextCursorAfterAnswer ?? cursor + 1)}
           onResult={(result) => void submitResult(result)}
         />
         {resultError ? <div className="list-empty">결과를 저장하지 못했습니다.</div> : null}
         {moveError ? <div className="list-empty">카드를 이동하지 못했습니다.</div> : null}
-        {selectedResult ? (
-          <div className="runner-next">
-            <AutoAdvanceTimer seconds={5} />
-            <button
-              type="button"
-              onClick={() => void moveTo(nextCursorAfterAnswer ?? cursor + 1)}
-            >
-              다음
-            </button>
-          </div>
-        ) : null}
       </div>
     </section>
   );

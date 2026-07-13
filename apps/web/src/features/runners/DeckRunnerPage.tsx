@@ -141,6 +141,10 @@ export function DeckRunnerPage() {
           key={currentCard.cardId}
           mode="study"
           segments={currentCard.segments}
+          currentIndex={cursor}
+          totalCards={runState.cards.length}
+          canPrevious={cursor > 0}
+          canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
         />

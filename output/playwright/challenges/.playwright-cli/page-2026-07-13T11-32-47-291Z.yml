@@ -1,0 +1,7 @@
+- main [ref=e3]:
+  - generic [ref=e4]:
+    - heading "잠금 해제" [level=1] [ref=e5]
+    - generic [ref=e6]:
+      - text: PIN
+      - textbox "PIN" [ref=e7]
+    - button "열기" [disabled] [ref=e8]

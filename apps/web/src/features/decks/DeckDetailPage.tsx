@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PencilLine, Trash2 } from "lucide-react";
 import { Link, useParams } from "react-router-dom";
 
 import { getRevealedText, type CardResponse } from "@inq/shared";
@@ -71,9 +72,11 @@ export function DeckDetailPage() {
             <p className="card-editor__revealed">{getRevealedText(card.segments)}</p>
             <div className="card-editor__actions">
               <Link className="row-action-link" to={`/cards/${card.id}/edit`}>
+                <PencilLine aria-hidden="true" size={17} strokeWidth={2.1} />
                 카드 수정
               </Link>
               <button type="button" onClick={() => void deleteCard(card.id)}>
+                <Trash2 aria-hidden="true" size={17} strokeWidth={2.1} />
                 카드 삭제
               </button>
             </div>

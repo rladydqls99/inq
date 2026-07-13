@@ -18,10 +18,10 @@ test("deck runner reveals answers and persists next cursor", async ({ page }) =>
   await page.goto("/decks/deck-1/run");
 
   await expect(page.getByText("훈민정음을 만든 ____이다.")).toBeVisible();
-  await page.getByRole("button", { name: "Show answer" }).click();
+  await page.getByRole("button", { name: "정답 보기" }).click();
   await expect(page.getByText("훈민정음을 만든 세종대왕이다.")).toBeVisible();
 
-  await page.getByRole("button", { name: "Next" }).click();
+  await page.getByRole("button", { name: "다음 카드" }).click();
   await expect(page.getByText("수도는 ____이다.")).toBeVisible();
 });
 

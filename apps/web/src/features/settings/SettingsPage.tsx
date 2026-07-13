@@ -2,7 +2,6 @@ import { useState } from "react";
 
 import { apiRequest } from "../../api/client";
 import { PageHeader } from "../../components/PageHeader";
-import { PinChangeForm } from "../auth/PinChangeForm";
 import { BackupExportButton } from "./BackupExportButton";
 
 export function SettingsPage() {
@@ -22,10 +21,6 @@ export function SettingsPage() {
     <section className="page">
       <PageHeader title="설정" />
       <div className="settings-sections">
-        <section className="settings-section">
-          <h2>PIN</h2>
-          <PinChangeForm />
-        </section>
         <section className="settings-section">
           <h2>백업</h2>
           <BackupExportButton />

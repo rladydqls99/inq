@@ -71,6 +71,9 @@ describe("DeckListPage", () => {
       }),
     );
 
+    await user.click(
+      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+    );
     await user.click(within(listItem).getByRole("button", { name: "챌린지 등록" }));
     await user.type(await screen.findByLabelText("챌린지 이름"), "중간고사");
     await user.click(screen.getByRole("button", { name: "등록하기" }));

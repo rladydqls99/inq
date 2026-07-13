@@ -1,0 +1,273 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-11T02:54:00Z",
+  "title": "Design System: inq",
+  "extensions": {
+    "colorMeta": {
+      "highlight-lime": {
+        "role": "primary",
+        "displayName": "형광 정답",
+        "canonical": "#CAFF19",
+        "tonalRamp": ["#1F2A00", "#3B5200", "#5D7C00", "#7FA600", "#9ED800", "#CAFF19", "#E2FF76", "#F5FFD6"]
+      },
+      "highlight-lime-strong": {
+        "role": "primary",
+        "displayName": "눌린 형광",
+        "canonical": "#9ED800",
+        "tonalRamp": ["#1A2600", "#354A00", "#526F00", "#719900", "#9ED800", "#BDEA35", "#DDF58B", "#F2FBD4"]
+      },
+      "highlight-ink": {
+        "role": "neutral",
+        "displayName": "시험지 잉크",
+        "canonical": "#0D160F",
+        "tonalRamp": ["#071009", "#18221A", "#303B32", "#4E5A50", "#737F75", "#A0AAA2", "#D2D8D3", "#F2F5F2"]
+      },
+      "ink-soft": {
+        "role": "neutral",
+        "displayName": "부드러운 잉크",
+        "canonical": "#3D463F",
+        "tonalRamp": ["#101612", "#262E28", "#3D463F", "#5A645C", "#7E8980", "#A8B1AA", "#D5DBD6", "#F2F5F2"]
+      },
+      "canvas": {
+        "role": "neutral",
+        "displayName": "깨끗한 문제지",
+        "canonical": "#FCFCFC",
+        "tonalRamp": ["#1A1A1A", "#353535", "#555555", "#777777", "#9C9C9C", "#C4C4C4", "#E8E8E8", "#FCFCFC"]
+      },
+      "surface": {
+        "role": "neutral",
+        "displayName": "연한 메모지",
+        "canonical": "#F4F7F3",
+        "tonalRamp": ["#151A15", "#303630", "#505750", "#737B73", "#9AA29A", "#C1C8C1", "#E1E6E0", "#F4F7F3"]
+      },
+      "line": {
+        "role": "neutral",
+        "displayName": "연필선",
+        "canonical": "#D4DAD3",
+        "tonalRamp": ["#171C18", "#333A34", "#535B54", "#747D75", "#98A199", "#BBC3BC", "#D4DAD3", "#F1F4F1"]
+      },
+      "success": {
+        "role": "semantic",
+        "displayName": "정답 초록",
+        "canonical": "#2E6F3E",
+        "tonalRamp": ["#092012", "#123D20", "#1D5A30", "#2E6F3E", "#4E8E5D", "#78B184", "#ACD5B4", "#E0F5E4"]
+      },
+      "error": {
+        "role": "semantic",
+        "displayName": "오답 빨강",
+        "canonical": "#B42318",
+        "tonalRamp": ["#2A0805", "#57100B", "#841911", "#B42318", "#D4493F", "#EA7B73", "#F5B5B0", "#FCE5E3"]
+      },
+      "warning": {
+        "role": "semantic",
+        "displayName": "주의 황토",
+        "canonical": "#8A5D00",
+        "tonalRamp": ["#241700", "#493000", "#6C4800", "#8A5D00", "#AD7B19", "#D09F45", "#EBCB89", "#FAEBCB"]
+      },
+      "dark-canvas": {
+        "role": "neutral",
+        "displayName": "야간 문제지",
+        "canonical": "#101511",
+        "tonalRamp": ["#0A0E0B", "#101511", "#283029", "#465048", "#68736A", "#929C94", "#C2C9C3", "#EFF2EF"]
+      },
+      "dark-surface": {
+        "role": "neutral",
+        "displayName": "야간 표면",
+        "canonical": "#1A211C",
+        "tonalRamp": ["#0B0F0C", "#1A211C", "#313A33", "#4F5951", "#737D75", "#9DA69F", "#CBD1CC", "#F0F3F0"]
+      },
+      "dark-ink": {
+        "role": "neutral",
+        "displayName": "야간 잉크",
+        "canonical": "#F7F9F7",
+        "tonalRamp": ["#171A17", "#333733", "#535853", "#757B75", "#9AA09A", "#C1C6C1", "#E2E6E2", "#F7F9F7"]
+      },
+      "dark-line": {
+        "role": "neutral",
+        "displayName": "야간 연필선",
+        "canonical": "#3A453D",
+        "tonalRamp": ["#0F1511", "#252E27", "#3A453D", "#57635A", "#7B867D", "#A4ADA6", "#D0D6D1", "#F0F3F0"]
+      }
+    },
+    "typographyMeta": {
+      "brand-display": {
+        "displayName": "Brand Display",
+        "purpose": "로고, 온보딩의 한 문장, 중요한 완료 장면에만 사용한다."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "최상위 화면 제목과 학습 완료 메시지에 사용한다."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "문제 제목, 섹션 제목, 주요 리스트 항목에 사용한다."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "문제 본문과 설명에 사용한다."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "버튼, 탭, 필드 레이블, 상태 텍스트에 사용한다."
+      }
+    },
+    "shadows": [
+      {
+        "name": "web-hover-lift",
+        "value": "0 2px 8px rgb(13 22 15 / 12%)",
+        "purpose": "/upload의 포인터 호버 상태에만 사용한다."
+      }
+    ],
+    "motion": [
+      {
+        "name": "state-fast",
+        "value": "150ms cubic-bezier(0.2, 0, 0, 1)",
+        "purpose": "버튼 눌림과 선택 상태 전환."
+      },
+      {
+        "name": "state-standard",
+        "value": "220ms cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "정답 공개와 패널 상태 전환."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0ms",
+        "purpose": "Reduce Motion 또는 Remove animations 설정에서 즉시 전환."
+      }
+    ],
+    "breakpoints": [
+      { "name": "compact", "value": "600px" },
+      { "name": "expanded-navigation", "value": "840px" },
+      { "name": "desktop-upload", "value": "1024px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "한 화면의 하나뿐인 주 행동에 사용하는 단단한 잉크 버튼.",
+      "html": "<button class=\"ds-btn-primary\">오늘 복습 시작 <span aria-hidden=\"true\">→</span></button>",
+      "css": ".ds-btn-primary { min-height: 48px; border: 0; border-radius: 8px; padding: 12px 18px; background: #0D160F; color: #FCFCFC; font: 700 14px/1.4 system-ui, sans-serif; cursor: pointer; transition: transform 150ms cubic-bezier(0.2, 0, 0, 1), background 150ms ease; } .ds-btn-primary:hover { background: #273128; } .ds-btn-primary:active { transform: scale(0.98); } .ds-btn-primary:focus-visible { outline: 3px solid #9ED800; outline-offset: 3px; }"
+    },
+    {
+      "name": "Answer Reveal Button",
+      "kind": "button",
+      "refersTo": "button-primary-active",
+      "description": "정답 확인 또는 공개 직후에만 나타나는 형광 버튼.",
+      "html": "<button class=\"ds-btn-reveal\">정답 확인 <span aria-hidden=\"true\">✓</span></button>",
+      "css": ".ds-btn-reveal { min-height: 48px; border: 0; border-radius: 8px; padding: 12px 18px; background: #CAFF19; color: #0D160F; font: 800 14px/1.4 system-ui, sans-serif; cursor: pointer; transition: background 150ms ease, transform 150ms cubic-bezier(0.2, 0, 0, 1); } .ds-btn-reveal:hover { background: #B7ED0C; } .ds-btn-reveal:active { background: #9ED800; transform: scale(0.98); } .ds-btn-reveal:focus-visible { outline: 3px solid #0D160F; outline-offset: 3px; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "취소, 이전, 보조 행동에 사용하는 조용한 표면 버튼.",
+      "html": "<button class=\"ds-btn-secondary\">나중에 하기</button>",
+      "css": ".ds-btn-secondary { min-height: 48px; border: 1px solid #D4DAD3; border-radius: 8px; padding: 12px 18px; background: #F4F7F3; color: #0D160F; font: 700 14px/1.4 system-ui, sans-serif; cursor: pointer; transition: background 150ms ease; } .ds-btn-secondary:hover { background: #E8EDE7; } .ds-btn-secondary:active { background: #DDE4DC; } .ds-btn-secondary:focus-visible { outline: 3px solid #9ED800; outline-offset: 3px; }"
+    },
+    {
+      "name": "Text Field",
+      "kind": "input",
+      "refersTo": "input-default",
+      "description": "항상 보이는 레이블과 명확한 포커스 링을 가진 48px 필드.",
+      "html": "<label class=\"ds-field\"><span>덱 이름</span><input type=\"text\" placeholder=\"예: 정보처리기사\" /></label>",
+      "css": ".ds-field { display: grid; gap: 6px; color: #0D160F; font: 700 14px/1.4 system-ui, sans-serif; } .ds-field input { min-height: 48px; border: 1px solid #D4DAD3; border-radius: 8px; padding: 12px 14px; background: #FCFCFC; color: #0D160F; font: 500 16px/1.6 system-ui, sans-serif; } .ds-field input::placeholder { color: #59625B; } .ds-field input:focus { border-color: #9ED800; outline: 3px solid rgba(158, 216, 0, 0.28); outline-offset: 1px; }"
+    },
+    {
+      "name": "Bottom Navigation",
+      "kind": "nav",
+      "description": "모바일의 네 최상위 목적지만 담는 적응형 하단 내비게이션.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"주요 메뉴\"><a class=\"ds-nav-active\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M3 10.5 12 3l9 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 19.5z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg><span>홈</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><path d=\"m9 12 2 2 4-5\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg><span>챌린지</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M5 4h12a2 2 0 0 1 2 2v14H7a2 2 0 0 1-2-2z\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg><span>덱</span></a><a href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"3\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/><circle cx=\"12\" cy=\"12\" r=\"8\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"/></svg><span>설정</span></a></nav>",
+      "css": ".ds-nav { display: grid; grid-template-columns: repeat(4, 1fr); min-height: 68px; border-top: 1px solid #D4DAD3; background: #FCFCFC; font-family: system-ui, sans-serif; } .ds-nav a { position: relative; display: flex; min-width: 0; min-height: 48px; align-items: center; justify-content: center; flex-direction: column; gap: 3px; color: #59625B; font-size: 11px; font-weight: 700; text-decoration: none; } .ds-nav svg { width: 21px; height: 21px; } .ds-nav a::after { position: absolute; bottom: 3px; width: 20px; height: 3px; background: transparent; content: ''; } .ds-nav .ds-nav-active { color: #0D160F; } .ds-nav .ds-nav-active::after { background: #CAFF19; } .ds-nav a:focus-visible { outline: 3px solid #9ED800; outline-offset: -3px; }"
+    },
+    {
+      "name": "Quiz Answer",
+      "kind": "custom",
+      "refersTo": "quiz-answer-revealed",
+      "description": "형광펜을 그은 것처럼 정답의 핵심 구간만 강조하는 시그니처 상태.",
+      "html": "<p class=\"ds-answer\">상태 업데이트는 <strong>비동기</strong>로 처리될 수 있다.</p>",
+      "css": ".ds-answer { margin: 0; color: #0D160F; font: 600 18px/1.7 system-ui, sans-serif; } .ds-answer strong { border-radius: 4px; padding: 2px 4px; background: #CAFF19; color: #0D160F; font-weight: 800; } .ds-answer strong:focus-visible { outline: 3px solid #9ED800; outline-offset: 3px; }"
+    },
+    {
+      "name": "Action List Row",
+      "kind": "custom",
+      "description": "카드 대신 구분선으로 이어지는 모바일 목록 행.",
+      "html": "<a class=\"ds-list-row\" href=\"#\"><span><strong>정보처리기사</strong><small>오늘 복습 12문제</small></span><span aria-hidden=\"true\">›</span></a>",
+      "css": ".ds-list-row { display: flex; min-height: 68px; align-items: center; justify-content: space-between; gap: 16px; border-bottom: 1px solid #D4DAD3; padding: 12px 4px; color: #0D160F; font-family: system-ui, sans-serif; text-decoration: none; } .ds-list-row > span:first-child { display: grid; gap: 4px; } .ds-list-row strong { font-size: 16px; line-height: 1.4; } .ds-list-row small { color: #3D463F; font-size: 13px; font-weight: 600; } .ds-list-row > span:last-child { font-size: 24px; } .ds-list-row:hover { background: #F4F7F3; } .ds-list-row:focus-visible { outline: 3px solid #9ED800; outline-offset: 2px; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "형광펜으로 표시한 정답",
+    "overview": "inq는 흰 문제지 위에 검은 잉크로 문제를 풀고, 꼭 기억해야 할 답에만 형광펜을 긋는 경험이다. 시험을 준비하는 사용자가 이동 중 한 손으로 앱을 열었을 때, 통계나 관리 도구보다 지금 풀 한 문제가 먼저 보여야 한다. 화면은 밝고 평평하며 여백이 충분하고, 라임은 학습의 핵심 순간에만 나타난다.\n\n제품의 성격은 선명하고, 영리하며, 활기차다. 그러나 시각적 에너지가 학습 흐름을 앞질러서는 안 된다. 카드와 통계가 빽빽한 전형적인 학습 대시보드를 명시적으로 거부하고, 한 화면에 하나의 주된 행동과 명확한 정보 계층을 둔다.\n\n현재 PWA와 최종 React Native 앱은 같은 브랜드 토큰을 공유한다. /upload는 넓은 데스크톱 편집 작업에 최적화하고, 나머지 모든 경로는 모바일 우선이다. iOS에서는 HIG의 구조와 제스처를, Android에서는 Material 3의 구조와 동작을 따른다. 브랜드는 색과 콘텐츠, 학습 피드백에서 드러나며 플랫폼의 익숙한 조작 방식을 덮어쓰지 않는다.",
+    "keyCharacteristics": [
+      "밝은 캔버스와 단단한 잉크 대비",
+      "정답 공개, 현재 선택, 진행 상태에만 나타나는 형광 라임",
+      "대시보드보다 오늘의 한 문제를 앞세우는 모바일 구조",
+      "평평한 표면과 명확한 구분선, 최소한의 그림자",
+      "iOS와 Android의 내비게이션·모달·뒤로가기 관습을 존중하는 적응형 컴포넌트"
+    ],
+    "rules": [
+      {
+        "name": "The One Question Rule",
+        "body": "학습 화면의 첫 시선은 항상 현재 문제 또는 오늘의 복습 시작 행동에 머물러야 한다.",
+        "section": "overview"
+      },
+      {
+        "name": "The Adaptive Brand Rule",
+        "body": "색과 콘텐츠는 공통으로 유지하되, iOS와 Android의 시스템 내비게이션과 제스처를 커스텀 브랜드 표현으로 대체하지 않는다.",
+        "section": "overview"
+      },
+      {
+        "name": "The Highlighter Budget Rule",
+        "body": "한 화면에서 라임이 차지하는 면적은 대략 15%를 넘지 않는다. 라임이 흔해지는 순간 정답의 의미가 사라진다.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semantic State Rule",
+        "body": "성공, 오류, 경고는 색상만으로 전달하지 않는다. 아이콘, 레이블, 위치 중 하나 이상을 반드시 함께 사용한다.",
+        "section": "colors"
+      },
+      {
+        "name": "The Platform Color Rule",
+        "body": "React Native에서는 위 브랜드 색을 iOS semantic color와 Material 3 color role로 매핑해 라이트·다크·고대비 테마를 제공한다. Android Dynamic Color를 사용할 때도 highlight-lime은 학습 피드백의 고유 브랜드 색으로 유지한다.",
+        "section": "colors"
+      },
+      {
+        "name": "The System Voice Rule",
+        "body": "학습 중인 화면에서는 시스템 글꼴만 사용한다. 브랜드 표시 글꼴이 문제보다 먼저 보이면 잘못된 화면이다.",
+        "section": "typography"
+      },
+      {
+        "name": "The No Tiny Data Rule",
+        "body": "핵심 학습 정보는 Caption 크기로 내려가지 않는다. 12px/11pt 수준은 보조 시간, 순서, 메타데이터에만 허용한다.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat by Default Rule",
+        "body": "표면은 휴지 상태에서 평평하다. 그림자는 상호작용 중이거나 시스템 모달 계층을 나타낼 때만 등장한다.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 오늘 풀 문제와 복습 시작 행동을 홈의 첫 화면에 둔다.",
+      "Do highlight-lime을 정답 공개, 현재 선택, 진행 상태에만 제한한다.",
+      "Do 리스트와 구분선을 우선하고, 실제 독립 객체에만 8–12px 카드를 사용한다.",
+      "Do 모든 터치 영역을 iOS 44pt 이상, Android 48dp 이상으로 만들고 인접 행동 사이에 최소 8dp 간격을 둔다.",
+      "Do 시스템 글자 크기, 다크 모드, 고대비, Reduce Motion 및 Remove animations 설정에서 모든 핵심 흐름을 검증한다.",
+      "Do iOS의 Tab Bar·Navigation Stack·Sheet와 Android의 Navigation Bar/Rail·Bottom Sheet·predictive Back을 각각 사용한다.",
+      "Do /upload만 넓은 데스크톱 작업 공간으로 설계하고, 나머지 모든 경로는 320px부터 모바일 우선으로 설계한다."
+    ],
+    "donts": [
+      "Don't 카드와 통계가 빽빽한 전형적인 학습 대시보드를 만든다. 홈에 지표, 스트릭, 차트, 추천 카드를 동시에 쌓지 않는다.",
+      "Don't 라임을 장식 배경, 비활성 아이콘, 모든 CTA에 반복 사용한다.",
+      "Don't display 글꼴을 버튼, 탭, 폼 레이블, 문제 본문에 사용한다.",
+      "Don't 색상 하나만으로 정답, 오답, 선택, 오류를 구분한다.",
+      "Don't iOS의 가장자리 뒤로가기나 Android의 predictive Back을 막거나 자체 제스처로 대체한다.",
+      "Don't 모바일에서 생성·편집을 습관적으로 중앙 모달에 넣는다. 플랫폼 sheet와 bottom sheet를 우선한다.",
+      "Don't 1px 외곽선과 16px 이상의 흐린 그림자를 같은 카드에 함께 사용한다.",
+      "Don't 카드와 섹션에 16px을 넘는 과도한 둥근 모서리를 사용한다.",
+      "Don't 애니메이션을 장식으로 사용하거나 학습자가 220ms 이상 기다리게 한다."
+    ]
+  }
+}

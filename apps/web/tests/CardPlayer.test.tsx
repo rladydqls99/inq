@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
@@ -15,6 +15,7 @@ const segments: QuizSegment[] = [
 
 describe("CardPlayer", () => {
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
   });
 
@@ -27,19 +28,21 @@ describe("CardPlayer", () => {
       <CardPlayer
         segments={segments}
         mode="challenge"
+        currentIndex={0}
+        totalCards={2}
         onPrevious={onPrevious}
         onNext={onNext}
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "이전" }));
-    await user.click(screen.getByRole("button", { name: "다음" }));
+    await user.click(screen.getByRole("button", { name: "이전 카드" }));
+    await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(onPrevious).toHaveBeenCalledTimes(1);
     expect(onNext).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps the answer hidden until the selected challenge result is saved", async () => {
+  it("shows result controls by default and reveals the answer when scored", async () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
 
@@ -47,16 +50,20 @@ describe("CardPlayer", () => {
       <CardPlayer
         segments={segments}
         mode="challenge"
+        currentIndex={0}
+        totalCards={2}
         onResult={onResult}
       />,
     );
 
     expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "틀렸어요" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "맞았어요" })).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "맞음" }));
+    await user.click(screen.getByRole("button", { name: "맞았어요" }));
 
+    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
     expect(onResult).toHaveBeenCalledWith("correct");
-    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
   });
 
   it("syncs the revealed answer when selected result changes from props", () => {
@@ -64,6 +71,8 @@ describe("CardPlayer", () => {
       <CardPlayer
         segments={segments}
         mode="challenge"
+        currentIndex={0}
+        totalCards={2}
         selectedResult={null}
       />,
     );
@@ -74,6 +83,8 @@ describe("CardPlayer", () => {
       <CardPlayer
         segments={segments}
         mode="challenge"
+        currentIndex={0}
+        totalCards={2}
         selectedResult="correct"
       />,
     );
@@ -84,11 +95,82 @@ describe("CardPlayer", () => {
   it("reveals inline answer in study mode", async () => {
     const user = userEvent.setup();
 
-    render(<CardPlayer segments={segments} mode="study" />);
+    render(
+      <CardPlayer
+        segments={segments}
+        mode="study"
+        currentIndex={1}
+        totalCards={3}
+      />,
+    );
 
     await user.click(screen.getByRole("button", { name: "정답 보기" }));
 
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
+    expect(screen.getByText("정답을 확인했어요")).toBeTruthy();
+  });
+
+  it("counts down and exposes a next-problem action after scoring", () => {
+    vi.useFakeTimers();
+    const onNext = vi.fn();
+
+    render(
+      <CardPlayer
+        segments={segments}
+        mode="challenge"
+        currentIndex={0}
+        totalCards={2}
+        selectedResult="correct"
+        autoAdvanceSeconds={5}
+        onNext={onNext}
+      />,
+    );
+
+    expect(screen.getByText("5초")).toBeTruthy();
+
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+
+    expect(screen.getByText("4초")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: /다음 문제/ }));
+    expect(onNext).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows progress and supports horizontal swipe navigation", () => {
+    const onPrevious = vi.fn();
+    const onNext = vi.fn();
+
+    render(
+      <CardPlayer
+        segments={segments}
+        mode="challenge"
+        currentIndex={1}
+        totalCards={4}
+        onPrevious={onPrevious}
+        onNext={onNext}
+      />,
+    );
+
+    const player = screen.getByRole("region", { name: "퀴즈 카드 2/4" });
+    expect(screen.getByText("2 / 4")).toBeTruthy();
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("2");
+
+    fireEvent.touchStart(player, {
+      changedTouches: [{ clientX: 240, clientY: 200 }],
+    });
+    fireEvent.touchEnd(player, {
+      changedTouches: [{ clientX: 140, clientY: 204 }],
+    });
+    fireEvent.touchStart(player, {
+      changedTouches: [{ clientX: 120, clientY: 200 }],
+    });
+    fireEvent.touchEnd(player, {
+      changedTouches: [{ clientX: 210, clientY: 203 }],
+    });
+
+    expect(onNext).toHaveBeenCalledTimes(1);
+    expect(onPrevious).toHaveBeenCalledTimes(1);
   });
 });
 

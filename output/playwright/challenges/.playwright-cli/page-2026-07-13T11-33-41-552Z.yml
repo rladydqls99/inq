@@ -1,0 +1,24 @@
+- generic [ref=e9]:
+  - main [ref=e10]:
+    - generic [ref=e11]:
+      - generic [ref=e12]:
+        - heading "덱" [level=1] [ref=e14]
+        - paragraph [ref=e15]: 문제를 모아둔 덱을 한눈에 확인하세요.
+      - generic [ref=e17]:
+        - link "test 카드 10장" [ref=e18] [cursor=pointer]:
+          - /url: /decks/cmrj310v30000rrbwtfn7ikf7/manage
+          - generic [ref=e19]:
+            - heading "test" [level=2] [ref=e20]
+            - generic [ref=e21]: 카드 10장
+        - button "test 메뉴" [ref=e23] [cursor=pointer]
+      - button "덱 만들기" [ref=e28] [cursor=pointer]
+  - navigation "주요 메뉴" [ref=e30]:
+    - generic [ref=e31]:
+      - link "홈" [ref=e32] [cursor=pointer]:
+        - /url: /
+      - link "챌린지" [ref=e38] [cursor=pointer]:
+        - /url: /challenges
+      - link "덱" [ref=e43] [cursor=pointer]:
+        - /url: /decks
+      - link "설정" [ref=e48] [cursor=pointer]:
+        - /url: /settings

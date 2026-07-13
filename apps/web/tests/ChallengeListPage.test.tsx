@@ -15,13 +15,39 @@ describe("ChallengeListPage", () => {
 
   it("renders challenge cards that open the challenge card list", async () => {
     mockFetchByPath({
-      "/api/challenges": [challenge({ id: "challenge-1", name: "중간고사" })],
+      "/api/challenges": [
+        challenge({
+          id: "challenge-1",
+          name: "중간고사",
+          currentStageCounts: { 0: 2, 1: 2, 2: 2, 3: 2 },
+        }),
+      ],
     });
 
     renderChallengeListPage();
 
     const row = await screen.findByRole("link", { name: /중간고사/ });
     expect(row.getAttribute("href")).toBe("/challenges/challenge-1/cards");
+    const progress = within(row).getByRole("progressbar", {
+      name: "중간고사 전체 진도",
+    });
+    expect(progress.getAttribute("aria-valuenow")).toBe("2");
+    expect(progress.getAttribute("aria-valuemax")).toBe("10");
+    expect(
+      within(row)
+        .getByRole("progressbar", { name: "3일 텀 완료" })
+        .getAttribute("aria-valuenow"),
+    ).toBe("6");
+    expect(
+      within(row)
+        .getByRole("progressbar", { name: "5일 텀 완료" })
+        .getAttribute("aria-valuenow"),
+    ).toBe("4");
+    expect(
+      within(row)
+        .getByRole("progressbar", { name: "10일 텀 완료" })
+        .getAttribute("aria-valuenow"),
+    ).toBe("2");
   });
 
   it("shows empty state and creates a challenge from the modal", async () => {
@@ -77,9 +103,15 @@ describe("ChallengeListPage", () => {
       }),
     );
 
+    await user.click(
+      within(listItem).getByRole("button", { name: "중간고사 메뉴" }),
+    );
     await user.click(within(listItem).getByRole("button", { name: "덱에서 카드 갱신" }));
     expect(await screen.findByText("2장의 카드가 추가되었습니다.")).toBeTruthy();
 
+    await user.click(
+      within(listItem).getByRole("button", { name: "중간고사 메뉴" }),
+    );
     await user.click(within(listItem).getByRole("button", { name: "삭제" }));
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1",
@@ -146,7 +178,11 @@ function jsonResponse(response: unknown, status = 200) {
   });
 }
 
-function challenge(input: { id: string; name: string }) {
+function challenge(input: {
+  id: string;
+  name: string;
+  currentStageCounts?: Record<number, number>;
+}) {
   return {
     id: input.id,
     name: input.name,
@@ -161,7 +197,7 @@ function challenge(input: { id: string; name: string }) {
       totalCards: 10,
       completedCards: 2,
       dueCards: 1,
-      currentStageCounts: { 0: 8 },
+      currentStageCounts: input.currentStageCounts ?? { 0: 8 },
     },
     nextDueAt: "2026-06-24T00:00:00.000Z",
     createdAt: "2026-06-22T00:00:00.000Z",

@@ -11,24 +11,29 @@ const tabs = [
 export function BottomTabNav() {
   return (
     <nav className="bottom-tab-nav" aria-label="주요 메뉴">
-      {tabs.map((tab) => {
-        const Icon = tab.icon;
+      <div className="bottom-tab-nav__inner">
+        {tabs.map((tab) => {
+          const Icon = tab.icon;
 
-        return (
-          <NavLink
-            key={tab.to}
-            to={tab.to}
-            end={tab.to === "/"}
-            className={({ isActive }) =>
-              isActive ? "bottom-tab-nav__item is-active" : "bottom-tab-nav__item"
-            }
-            title={tab.label}
-          >
-            <Icon aria-hidden="true" size={20} strokeWidth={2.2} />
-            <span>{tab.label}</span>
-          </NavLink>
-        );
-      })}
+          return (
+            <NavLink
+              key={tab.to}
+              to={tab.to}
+              end={tab.to === "/"}
+              className={({ isActive }) =>
+                isActive
+                  ? "bottom-tab-nav__item is-active"
+                  : "bottom-tab-nav__item"
+              }
+            >
+              <span className="bottom-tab-nav__icon" aria-hidden="true">
+                <Icon size={20} strokeWidth={2.2} />
+              </span>
+              <span className="bottom-tab-nav__label">{tab.label}</span>
+            </NavLink>
+          );
+        })}
+      </div>
     </nav>
   );
 }

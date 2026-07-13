@@ -24,7 +24,7 @@ describe("DeckRunnerPage", () => {
     expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "정답 보기" }));
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
-    expect(screen.getByText("10s")).toBeTruthy();
+    expect(screen.getByText("10초")).toBeTruthy();
   });
 
   it("shows an error when loading a deck run fails", async () => {
@@ -50,7 +50,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
-    await user.click(screen.getByRole("button", { name: "다음" }));
+    await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1/run",
@@ -74,7 +74,7 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
-    await user.click(screen.getByRole("button", { name: "다음" }));
+    await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();

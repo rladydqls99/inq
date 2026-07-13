@@ -42,14 +42,15 @@ describe("ChallengeRunnerPage", () => {
       ),
     ).toBeTruthy();
 
-    await user.click(screen.getByRole("button", { name: "맞음" }));
+    expect(screen.getByText("1 / 2")).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: "맞았어요" }));
 
     expect(
       screen.getByText((_, element) =>
         matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    expect(screen.getByText("5s")).toBeTruthy();
+    expect(screen.getByText("5초")).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/results",
       expect.objectContaining({
@@ -61,8 +62,7 @@ describe("ChallengeRunnerPage", () => {
       }),
     );
 
-    const nextButtons = screen.getAllByRole("button", { name: "다음" });
-    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: /다음 문제/ }));
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/run",
       expect.objectContaining({
@@ -116,9 +116,8 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "맞음" }));
-    const nextButtons = screen.getAllByRole("button", { name: "다음" });
-    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: "맞았어요" }));
+    await user.click(screen.getByRole("button", { name: /다음 문제/ }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/run",
@@ -148,17 +147,16 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "틀림" }));
+    await user.click(screen.getByRole("button", { name: "틀렸어요" }));
 
     expect(
       screen.getByText((_, element) =>
         matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    await screen.findByText("5s");
+    await screen.findByText("5초");
 
-    const nextButtons = screen.getAllByRole("button", { name: "다음" });
-    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: /다음 문제/ }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/run",
@@ -192,15 +190,15 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "맞음" }));
+    await user.click(screen.getByRole("button", { name: "맞았어요" }));
 
     expect(await screen.findByText("결과를 저장하지 못했습니다.")).toBeTruthy();
     expect(
       screen.getByText((_, element) =>
-        matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+        matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    expect(screen.queryByText("5s")).toBeNull();
+    expect(screen.queryByText("5초")).toBeNull();
   });
 
   it("shows an error and keeps the answered card when moving fails", async () => {
@@ -221,9 +219,8 @@ describe("ChallengeRunnerPage", () => {
     await screen.findByText((_, element) =>
       matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
     );
-    await user.click(screen.getByRole("button", { name: "맞음" }));
-    const nextButtons = screen.getAllByRole("button", { name: "다음" });
-    await user.click(nextButtons[nextButtons.length - 1] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: "맞았어요" }));
+    await user.click(screen.getByRole("button", { name: /다음 문제/ }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
     expect(
@@ -252,7 +249,7 @@ describe("ChallengeRunnerPage", () => {
     );
 
     vi.useFakeTimers();
-    fireEvent.click(screen.getByRole("button", { name: "맞음" }));
+    fireEvent.click(screen.getByRole("button", { name: "맞았어요" }));
 
     await act(async () => {
       await Promise.resolve();
