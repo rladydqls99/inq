@@ -312,8 +312,11 @@ Compose는 변경된 이미지를 교체하고 기존 named volume의 SQLite 데
 실행 중인 Nginx 컨테이너에 라벨이 적용됐는지 확인한다.
 
 ```bash
-docker inspect "$(docker ps -q --filter 'name=inq.*nginx')" \
-  --format '{{json .Config.Labels}}'
+cd /opt/inq
+
+docker inspect "$(
+  docker compose -f deploy/docker-compose.prod.yml ps -q nginx
+)" --format '{{json .Config.Labels}}'
 ```
 
 최소 다음 값이 있어야 한다.
