@@ -43,6 +43,13 @@ services:
         condition: service_healthy
     ports:
       - "127.0.0.1:${NGINX_PORT:-8080}:80"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.inq.rule=Host(`${DOMAIN:?DOMAIN must be set}`)
+      - traefik.http.routers.inq.entrypoints=websecure
+      - traefik.http.routers.inq.tls=true
+      - traefik.http.routers.inq.tls.certresolver=letsencrypt
+      - traefik.http.services.inq.loadbalancer.server.port=80
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--spider", "http://127.0.0.1/api/health"]
       interval: 10s

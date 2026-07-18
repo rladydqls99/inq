@@ -53,11 +53,18 @@ stored in the named Docker volume `inq-sqlite`.
 ## VPS Domain Deployment
 
 The app Nginx container serves the built SPA and proxies `/api` to the API
-container. A Caddy edge container handles public ports, automatic HTTPS, and
-certificate renewal.
+container. The VPS's existing host-network Traefik instance detects the Nginx
+container labels, routes `DOMAIN` traffic to its internal port `80`, and handles
+automatic HTTPS with the `letsencrypt` certificate resolver.
+
+For the complete Hostinger VPS and DuckDNS procedure, including firewall,
+verification, updates, and troubleshooting, see
+[docs/vps-deployment.md](docs/vps-deployment.md).
 
 1. Point the domain's `A` record (and `AAAA` when IPv6 is configured) to the VPS.
-2. Allow inbound TCP ports `80` and `443`; allow UDP `443` for HTTP/3.
+2. Ensure the existing Traefik service owns public ports `80` and `443`, has the
+   Docker provider enabled, and provides the `websecure` entrypoint and
+   `letsencrypt` certificate resolver.
 3. Create `.env` from `.env.example` and set at least:
 
    ```dotenv
@@ -76,13 +83,14 @@ certificate renewal.
 5. Verify the deployment:
 
    ```bash
+   curl --fail http://127.0.0.1:8080/api/health
    curl --fail https://quiz.example.com/api/health
-   docker compose -f deploy/docker-compose.prod.yml \
-     -f deploy/docker-compose.edge.yml ps
+   docker compose -f deploy/docker-compose.prod.yml ps
    ```
 
-Use `pnpm docker:deploy:down` to stop the public stack. The `caddy-data` volume
-must be preserved so Caddy can retain certificate state.
+Use `pnpm docker:deploy:down` to stop the inq stack. It does not stop the VPS's
+shared Traefik service. Preserve the `inq-sqlite` volume to retain application
+data.
 
 `INITIAL_PIN` initializes only an empty database. After the first start, change
 the PIN inside the app; editing `.env` does not replace a PIN already stored in
