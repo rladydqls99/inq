@@ -1,9 +1,12 @@
-const CACHE_NAME = "inq-static-v1";
+const CACHE_NAME = "inq-static-v2";
 const APP_SHELL_URLS = [
   "/",
   "/manifest.webmanifest",
-  "/icons/icon.svg",
-  "/icons/maskable.svg",
+  "/icons/icon-192.png",
+  "/icons/icon-512.png",
+  "/icons/maskable-512.png",
+  "/icons/apple-touch-icon.png",
+  "/icons/favicon-32.png",
 ];
 
 self.addEventListener("install", (event) => {
