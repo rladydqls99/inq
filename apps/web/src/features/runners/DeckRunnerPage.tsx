@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 import type { DeckRunResponse } from "@inq/shared";
 import { apiRequest } from "../../api/client";
-import { AutoAdvanceTimer } from "../../components/AutoAdvanceTimer";
 import { CardPlayer } from "../../components/CardPlayer";
 import { PageHeader } from "../../components/PageHeader";
 import { attachMediaSessionHandlers } from "./MediaSessionController";
+
+const AUTO_ADVANCE_SECONDS = 5;
 
 export function DeckRunnerPage() {
   const { deckId } = useParams();
@@ -14,7 +15,7 @@ export function DeckRunnerPage() {
   const [cursor, setCursor] = useState(0);
   const [loadError, setLoadError] = useState(false);
   const [moveError, setMoveError] = useState(false);
-  const [restartError, setRestartError] = useState(false);
+  const [answerRevealed, setAnswerRevealed] = useState(false);
 
   useEffect(() => {
     if (!deckId) {
@@ -43,23 +44,28 @@ export function DeckRunnerPage() {
   }, [deckId]);
 
   useEffect(() => {
-    if (!runState || runState.completedAt || cursor >= runState.cards.length) {
+    if (
+      !answerRevealed ||
+      !runState ||
+      runState.completedAt ||
+      cursor >= runState.cards.length
+    ) {
       return;
     }
 
     const timeoutId = window.setTimeout(() => {
       void moveTo(cursor + 1);
-    }, 10000);
+    }, AUTO_ADVANCE_SECONDS * 1000);
 
     return () => window.clearTimeout(timeoutId);
-  }, [cursor, runState]);
+  }, [answerRevealed, cursor, runState]);
 
   useEffect(() => {
     return attachMediaSessionHandlers({
       onNext: () => void moveTo(cursor + 1),
       onPrevious: () => void moveTo(cursor - 1),
     });
-  }, [cursor, runState]);
+  }, [answerRevealed, cursor, runState]);
 
   if (loadError) {
     return <div className="list-empty">덱 실행 정보를 불러오지 못했습니다.</div>;
@@ -81,8 +87,10 @@ export function DeckRunnerPage() {
       Math.max(nextCursor, 0),
       runState.cards.length,
     );
+    const wasAnswerRevealed = answerRevealed;
 
     setMoveError(false);
+    setAnswerRevealed(false);
 
     try {
       const nextRunState = await apiRequest<DeckRunResponse>(`/decks/${deckId}/run`, {
@@ -93,44 +101,13 @@ export function DeckRunnerPage() {
       setRunState(nextRunState);
       setCursor(nextRunState.cursor);
     } catch {
+      setAnswerRevealed(wasAnswerRevealed);
       setMoveError(true);
     }
   }
 
-  async function restart() {
-    if (!deckId) {
-      return;
-    }
-
-    setRestartError(false);
-
-    try {
-      const nextRunState = await apiRequest<DeckRunResponse>(
-        `/decks/${deckId}/run/restart`,
-        { method: "POST" },
-      );
-      setRunState(nextRunState);
-      setCursor(nextRunState.cursor);
-    } catch {
-      setRestartError(true);
-    }
-  }
-
   if (completed || !currentCard) {
-    return (
-      <section className="page">
-        <PageHeader title="덱 학습" />
-        <div className="runner-surface">
-          <div className="list-empty">완료되었습니다.</div>
-          <div className="runner-next">
-            <button type="button" onClick={() => void restart()}>
-              다시 시작
-            </button>
-          </div>
-          {restartError ? <div className="list-empty">덱을 다시 시작하지 못했습니다.</div> : null}
-        </div>
-      </section>
-    );
+    return <Navigate to="/decks" replace />;
   }
 
   return (
@@ -143,14 +120,15 @@ export function DeckRunnerPage() {
           segments={currentCard.segments}
           currentIndex={cursor}
           totalCards={runState.cards.length}
+          {...(answerRevealed
+            ? { autoAdvanceSeconds: AUTO_ADVANCE_SECONDS }
+            : {})}
           canPrevious={cursor > 0}
           canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
+          onAnswerReveal={() => setAnswerRevealed(true)}
         />
-        <div className="runner-next">
-          <AutoAdvanceTimer seconds={10} />
-        </div>
         {moveError ? <div className="list-empty">카드를 이동하지 못했습니다.</div> : null}
       </div>
     </section>

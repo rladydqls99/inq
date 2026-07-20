@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -9,6 +9,7 @@ import { DeckRunnerPage } from "../src/features/runners/DeckRunnerPage";
 
 describe("DeckRunnerPage", () => {
   afterEach(() => {
+    vi.useRealTimers();
     cleanup();
     vi.restoreAllMocks();
   });
@@ -22,9 +23,49 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
+    expect(screen.queryByText("5초")).toBeNull();
     await user.click(screen.getByRole("button", { name: "정답 보기" }));
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
-    expect(screen.getByText("10초")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
+    expect(screen.getByText("5초")).toBeTruthy();
+  });
+
+  it("starts the five-second auto advance only after the answer is revealed", async () => {
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
+    });
+
+    renderDeckRunner();
+
+    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
+    vi.useFakeTimers();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(5000);
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByRole("button", { name: "정답 보기" }));
+    expect(screen.getByText("5초")).toBeTruthy();
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(4999);
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(1);
+    });
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 1 }),
+      }),
+    );
   });
 
   it("shows an error when loading a deck run fails", async () => {
@@ -80,45 +121,36 @@ describe("DeckRunnerPage", () => {
     expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
   });
 
-  it("shows completed state and restarts the deck run", async () => {
-    const user = userEvent.setup();
-    const fetchMock = mockFetchByPath({
+  it("returns to the deck list when loading a completed run", async () => {
+    mockFetchByPath({
       "/api/decks/deck-1/run": deckRun({ cursor: 2, completedAt: "2026-06-25T00:00:00.000Z" }),
-      "/api/decks/deck-1/run/restart": deckRun({ cursor: 0 }),
     });
 
     renderDeckRunner();
 
-    expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "다시 시작" }));
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/decks/deck-1/run/restart",
-      expect.objectContaining({ method: "POST" }),
-    );
-    expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
+    expect(await screen.findByText("덱 목록")).toBeTruthy();
+    expect(screen.queryByText("완료되었습니다.")).toBeNull();
   });
 
-  it("shows an error and stays completed when restarting fails", async () => {
+  it("returns to the deck list after advancing past the final card", async () => {
     const user = userEvent.setup();
-    mockFetchByPath({
-      "/api/decks/deck-1/run": deckRun({
-        cursor: 2,
-        completedAt: "2026-06-25T00:00:00.000Z",
-      }),
-      "/api/decks/deck-1/run/restart": {
-        body: { error: "restart_failed" },
-        status: 500,
-      },
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({ cursor: 1 }),
     });
 
     renderDeckRunner();
 
-    expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
-    await user.click(screen.getByRole("button", { name: "다시 시작" }));
+    await screen.findByText(matchesTextContent("수도는 ____이다."));
+    await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
-    expect(await screen.findByText("덱을 다시 시작하지 못했습니다.")).toBeTruthy();
-    expect(screen.getByText("완료되었습니다.")).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1/run",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({ cursor: 2 }),
+      }),
+    );
+    expect(await screen.findByText("덱 목록")).toBeTruthy();
   });
 });
 
@@ -127,6 +159,7 @@ function renderDeckRunner() {
     <MemoryRouter initialEntries={["/decks/deck-1/run"]}>
       <Routes>
         <Route path="/decks/:deckId/run" element={<DeckRunnerPage />} />
+        <Route path="/decks" element={<div>덱 목록</div>} />
       </Routes>
     </MemoryRouter>,
   );

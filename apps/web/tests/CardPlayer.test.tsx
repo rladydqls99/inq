@@ -92,8 +92,9 @@ describe("CardPlayer", () => {
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
   });
 
-  it("reveals inline answer in study mode", async () => {
+  it("reveals from the study card area and changes the action to next", async () => {
     const user = userEvent.setup();
+    const onAnswerReveal = vi.fn();
 
     render(
       <CardPlayer
@@ -101,13 +102,17 @@ describe("CardPlayer", () => {
         mode="study"
         currentIndex={1}
         totalCards={3}
+        onAnswerReveal={onAnswerReveal}
       />,
     );
 
-    await user.click(screen.getByRole("button", { name: "정답 보기" }));
+    await user.click(
+      screen.getByRole("button", { name: "카드 영역을 눌러 정답 보기" }),
+    );
 
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-    expect(screen.getByText("정답을 확인했어요")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
+    expect(onAnswerReveal).toHaveBeenCalledTimes(1);
   });
 
   it("counts down and exposes a next-problem action after scoring", () => {

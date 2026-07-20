@@ -1,5 +1,11 @@
 import { Check, ChevronLeft, ChevronRight, Eye, X } from "lucide-react";
-import { useRef, useState, type TouchEvent } from "react";
+import {
+  useRef,
+  useState,
+  type KeyboardEvent,
+  type MouseEvent,
+  type TouchEvent,
+} from "react";
 
 import type { QuizSegment } from "@inq/shared";
 import {
@@ -20,6 +26,7 @@ type CardPlayerProps = {
   onPrevious?: () => void;
   onNext?: () => void;
   onResult?: (result: "correct" | "wrong") => void;
+  onAnswerReveal?: () => void;
 };
 
 export function CardPlayer({
@@ -34,6 +41,7 @@ export function CardPlayer({
   onPrevious,
   onNext,
   onResult,
+  onAnswerReveal,
 }: CardPlayerProps) {
   const [answerRevealed, setAnswerRevealed] = useState(selectedResult !== null);
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
@@ -47,6 +55,38 @@ export function CardPlayer({
   function selectResult(result: "correct" | "wrong") {
     setAnswerRevealed(true);
     onResult?.(result);
+  }
+
+  function revealAnswer() {
+    if (revealed) {
+      return;
+    }
+
+    setAnswerRevealed(true);
+    onAnswerReveal?.();
+  }
+
+  function handleStageClick(event: MouseEvent<HTMLDivElement>) {
+    const target = event.target;
+
+    if (
+      mode !== "study" ||
+      revealed ||
+      (target instanceof Element && target.closest("button"))
+    ) {
+      return;
+    }
+
+    revealAnswer();
+  }
+
+  function handleQuestionKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    revealAnswer();
   }
 
   function handleTouchStart(event: TouchEvent<HTMLElement>) {
@@ -113,7 +153,12 @@ export function CardPlayer({
         </div>
       </header>
 
-      <div className="card-player__stage">
+      <div
+        className={`card-player__stage${
+          mode === "study" && !revealed ? " is-revealable" : ""
+        }`}
+        onClick={handleStageClick}
+      >
         <button
           className="card-player__nav-button"
           type="button"
@@ -124,12 +169,28 @@ export function CardPlayer({
           <ChevronLeft aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
 
-        <div className="card-player__question" aria-live="polite">
-          <QuizTextRenderer
-            mode={revealed ? "revealed" : "prompt"}
-            segments={segments}
-            tone={revealed ? tone : "neutral"}
-          />
+        <div
+          className="card-player__question"
+          role={mode === "study" && !revealed ? "button" : undefined}
+          tabIndex={mode === "study" && !revealed ? 0 : undefined}
+          aria-label={
+            mode === "study" && !revealed
+              ? "카드 영역을 눌러 정답 보기"
+              : undefined
+          }
+          onKeyDown={
+            mode === "study" && !revealed
+              ? handleQuestionKeyDown
+              : undefined
+          }
+        >
+          <div aria-live="polite">
+            <QuizTextRenderer
+              mode={revealed ? "revealed" : "prompt"}
+              segments={segments}
+              tone={revealed ? tone : "neutral"}
+            />
+          </div>
         </div>
 
         <button
@@ -166,14 +227,16 @@ export function CardPlayer({
         </div>
       ) : null}
 
-      {mode === "challenge" && selectedResult ? (
+      {(mode === "challenge" && selectedResult) ||
+      (mode === "study" && revealed) ? (
         <button
           className="card-player__reveal-button is-next"
           type="button"
+          aria-label={mode === "study" ? "다음 카드로 이동" : undefined}
           disabled={!canNext}
           onClick={onNext}
         >
-          <span>다음 문제</span>
+          <span>{mode === "study" ? "다음" : "다음 문제"}</span>
           <span className="card-player__next-meta">
             {autoAdvanceSeconds ? (
               <AutoAdvanceTimer
@@ -188,17 +251,12 @@ export function CardPlayer({
         <button
           className="card-player__reveal-button"
           type="button"
-          onClick={() => setAnswerRevealed(true)}
+          onClick={revealAnswer}
         >
           <Eye aria-hidden="true" size={20} strokeWidth={2.2} />
           정답 보기
         </button>
-      ) : (
-        <p className="card-player__answer-status">
-          <Check aria-hidden="true" size={18} strokeWidth={2.4} />
-          정답을 확인했어요
-        </p>
-      )}
+      ) : null}
     </section>
   );
 }

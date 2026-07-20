@@ -264,9 +264,28 @@ textarea {
 }
 
 .card-player__question {
+  display: grid;
+  align-self: stretch;
   width: min(100%, 34rem);
   margin: 0 auto;
+  border-radius: 8px;
+  padding: 16px 0;
+  place-items: center;
   text-align: center;
+  transition: background-color 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-player__question[role="button"] {
+  cursor: pointer;
+}
+
+.card-player__stage.is-revealable {
+  cursor: pointer;
+}
+
+.card-player__question[role="button"]:focus-visible {
+  outline: 3px solid var(--inq-highlight-strong);
+  outline-offset: -3px;
 }
 
 .card-player__nav-button,
@@ -375,21 +394,6 @@ textarea {
 .card-player__reveal-button:not(:disabled):active,
 .card-player__result-button:active {
   transform: scale(0.98);
-}
-
-.card-player__answer-status {
-  display: flex;
-  min-height: 48px;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  margin: 0;
-  border-radius: 8px;
-  background: var(--inq-highlight);
-  color: var(--inq-on-highlight);
-  font-size: var(--text-label-size);
-  font-weight: var(--text-label-weight);
-  line-height: var(--text-label-leading);
 }
 
 .quiz-preview {
@@ -940,6 +944,10 @@ textarea {
 }
 
 @media (hover: hover) and (pointer: fine) {
+  .card-player__question[role="button"]:hover {
+    background: var(--inq-surface);
+  }
+
   .bottom-tab-nav__item:hover,
   .home-upcoming__row:hover {
     background: var(--inq-surface);
@@ -1818,8 +1826,68 @@ textarea {
 
 .interval-grid {
   display: grid;
+  min-width: 0;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
+}
+
+.interval-grid > label {
+  min-width: 0;
+  grid-template-rows: 1fr auto;
+}
+
+.challenge-form {
+  color: var(--inq-ink);
+}
+
+.challenge-form label {
+  min-width: 0;
+  color: var(--inq-ink-soft);
+}
+
+.challenge-form input,
+.challenge-form select {
+  width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  border-color: var(--inq-line);
+  background: var(--inq-canvas);
+  color: var(--inq-ink);
+}
+
+.challenge-form select:disabled {
+  background: color-mix(in srgb, var(--inq-line) 42%, var(--inq-surface));
+  color: var(--inq-ink-soft);
+  opacity: 1;
+}
+
+.challenge-form button {
+  min-height: 48px;
+  border: 0;
+  background: var(--inq-ink);
+  color: var(--inq-canvas);
+  transition:
+    background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.challenge-form button:disabled {
+  background: var(--inq-line);
+  color: var(--inq-ink-soft);
+  opacity: 1;
+}
+
+.challenge-form input:focus-visible,
+.challenge-form select:focus-visible,
+.challenge-form button:focus-visible,
+.modal__header .icon-button:focus-visible {
+  outline: 3px solid var(--inq-highlight-strong);
+  outline-offset: 2px;
+}
+
+.challenge-form button:not(:disabled):active {
+  transform: scale(0.98);
 }
 
 .form-error {
@@ -1835,17 +1903,21 @@ textarea {
   display: grid;
   place-items: center;
   padding: 18px;
-  background: rgb(23 23 23 / 40%);
+  background: rgb(13 22 15 / 56%);
 }
 
 .modal {
   display: grid;
   width: min(100%, 420px);
+  max-height: calc(100dvh - 36px);
+  overflow-y: auto;
   gap: 14px;
   border-radius: 8px;
   padding: 16px;
-  background: #fff;
-  box-shadow: 0 18px 50px rgb(0 0 0 / 18%);
+  background: var(--inq-surface);
+  color: var(--inq-ink);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 24%);
+  overscroll-behavior: contain;
 }
 
 .modal__header {
@@ -1857,9 +1929,65 @@ textarea {
 
 .modal__header h2 {
   margin: 0;
-  font-size: 18px;
-  font-weight: 820;
-  letter-spacing: 0;
+  color: var(--inq-ink);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-leading);
+  letter-spacing: var(--text-title-tracking);
+  text-wrap: balance;
+}
+
+.modal__header .icon-button {
+  width: 44px;
+  height: 44px;
+  border: 0;
+  background: transparent;
+  color: var(--inq-ink);
+  transition:
+    background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.modal__header .icon-button:active {
+  background: var(--inq-line);
+  transform: scale(0.96);
+}
+
+.modal > .challenge-form,
+.modal > .compact-form {
+  margin-top: 0;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .modal__header .icon-button:hover {
+    background: var(--inq-line);
+  }
+}
+
+@media (max-width: 560px) {
+  .modal-backdrop {
+    place-items: end stretch;
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    max-height: calc(100dvh - env(safe-area-inset-top, 0px) - 16px);
+    border-radius: 12px 12px 0 0;
+    padding: 20px 16px calc(20px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .challenge-form button,
+  .modal__header .icon-button {
+    transition: none;
+  }
+
+  .challenge-form button:not(:disabled):active,
+  .modal__header .icon-button:active {
+    transform: none;
+  }
 }
 
 .row-action-link {
@@ -1930,6 +2058,7 @@ textarea {
 
 @media (prefers-reduced-motion: reduce) {
   .card-player__progress-track span,
+  .card-player__question,
   .card-player__nav-button,
   .card-player__reveal-button,
   .card-player__result-button {
