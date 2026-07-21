@@ -54,6 +54,7 @@ export const ModelName = {
   Deck: 'Deck',
   Card: 'Card',
   Challenge: 'Challenge',
+  ChallengeCard: 'ChallengeCard',
   ChallengeCardState: 'ChallengeCardState',
   ChallengeAnswerEvent: 'ChallengeAnswerEvent',
   ChallengeRunSession: 'ChallengeRunSession',
@@ -101,7 +102,8 @@ export type CardScalarFieldEnum = (typeof CardScalarFieldEnum)[keyof typeof Card
 export const ChallengeScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  deckId: 'deckId',
+  sourceDeckId: 'sourceDeckId',
+  sourceDeckTitle: 'sourceDeckTitle',
   status: 'status',
   answerMode: 'answerMode',
   reviewIntervalsDays: 'reviewIntervalsDays',
@@ -114,10 +116,22 @@ export const ChallengeScalarFieldEnum = {
 export type ChallengeScalarFieldEnum = (typeof ChallengeScalarFieldEnum)[keyof typeof ChallengeScalarFieldEnum]
 
 
+export const ChallengeCardScalarFieldEnum = {
+  id: 'id',
+  challengeId: 'challengeId',
+  sourceDeckCardId: 'sourceDeckCardId',
+  segments: 'segments',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChallengeCardScalarFieldEnum = (typeof ChallengeCardScalarFieldEnum)[keyof typeof ChallengeCardScalarFieldEnum]
+
+
 export const ChallengeCardStateScalarFieldEnum = {
   id: 'id',
   challengeId: 'challengeId',
-  cardId: 'cardId',
+  challengeCardId: 'challengeCardId',
   stage: 'stage',
   challengeViewCount: 'challengeViewCount',
   dueAt: 'dueAt',
@@ -135,7 +149,7 @@ export const ChallengeAnswerEventScalarFieldEnum = {
   id: 'id',
   challengeId: 'challengeId',
   stateId: 'stateId',
-  cardId: 'cardId',
+  challengeCardId: 'challengeCardId',
   sessionCardId: 'sessionCardId',
   finalResult: 'finalResult',
   previousStage: 'previousStage',

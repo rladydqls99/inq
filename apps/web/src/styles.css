@@ -2139,6 +2139,46 @@ textarea {
   margin-top: 16px;
 }
 
+.vehicle-control-status {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: var(--inq-surface);
+  color: var(--inq-ink-soft);
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.vehicle-control-status.is-ready {
+  color: var(--inq-success);
+}
+
+.vehicle-control-status.is-failed {
+  color: var(--inq-error);
+}
+
+.vehicle-control-status button {
+  min-height: 44px;
+  flex: 0 0 auto;
+  border: 0;
+  border-radius: 8px;
+  padding: 0 12px;
+  background: var(--inq-ink);
+  color: var(--inq-canvas);
+  cursor: pointer;
+  font-weight: 750;
+}
+
+.vehicle-control-status button:focus-visible {
+  outline: 3px solid var(--inq-highlight-strong);
+  outline-offset: 2px;
+}
+
 .runner-next {
   display: flex;
   align-items: center;
@@ -2474,6 +2514,87 @@ textarea {
   font-size: 15px;
   font-weight: 800;
   letter-spacing: 0;
+}
+
+.settings-toggle {
+  display: flex;
+  min-height: 56px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--inq-line);
+  cursor: pointer;
+}
+
+.settings-toggle__copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.settings-toggle__copy strong {
+  font-size: 15px;
+  font-weight: 750;
+}
+
+.settings-toggle__copy span {
+  max-width: 48ch;
+  color: var(--inq-ink-soft);
+  font-size: 13px;
+  font-weight: 550;
+  line-height: 1.45;
+  text-wrap: pretty;
+}
+
+.settings-toggle input {
+  width: 46px;
+  height: 28px;
+  flex: 0 0 auto;
+  margin: 0;
+  appearance: none;
+  border: 1px solid var(--inq-line);
+  border-radius: 999px;
+  padding: 3px;
+  background: var(--inq-surface);
+  cursor: pointer;
+  transition:
+    border-color 160ms ease,
+    background-color 160ms ease;
+}
+
+.settings-toggle input::after {
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--inq-ink-soft);
+  content: "";
+  transition:
+    background-color 160ms ease,
+    transform 160ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.settings-toggle input:checked {
+  border-color: var(--inq-highlight-strong);
+  background: var(--inq-highlight);
+}
+
+.settings-toggle input:checked::after {
+  background: var(--inq-on-highlight);
+  transform: translateX(18px);
+}
+
+.settings-toggle input:focus-visible {
+  outline: 3px solid var(--inq-ink);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .settings-toggle input,
+  .settings-toggle input::after {
+    transition: none;
+  }
 }
 
 .settings-action {

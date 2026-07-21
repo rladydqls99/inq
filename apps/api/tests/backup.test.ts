@@ -40,11 +40,13 @@ describe("backup routes", () => {
       expect(response.status).toBe(200);
       const backup = await response.json();
       expect(backup).toMatchObject({
+        schemaVersion: 2,
         exportedAt: expect.any(String),
         decks: [{ id: deck.id, title: "국어" }],
         cards: [{ id: card.id, deckId: deck.id, segments }],
         challenges: [{ id: challenge.id, name: "중간고사" }],
       });
+      expect(backup.challengeCards).toHaveLength(1);
       expect(backup.challengeCardStates).toHaveLength(1);
       expect(backup.challengeRunSessions).toHaveLength(1);
       expect(backup.deckRunStates).toHaveLength(1);
@@ -55,7 +57,7 @@ describe("backup routes", () => {
     }
   });
 
-  it("excludes deleted cards from exported challenge run queues", async () => {
+  it("exports challenge run queues from snapshots after source card deletion", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -90,22 +92,30 @@ describe("backup routes", () => {
       const backup = await response.json();
       expect(backup.challengeRunSessions).toHaveLength(1);
       expect(backup.challengeRunSessions[0].status).toBe("completed");
-      expect(backup.challengeRunSessions[0].cursor).toBe(0);
+      expect(backup.challengeRunSessions[0].cursor).toBe(1);
       expect(backup.challengeRunSessions[0].completedAt).toEqual(expect.any(String));
-      expect(backup.challengeRunSessions[0].queue).toEqual([]);
+      expect(backup.challengeRunSessions[0].queue).toMatchObject([
+        {
+          challengeCardId: expect.any(String),
+          segments,
+        },
+      ]);
+      expect(backup.challengeCards).toMatchObject([
+        { sourceDeckCardId: null, segments },
+      ]);
     } finally {
       await cleanup();
     }
   });
 
-  it("marks exported challenge run complete when deleted cards empty an active queue", async () => {
+  it("exports complete challenge data after the source deck is deleted", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
       const deck = await prisma.deck.create({ data: { title: "국어" } });
-      const card = await createCard(prisma, { deckId: deck.id, segments });
+      await createCard(prisma, { deckId: deck.id, segments });
       const challenge = await createChallenge(prisma, {
         name: "중간고사",
         deckId: deck.id,
@@ -115,7 +125,7 @@ describe("backup routes", () => {
       await app.request(`/api/challenges/${challenge.id}/run`, {
         headers: { cookie },
       });
-      await prisma.card.delete({ where: { id: card.id } });
+      await prisma.deck.delete({ where: { id: deck.id } });
 
       const response = await app.request("/api/backup/export", {
         headers: { cookie },
@@ -123,12 +133,30 @@ describe("backup routes", () => {
 
       expect(response.status).toBe(200);
       const backup = await response.json();
+      expect(backup.decks).toEqual([]);
+      expect(backup.cards).toEqual([]);
+      expect(backup.challenges).toMatchObject([
+        {
+          id: challenge.id,
+          sourceDeckId: null,
+          deckTitle: "국어",
+        },
+      ]);
+      expect(backup.challengeCards).toMatchObject([
+        { sourceDeckCardId: null, segments },
+      ]);
+      expect(backup.challengeCardStates).toHaveLength(1);
       expect(backup.challengeRunSessions).toHaveLength(1);
       expect(backup.challengeRunSessions[0]).toMatchObject({
-        status: "completed",
+        status: "active",
         cursor: 0,
-        completedAt: expect.any(String),
-        queue: [],
+        completedAt: null,
+        queue: [
+          {
+            challengeCardId: expect.any(String),
+            segments,
+          },
+        ],
       });
     } finally {
       await cleanup();

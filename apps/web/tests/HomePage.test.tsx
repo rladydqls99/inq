@@ -262,7 +262,7 @@ function challenge({
   return {
     id,
     name,
-    deckId: `deck-${id}`,
+    sourceDeckId: `deck-${id}`,
     deckTitle: "한국사",
     status,
     answerMode: "manual" as const,

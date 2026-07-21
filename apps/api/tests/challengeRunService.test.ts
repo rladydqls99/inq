@@ -90,7 +90,7 @@ describe("buildChallengeRunQueue", () => {
     const queue = buildChallengeRunQueue([
       {
         stateId: "state-1",
-        cardId: "card-1",
+        challengeCardId: "challenge-card-1",
         stage: 0,
         dueAt: new Date("2026-12-31T00:00:00.000Z"),
         completedAt: null,
@@ -101,7 +101,7 @@ describe("buildChallengeRunQueue", () => {
       {
         sessionCardId: "state-1",
         stateId: "state-1",
-        cardId: "card-1",
+        challengeCardId: "challenge-card-1",
         queueIndex: 0,
         startingStage: 0,
         selectedResult: null,
@@ -115,14 +115,14 @@ describe("applySessionCardResult", () => {
     const queue = buildChallengeRunQueue([
       {
         stateId: "state-1",
-        cardId: "card-1",
+        challengeCardId: "challenge-card-1",
         stage: 0,
         dueAt: null,
         completedAt: null,
       },
       {
         stateId: "state-2",
-        cardId: "card-2",
+        challengeCardId: "challenge-card-2",
         stage: 0,
         dueAt: null,
         completedAt: null,
@@ -149,7 +149,7 @@ describe("applySessionCardResult", () => {
       {
         sessionCardId: "state-2",
         stateId: "state-2",
-        cardId: "card-2",
+        challengeCardId: "challenge-card-2",
         queueIndex: 0,
         startingStage: 0,
         selectedResult: null,
@@ -157,7 +157,7 @@ describe("applySessionCardResult", () => {
       {
         sessionCardId: "state-1",
         stateId: "state-1",
-        cardId: "card-1",
+        challengeCardId: "challenge-card-1",
         queueIndex: 1,
         startingStage: 0,
         selectedResult: "wrong" as const,

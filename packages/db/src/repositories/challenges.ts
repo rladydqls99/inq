@@ -7,15 +7,24 @@ export async function createChallenge(
   const maxStage = input.reviewIntervalsDays.length;
 
   return prisma.$transaction(async (transaction) => {
-    const cards = await transaction.card.findMany({
-      where: { deckId: input.deckId },
-      select: { id: true },
+    const deck = await transaction.deck.findUniqueOrThrow({
+      where: { id: input.deckId },
+      select: {
+        id: true,
+        title: true,
+        cards: {
+          orderBy: { createdAt: "asc" },
+          select: { id: true, segments: true },
+        },
+      },
     });
+    const cards = deck.cards;
     const emptyDeck = cards.length === 0;
     const challenge = await transaction.challenge.create({
       data: {
         name: input.name,
-        deckId: input.deckId,
+        sourceDeckId: deck.id,
+        sourceDeckTitle: deck.title,
         reviewIntervalsDays:
           input.reviewIntervalsDays as unknown as Prisma.InputJsonValue,
         maxStage,
@@ -24,12 +33,14 @@ export async function createChallenge(
       },
     });
 
-    if (cards.length > 0) {
-      await transaction.challengeCardState.createMany({
-        data: cards.map((card) => ({
+    for (const card of cards) {
+      await transaction.challengeCard.create({
+        data: {
           challengeId: challenge.id,
-          cardId: card.id,
-        })),
+          sourceDeckCardId: card.id,
+          segments: card.segments as Prisma.InputJsonValue,
+          state: { create: { challengeId: challenge.id } },
+        },
       });
     }
 
@@ -44,28 +55,43 @@ export async function updateChallengeFromDeck(
   return prisma.$transaction(async (transaction) => {
     const challenge = await transaction.challenge.findUniqueOrThrow({
       where: { id: challengeId },
-      select: { id: true, deckId: true },
+      select: { id: true, sourceDeckId: true },
     });
+
+    if (!challenge.sourceDeckId) {
+      throw new ChallengeSourceDeckUnavailableError(challengeId);
+    }
+
     const cards = await transaction.card.findMany({
-      where: { deckId: challenge.deckId },
-      select: { id: true },
+      where: { deckId: challenge.sourceDeckId },
+      orderBy: { createdAt: "asc" },
+      select: { id: true, segments: true },
     });
-    const existingStates = await transaction.challengeCardState.findMany({
+    const existingChallengeCards = await transaction.challengeCard.findMany({
       where: { challengeId },
-      select: { cardId: true },
+      select: { sourceDeckCardId: true },
     });
-    const existingCardIds = new Set(
-      existingStates.map((state) => state.cardId),
+    const existingSourceCardIds = new Set(
+      existingChallengeCards.flatMap((card) =>
+        card.sourceDeckCardId ? [card.sourceDeckCardId] : [],
+      ),
     );
-    const missingCards = cards.filter((card) => !existingCardIds.has(card.id));
+    const missingCards = cards.filter(
+      (card) => !existingSourceCardIds.has(card.id),
+    );
+
+    for (const card of missingCards) {
+      await transaction.challengeCard.create({
+        data: {
+          challengeId: challenge.id,
+          sourceDeckCardId: card.id,
+          segments: card.segments as Prisma.InputJsonValue,
+          state: { create: { challengeId: challenge.id } },
+        },
+      });
+    }
 
     if (missingCards.length > 0) {
-      await transaction.challengeCardState.createMany({
-        data: missingCards.map((card) => ({
-          challengeId: challenge.id,
-          cardId: card.id,
-        })),
-      });
       await transaction.challenge.update({
         where: { id: challenge.id },
         data: {
@@ -77,4 +103,11 @@ export async function updateChallengeFromDeck(
 
     return { addedCount: missingCards.length };
   });
+}
+
+export class ChallengeSourceDeckUnavailableError extends Error {
+  constructor(challengeId: string) {
+    super(`Source deck is unavailable for challenge: ${challengeId}`);
+    this.name = "ChallengeSourceDeckUnavailableError";
+  }
 }

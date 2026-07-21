@@ -3,6 +3,7 @@ import { Hono, type Context } from "hono";
 import type { Prisma, PrismaClient } from "@inq/db";
 import type { ChallengeCardResponse, QuizSegment } from "@inq/shared";
 import {
+  ChallengeSourceDeckUnavailableError,
   createChallenge,
   updateChallengeFromDeck,
 } from "@inq/db/repositories/challenges";
@@ -130,13 +131,13 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_not_found" }, 404);
     }
 
-    const cardStates = await options.prisma.challengeCardState.findMany({
+    const challengeCards = await options.prisma.challengeCard.findMany({
       where: { challengeId },
-      include: { card: true },
+      include: { state: true },
       orderBy: { createdAt: "asc" },
     });
 
-    return context.json(cardStates.map(toChallengeCardResponse));
+    return context.json(challengeCards.map(toChallengeCardResponse));
   });
 
   route.get("/:challengeId/run", async (context) => {
@@ -235,10 +236,17 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
 
     const cardState = await options.prisma.challengeCardState.findUnique({
       where: { id: queueCard.stateId },
-      select: { id: true },
+      select: {
+        id: true,
+        challengeCard: { select: { id: true, challengeId: true } },
+      },
     });
 
-    if (!cardState) {
+    if (
+      !cardState ||
+      cardState.challengeCard.id !== queueCard.challengeCardId ||
+      cardState.challengeCard.challengeId !== challengeId
+    ) {
       return context.json({ error: "session_card_not_found" }, 404);
     }
 
@@ -267,9 +275,17 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "challenge_not_found" }, 404);
     }
 
-    return context.json(
-      await updateChallengeFromDeck(options.prisma, challengeId),
-    );
+    try {
+      return context.json(
+        await updateChallengeFromDeck(options.prisma, challengeId),
+      );
+    } catch (error) {
+      if (error instanceof ChallengeSourceDeckUnavailableError) {
+        return context.json({ error: "source_deck_unavailable" }, 409);
+      }
+
+      throw error;
+    }
   }
 
   route.post("/:challengeId/update", updateChallengeFromDeckHandler);
@@ -278,25 +294,37 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
   return route;
 }
 
-function toChallengeCardResponse(state: {
+function toChallengeCardResponse(card: {
   id: string;
   challengeId: string;
-  cardId: string;
-  card: { segments: unknown };
-  stage: number;
-  challengeViewCount: number;
-  dueAt: Date | null;
-  lastChallengedAt: Date | null;
-  result: string | null;
-  completedAt: Date | null;
+  sourceDeckCardId: string | null;
+  segments: unknown;
   createdAt: Date;
   updatedAt: Date;
+  state: {
+    id: string;
+    stage: number;
+    challengeViewCount: number;
+    dueAt: Date | null;
+    lastChallengedAt: Date | null;
+    result: string | null;
+    completedAt: Date | null;
+    createdAt: Date;
+    updatedAt: Date;
+  } | null;
 }): ChallengeCardResponse {
+  if (!card.state) {
+    throw new Error(`Challenge card state not found: ${card.id}`);
+  }
+
+  const state = card.state;
+
   return {
-    id: state.id,
-    challengeId: state.challengeId,
-    cardId: state.cardId,
-    segments: state.card.segments as QuizSegment[],
+    stateId: state.id,
+    challengeId: card.challengeId,
+    challengeCardId: card.id,
+    sourceDeckCardId: card.sourceDeckCardId,
+    segments: card.segments as QuizSegment[],
     stage: state.stage,
     challengeViewCount: state.challengeViewCount,
     dueAt: state.dueAt?.toISOString() ?? null,
@@ -352,8 +380,10 @@ function findQueueCard(queue: unknown, sessionCardId: string) {
       typeof card === "object" &&
       "sessionCardId" in card &&
       "stateId" in card &&
+      "challengeCardId" in card &&
       card.sessionCardId === sessionCardId &&
-      typeof card.stateId === "string"
+      typeof card.stateId === "string" &&
+      typeof card.challengeCardId === "string"
     ) {
       return card;
     }

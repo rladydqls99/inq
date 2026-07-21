@@ -10,11 +10,15 @@ export async function getDeckRunResponse(
   prisma: PrismaClient,
   deckId: string,
 ): Promise<DeckRunResponse> {
-  const [runState, cards] = await Promise.all([
+  const [runState, cards, deck] = await Promise.all([
     getDeckRunState(prisma, deckId),
     prisma.card.findMany({
       where: { deckId },
       orderBy: { createdAt: "asc" },
+    }),
+    prisma.deck.findUniqueOrThrow({
+      where: { id: deckId },
+      select: { title: true },
     }),
   ]);
   const cursor = Math.min(runState.cursor, cards.length);
@@ -36,6 +40,7 @@ export async function getDeckRunResponse(
 
   return {
     deckId,
+    deckTitle: deck.title,
     cursor,
     completedAt: completedAt?.toISOString() ?? null,
     cards: cards.map((card) => ({

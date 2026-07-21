@@ -11,6 +11,7 @@
 export type * from './models/Deck'
 export type * from './models/Card'
 export type * from './models/Challenge'
+export type * from './models/ChallengeCard'
 export type * from './models/ChallengeCardState'
 export type * from './models/ChallengeAnswerEvent'
 export type * from './models/ChallengeRunSession'

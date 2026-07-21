@@ -183,6 +183,12 @@ export function ChallengeListPage() {
               </button>
               <button
                 type="button"
+                disabled={!challenge.sourceDeckId}
+                title={
+                  challenge.sourceDeckId
+                    ? undefined
+                    : "원본 덱이 삭제되어 카드를 갱신할 수 없습니다."
+                }
                 onClick={() => void updateFromDeck(challenge.id)}
               >
                 덱에서 카드 갱신

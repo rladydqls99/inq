@@ -8,27 +8,26 @@ datasource db {
 }
 
 model Deck {
-  id           String        @id @default(cuid())
-  title        String
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  cards        Card[]
-  challenges   Challenge[]
-  deckRunState DeckRunState?
+  id               String        @id @default(cuid())
+  title            String
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  cards            Card[]
+  sourceChallenges Challenge[]   @relation("ChallengeSourceDeck")
+  deckRunState     DeckRunState?
 }
 
 model Card {
-  id              String                 @id @default(cuid())
-  deckId          String
-  deck            Deck                   @relation(fields: [deckId], references: [id], onDelete: Cascade)
-  segments        Json
-  studyViewCount  Int                    @default(0)
-  lastStudiedAt   DateTime?
-  version         Int                    @default(1)
-  createdAt       DateTime               @default(now())
-  updatedAt       DateTime               @updatedAt
-  challengeStates ChallengeCardState[]
-  answerEvents    ChallengeAnswerEvent[]
+  id                   String          @id @default(cuid())
+  deckId               String
+  deck                 Deck            @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  segments             Json
+  studyViewCount       Int             @default(0)
+  lastStudiedAt        DateTime?
+  version              Int             @default(1)
+  createdAt            DateTime        @default(now())
+  updatedAt            DateTime        @updatedAt
+  sourceChallengeCards ChallengeCard[] @relation("ChallengeCardSource")
 
   @@index([deckId])
 }
@@ -36,8 +35,9 @@ model Card {
 model Challenge {
   id                  String                 @id @default(cuid())
   name                String
-  deckId              String
-  deck                Deck                   @relation(fields: [deckId], references: [id], onDelete: Cascade)
+  sourceDeckId        String?
+  sourceDeck          Deck?                  @relation("ChallengeSourceDeck", fields: [sourceDeckId], references: [id], onDelete: SetNull)
+  sourceDeckTitle     String
   status              String                 @default("active")
   answerMode          String                 @default("manual")
   reviewIntervalsDays Json
@@ -45,20 +45,38 @@ model Challenge {
   completedAt         DateTime?
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
+  cards               ChallengeCard[]
   cardStates          ChallengeCardState[]
   answerEvents        ChallengeAnswerEvent[]
   runSessions         ChallengeRunSession[]
 
-  @@index([deckId])
+  @@index([sourceDeckId])
   @@index([status])
+}
+
+model ChallengeCard {
+  id               String                 @id @default(cuid())
+  challengeId      String
+  challenge        Challenge              @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  sourceDeckCardId String?
+  sourceDeckCard   Card?                  @relation("ChallengeCardSource", fields: [sourceDeckCardId], references: [id], onDelete: SetNull)
+  segments         Json
+  createdAt        DateTime               @default(now())
+  updatedAt        DateTime               @updatedAt
+  state            ChallengeCardState?
+  answerEvents     ChallengeAnswerEvent[]
+
+  @@unique([challengeId, sourceDeckCardId])
+  @@index([challengeId])
+  @@index([sourceDeckCardId])
 }
 
 model ChallengeCardState {
   id                 String                 @id @default(cuid())
   challengeId        String
   challenge          Challenge              @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  cardId             String
-  card               Card                   @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  challengeCardId    String                 @unique
+  challengeCard      ChallengeCard          @relation(fields: [challengeCardId], references: [id], onDelete: Cascade)
   stage              Int                    @default(0)
   challengeViewCount Int                    @default(0)
   dueAt              DateTime?
@@ -69,28 +87,26 @@ model ChallengeCardState {
   updatedAt          DateTime               @updatedAt
   answerEvents       ChallengeAnswerEvent[]
 
-  @@unique([challengeId, cardId])
   @@index([challengeId, dueAt])
-  @@index([cardId])
 }
 
 model ChallengeAnswerEvent {
-  id            String             @id @default(cuid())
-  challengeId   String
-  challenge     Challenge          @relation(fields: [challengeId], references: [id], onDelete: Cascade)
-  stateId       String
-  state         ChallengeCardState @relation(fields: [stateId], references: [id], onDelete: Cascade)
-  cardId        String
-  card          Card               @relation(fields: [cardId], references: [id], onDelete: Cascade)
-  sessionCardId String
-  finalResult   String
-  previousStage Int
-  nextStage     Int?
-  answeredAt    DateTime           @default(now())
+  id              String             @id @default(cuid())
+  challengeId     String
+  challenge       Challenge          @relation(fields: [challengeId], references: [id], onDelete: Cascade)
+  stateId         String
+  state           ChallengeCardState @relation(fields: [stateId], references: [id], onDelete: Cascade)
+  challengeCardId String
+  challengeCard   ChallengeCard      @relation(fields: [challengeCardId], references: [id], onDelete: Cascade)
+  sessionCardId   String
+  finalResult     String
+  previousStage   Int
+  nextStage       Int?
+  answeredAt      DateTime           @default(now())
 
   @@index([challengeId])
   @@index([stateId])
-  @@index([cardId])
+  @@index([challengeCardId])
   @@index([sessionCardId])
 }
 

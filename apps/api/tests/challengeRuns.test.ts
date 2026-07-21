@@ -221,7 +221,7 @@ describe("challenge run routes", () => {
     }
   });
 
-  it("omits deleted cards from an existing challenge run session", async () => {
+  it("keeps challenge cards in an existing run after a source card is deleted", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -230,7 +230,12 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       const run = await getRun(app, challenge.id, cookie);
 
-      await prisma.card.delete({ where: { id: run.cards[0].cardId } });
+      const sourceSnapshot = await prisma.challengeCard.findUniqueOrThrow({
+        where: { id: run.cards[0].challengeCardId },
+      });
+      await prisma.card.delete({
+        where: { id: sourceSnapshot.sourceDeckCardId ?? "missing" },
+      });
 
       const response = await app.request(`/api/challenges/${challenge.id}/run`, {
         headers: { cookie },
@@ -238,9 +243,10 @@ describe("challenge run routes", () => {
 
       expect(response.status).toBe(200);
       const reloadedRun = await response.json();
-      expect(reloadedRun.cards).toHaveLength(1);
+      expect(reloadedRun.cards).toHaveLength(2);
       expect(reloadedRun.cards[0]).toMatchObject({
-        cardId: run.cards[1].cardId,
+        challengeCardId: run.cards[0].challengeCardId,
+        segments,
         queueIndex: 0,
       });
     } finally {
@@ -678,7 +684,7 @@ describe("challenge run routes", () => {
     }
   });
 
-  it("rejects results for deleted cards in an existing challenge run queue", async () => {
+  it("accepts results after the source deck card is deleted", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -686,14 +692,19 @@ describe("challenge run routes", () => {
       const cookie = await unlockTestApp(app);
       const { challenge } = await createChallengeFixture(prisma);
       const run = await getRun(app, challenge.id, cookie);
-      const deletedCard = run.cards[0];
+      const runCard = run.cards[0];
+      const sourceSnapshot = await prisma.challengeCard.findUniqueOrThrow({
+        where: { id: runCard.challengeCardId },
+      });
 
-      await prisma.card.delete({ where: { id: deletedCard.cardId } });
+      await prisma.card.delete({
+        where: { id: sourceSnapshot.sourceDeckCardId ?? "missing" },
+      });
 
       const response = await app.request(`/api/challenges/${challenge.id}/results`, {
         method: "POST",
         body: JSON.stringify({
-          sessionCardId: deletedCard.sessionCardId,
+          sessionCardId: runCard.sessionCardId,
           finalResult: "correct",
         }),
         headers: {
@@ -702,11 +713,13 @@ describe("challenge run routes", () => {
         },
       });
 
-      expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({
-        error: "session_card_not_found",
+      expect(response.status).toBe(200);
+      await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(1);
+      await expect(
+        prisma.challengeAnswerEvent.findFirstOrThrow(),
+      ).resolves.toMatchObject({
+        challengeCardId: runCard.challengeCardId,
       });
-      await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(0);
     } finally {
       await cleanup();
     }

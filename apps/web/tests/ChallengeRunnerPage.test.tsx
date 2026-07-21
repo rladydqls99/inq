@@ -18,6 +18,7 @@ describe("ChallengeRunnerPage", () => {
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
+    Reflect.deleteProperty(navigator, "mediaSession");
     vi.restoreAllMocks();
   });
 
@@ -78,6 +79,29 @@ describe("ChallengeRunnerPage", () => {
         ),
       ).toBeTruthy();
     });
+  });
+
+  it("never registers Media Session handlers for challenge study", async () => {
+    const setActionHandler = vi.fn();
+    Object.defineProperty(navigator, "mediaSession", {
+      configurable: true,
+      value: { metadata: null, setActionHandler },
+    });
+    mockFetch();
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("1 / 2")).toBeTruthy();
+    expect(setActionHandler).not.toHaveBeenCalled();
   });
 
   it("shows an error when loading a challenge run fails", async () => {
@@ -356,7 +380,7 @@ function runState(options: { cardCount?: number } = {}) {
     {
       sessionCardId: "session-card-1",
       stateId: "state-1",
-      cardId: "card-1",
+      challengeCardId: "challenge-card-1",
       queueIndex: 0,
       selectedResult: null,
       segments: [
@@ -368,7 +392,7 @@ function runState(options: { cardCount?: number } = {}) {
     {
       sessionCardId: "session-card-2",
       stateId: "state-2",
-      cardId: "card-2",
+      challengeCardId: "challenge-card-2",
       queueIndex: 1,
       selectedResult: null,
       segments: [

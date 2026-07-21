@@ -80,7 +80,7 @@ export function ChallengeDetailPage() {
       ) : null}
       <div className="card-editor-list">
         {cards.map((card) => (
-          <article key={card.id} className="card-editor">
+          <article key={card.challengeCardId} className="card-editor">
             <QuizTextRenderer
               className="card-editor__revealed"
               mode="revealed"

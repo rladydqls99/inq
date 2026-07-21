@@ -24,7 +24,7 @@ export * as $Enums from './enums'
 export * from "./enums"
 /**
  * ## Prisma Client
- * 
+ *
  * Type-safe database client for TypeScript
  * @example
  * ```
@@ -34,7 +34,7 @@ export * from "./enums"
  * // Fetch zero or more Decks
  * const decks = await prisma.deck.findMany()
  * ```
- * 
+ *
  * Read more in our [docs](https://pris.ly/d/client).
  */
 export const PrismaClient = $Class.getPrismaClientClass()
@@ -53,9 +53,14 @@ export type Deck = Prisma.DeckModel
 export type Card = Prisma.CardModel
 /**
  * Model Challenge
- * 
+ *
  */
 export type Challenge = Prisma.ChallengeModel
+/**
+ * Model ChallengeCard
+ *
+ */
+export type ChallengeCard = Prisma.ChallengeCardModel
 /**
  * Model ChallengeCardState
  * 

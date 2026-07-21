@@ -1,5 +1,5 @@
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readdirSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -21,18 +21,25 @@ const testEnv = {
 export async function createTestPrisma() {
   const directory = mkdtempSync(join(tmpdir(), "inq-api-test-"));
   const databasePath = join(directory, "test.db");
-  const migrationSql = readFileSync(
-    join(
-      testDirname,
-      "../../../packages/db/prisma/migrations/20260622135735_init/migration.sql",
-    ),
-    "utf8",
+  const migrationsDirectory = join(
+    testDirname,
+    "../../../packages/db/prisma/migrations",
   );
 
-  execFileSync("sqlite3", [databasePath], {
-    input: migrationSql,
-    stdio: ["pipe", "pipe", "pipe"],
-  });
+  for (const migration of readdirSync(migrationsDirectory, {
+    withFileTypes: true,
+  })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name)
+    .sort()) {
+    execFileSync("sqlite3", [databasePath], {
+      input: readFileSync(
+        join(migrationsDirectory, migration, "migration.sql"),
+        "utf8",
+      ),
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+  }
 
   const prisma = createPrismaClient(`file:${databasePath}`);
 

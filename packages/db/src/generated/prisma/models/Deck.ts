@@ -175,7 +175,7 @@ export type DeckWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   cards?: Prisma.CardListRelationFilter
-  challenges?: Prisma.ChallengeListRelationFilter
+  sourceChallenges?: Prisma.ChallengeListRelationFilter
   deckRunState?: Prisma.XOR<Prisma.DeckRunStateNullableScalarRelationFilter, Prisma.DeckRunStateWhereInput> | null
 }
 
@@ -185,7 +185,7 @@ export type DeckOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   cards?: Prisma.CardOrderByRelationAggregateInput
-  challenges?: Prisma.ChallengeOrderByRelationAggregateInput
+  sourceChallenges?: Prisma.ChallengeOrderByRelationAggregateInput
   deckRunState?: Prisma.DeckRunStateOrderByWithRelationInput
 }
 
@@ -198,7 +198,7 @@ export type DeckWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   cards?: Prisma.CardListRelationFilter
-  challenges?: Prisma.ChallengeListRelationFilter
+  sourceChallenges?: Prisma.ChallengeListRelationFilter
   deckRunState?: Prisma.XOR<Prisma.DeckRunStateNullableScalarRelationFilter, Prisma.DeckRunStateWhereInput> | null
 }, "id">
 
@@ -228,7 +228,7 @@ export type DeckCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
-  challenges?: Prisma.ChallengeCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeCreateNestedManyWithoutSourceDeckInput
   deckRunState?: Prisma.DeckRunStateCreateNestedOneWithoutDeckInput
 }
 
@@ -238,7 +238,7 @@ export type DeckUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
-  challenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutSourceDeckInput
   deckRunState?: Prisma.DeckRunStateUncheckedCreateNestedOneWithoutDeckInput
 }
 
@@ -248,7 +248,7 @@ export type DeckUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
-  challenges?: Prisma.ChallengeUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUpdateManyWithoutSourceDeckNestedInput
   deckRunState?: Prisma.DeckRunStateUpdateOneWithoutDeckNestedInput
 }
 
@@ -258,7 +258,7 @@ export type DeckUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
-  challenges?: Prisma.ChallengeUncheckedUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput
   deckRunState?: Prisma.DeckRunStateUncheckedUpdateOneWithoutDeckNestedInput
 }
 
@@ -309,6 +309,11 @@ export type DeckScalarRelationFilter = {
   isNot?: Prisma.DeckWhereInput
 }
 
+export type DeckNullableScalarRelationFilter = {
+  is?: Prisma.DeckWhereInput | null
+  isNot?: Prisma.DeckWhereInput | null
+}
+
 export type StringFieldUpdateOperationsInput = {
   set?: string
 }
@@ -331,18 +336,20 @@ export type DeckUpdateOneRequiredWithoutCardsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.DeckUpdateToOneWithWhereWithoutCardsInput, Prisma.DeckUpdateWithoutCardsInput>, Prisma.DeckUncheckedUpdateWithoutCardsInput>
 }
 
-export type DeckCreateNestedOneWithoutChallengesInput = {
-  create?: Prisma.XOR<Prisma.DeckCreateWithoutChallengesInput, Prisma.DeckUncheckedCreateWithoutChallengesInput>
-  connectOrCreate?: Prisma.DeckCreateOrConnectWithoutChallengesInput
+export type DeckCreateNestedOneWithoutSourceChallengesInput = {
+  create?: Prisma.XOR<Prisma.DeckCreateWithoutSourceChallengesInput, Prisma.DeckUncheckedCreateWithoutSourceChallengesInput>
+  connectOrCreate?: Prisma.DeckCreateOrConnectWithoutSourceChallengesInput
   connect?: Prisma.DeckWhereUniqueInput
 }
 
-export type DeckUpdateOneRequiredWithoutChallengesNestedInput = {
-  create?: Prisma.XOR<Prisma.DeckCreateWithoutChallengesInput, Prisma.DeckUncheckedCreateWithoutChallengesInput>
-  connectOrCreate?: Prisma.DeckCreateOrConnectWithoutChallengesInput
-  upsert?: Prisma.DeckUpsertWithoutChallengesInput
+export type DeckUpdateOneWithoutSourceChallengesNestedInput = {
+  create?: Prisma.XOR<Prisma.DeckCreateWithoutSourceChallengesInput, Prisma.DeckUncheckedCreateWithoutSourceChallengesInput>
+  connectOrCreate?: Prisma.DeckCreateOrConnectWithoutSourceChallengesInput
+  upsert?: Prisma.DeckUpsertWithoutSourceChallengesInput
+  disconnect?: Prisma.DeckWhereInput | boolean
+  delete?: Prisma.DeckWhereInput | boolean
   connect?: Prisma.DeckWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.DeckUpdateToOneWithWhereWithoutChallengesInput, Prisma.DeckUpdateWithoutChallengesInput>, Prisma.DeckUncheckedUpdateWithoutChallengesInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.DeckUpdateToOneWithWhereWithoutSourceChallengesInput, Prisma.DeckUpdateWithoutSourceChallengesInput>, Prisma.DeckUncheckedUpdateWithoutSourceChallengesInput>
 }
 
 export type DeckCreateNestedOneWithoutDeckRunStateInput = {
@@ -364,7 +371,7 @@ export type DeckCreateWithoutCardsInput = {
   title: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  challenges?: Prisma.ChallengeCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeCreateNestedManyWithoutSourceDeckInput
   deckRunState?: Prisma.DeckRunStateCreateNestedOneWithoutDeckInput
 }
 
@@ -373,7 +380,7 @@ export type DeckUncheckedCreateWithoutCardsInput = {
   title: string
   createdAt?: Date | string
   updatedAt?: Date | string
-  challenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutSourceDeckInput
   deckRunState?: Prisma.DeckRunStateUncheckedCreateNestedOneWithoutDeckInput
 }
 
@@ -398,7 +405,7 @@ export type DeckUpdateWithoutCardsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challenges?: Prisma.ChallengeUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUpdateManyWithoutSourceDeckNestedInput
   deckRunState?: Prisma.DeckRunStateUpdateOneWithoutDeckNestedInput
 }
 
@@ -407,11 +414,11 @@ export type DeckUncheckedUpdateWithoutCardsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challenges?: Prisma.ChallengeUncheckedUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput
   deckRunState?: Prisma.DeckRunStateUncheckedUpdateOneWithoutDeckNestedInput
 }
 
-export type DeckCreateWithoutChallengesInput = {
+export type DeckCreateWithoutSourceChallengesInput = {
   id?: string
   title: string
   createdAt?: Date | string
@@ -420,7 +427,7 @@ export type DeckCreateWithoutChallengesInput = {
   deckRunState?: Prisma.DeckRunStateCreateNestedOneWithoutDeckInput
 }
 
-export type DeckUncheckedCreateWithoutChallengesInput = {
+export type DeckUncheckedCreateWithoutSourceChallengesInput = {
   id?: string
   title: string
   createdAt?: Date | string
@@ -429,23 +436,23 @@ export type DeckUncheckedCreateWithoutChallengesInput = {
   deckRunState?: Prisma.DeckRunStateUncheckedCreateNestedOneWithoutDeckInput
 }
 
-export type DeckCreateOrConnectWithoutChallengesInput = {
+export type DeckCreateOrConnectWithoutSourceChallengesInput = {
   where: Prisma.DeckWhereUniqueInput
-  create: Prisma.XOR<Prisma.DeckCreateWithoutChallengesInput, Prisma.DeckUncheckedCreateWithoutChallengesInput>
+  create: Prisma.XOR<Prisma.DeckCreateWithoutSourceChallengesInput, Prisma.DeckUncheckedCreateWithoutSourceChallengesInput>
 }
 
-export type DeckUpsertWithoutChallengesInput = {
-  update: Prisma.XOR<Prisma.DeckUpdateWithoutChallengesInput, Prisma.DeckUncheckedUpdateWithoutChallengesInput>
-  create: Prisma.XOR<Prisma.DeckCreateWithoutChallengesInput, Prisma.DeckUncheckedCreateWithoutChallengesInput>
+export type DeckUpsertWithoutSourceChallengesInput = {
+  update: Prisma.XOR<Prisma.DeckUpdateWithoutSourceChallengesInput, Prisma.DeckUncheckedUpdateWithoutSourceChallengesInput>
+  create: Prisma.XOR<Prisma.DeckCreateWithoutSourceChallengesInput, Prisma.DeckUncheckedCreateWithoutSourceChallengesInput>
   where?: Prisma.DeckWhereInput
 }
 
-export type DeckUpdateToOneWithWhereWithoutChallengesInput = {
+export type DeckUpdateToOneWithWhereWithoutSourceChallengesInput = {
   where?: Prisma.DeckWhereInput
-  data: Prisma.XOR<Prisma.DeckUpdateWithoutChallengesInput, Prisma.DeckUncheckedUpdateWithoutChallengesInput>
+  data: Prisma.XOR<Prisma.DeckUpdateWithoutSourceChallengesInput, Prisma.DeckUncheckedUpdateWithoutSourceChallengesInput>
 }
 
-export type DeckUpdateWithoutChallengesInput = {
+export type DeckUpdateWithoutSourceChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -454,7 +461,7 @@ export type DeckUpdateWithoutChallengesInput = {
   deckRunState?: Prisma.DeckRunStateUpdateOneWithoutDeckNestedInput
 }
 
-export type DeckUncheckedUpdateWithoutChallengesInput = {
+export type DeckUncheckedUpdateWithoutSourceChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -469,7 +476,7 @@ export type DeckCreateWithoutDeckRunStateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
-  challenges?: Prisma.ChallengeCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeCreateNestedManyWithoutSourceDeckInput
 }
 
 export type DeckUncheckedCreateWithoutDeckRunStateInput = {
@@ -478,7 +485,7 @@ export type DeckUncheckedCreateWithoutDeckRunStateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
-  challenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutDeckInput
+  sourceChallenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutSourceDeckInput
 }
 
 export type DeckCreateOrConnectWithoutDeckRunStateInput = {
@@ -503,7 +510,7 @@ export type DeckUpdateWithoutDeckRunStateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
-  challenges?: Prisma.ChallengeUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUpdateManyWithoutSourceDeckNestedInput
 }
 
 export type DeckUncheckedUpdateWithoutDeckRunStateInput = {
@@ -512,7 +519,7 @@ export type DeckUncheckedUpdateWithoutDeckRunStateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
-  challenges?: Prisma.ChallengeUncheckedUpdateManyWithoutDeckNestedInput
+  sourceChallenges?: Prisma.ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput
 }
 
 
@@ -522,12 +529,12 @@ export type DeckUncheckedUpdateWithoutDeckRunStateInput = {
 
 export type DeckCountOutputType = {
   cards: number
-  challenges: number
+  sourceChallenges: number
 }
 
 export type DeckCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cards?: boolean | DeckCountOutputTypeCountCardsArgs
-  challenges?: boolean | DeckCountOutputTypeCountChallengesArgs
+  sourceChallenges?: boolean | DeckCountOutputTypeCountSourceChallengesArgs
 }
 
 /**
@@ -550,7 +557,7 @@ export type DeckCountOutputTypeCountCardsArgs<ExtArgs extends runtime.Types.Exte
 /**
  * DeckCountOutputType without action
  */
-export type DeckCountOutputTypeCountChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type DeckCountOutputTypeCountSourceChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.ChallengeWhereInput
 }
 
@@ -561,7 +568,7 @@ export type DeckSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   cards?: boolean | Prisma.Deck$cardsArgs<ExtArgs>
-  challenges?: boolean | Prisma.Deck$challengesArgs<ExtArgs>
+  sourceChallenges?: boolean | Prisma.Deck$sourceChallengesArgs<ExtArgs>
   deckRunState?: boolean | Prisma.Deck$deckRunStateArgs<ExtArgs>
   _count?: boolean | Prisma.DeckCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["deck"]>
@@ -590,7 +597,7 @@ export type DeckSelectScalar = {
 export type DeckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
 export type DeckInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cards?: boolean | Prisma.Deck$cardsArgs<ExtArgs>
-  challenges?: boolean | Prisma.Deck$challengesArgs<ExtArgs>
+  sourceChallenges?: boolean | Prisma.Deck$sourceChallengesArgs<ExtArgs>
   deckRunState?: boolean | Prisma.Deck$deckRunStateArgs<ExtArgs>
   _count?: boolean | Prisma.DeckCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -601,7 +608,7 @@ export type $DeckPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Deck"
   objects: {
     cards: Prisma.$CardPayload<ExtArgs>[]
-    challenges: Prisma.$ChallengePayload<ExtArgs>[]
+    sourceChallenges: Prisma.$ChallengePayload<ExtArgs>[]
     deckRunState: Prisma.$DeckRunStatePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1004,7 +1011,7 @@ readonly fields: DeckFieldRefs;
 export interface Prisma__DeckClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   cards<T extends Prisma.Deck$cardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deck$cardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  challenges<T extends Prisma.Deck$challengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deck$challengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sourceChallenges<T extends Prisma.Deck$sourceChallengesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deck$sourceChallengesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   deckRunState<T extends Prisma.Deck$deckRunStateArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Deck$deckRunStateArgs<ExtArgs>>): Prisma.Prisma__DeckRunStateClient<runtime.Types.Result.GetResult<Prisma.$DeckRunStatePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1454,9 +1461,9 @@ export type Deck$cardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs
 }
 
 /**
- * Deck.challenges
+ * Deck.sourceChallenges
  */
-export type Deck$challengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Deck$sourceChallengesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
    * Select specific fields to fetch from the Challenge
    */

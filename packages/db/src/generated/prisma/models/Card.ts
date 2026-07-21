@@ -241,8 +241,7 @@ export type CardWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   deck?: Prisma.XOR<Prisma.DeckScalarRelationFilter, Prisma.DeckWhereInput>
-  challengeStates?: Prisma.ChallengeCardStateListRelationFilter
-  answerEvents?: Prisma.ChallengeAnswerEventListRelationFilter
+  sourceChallengeCards?: Prisma.ChallengeCardListRelationFilter
 }
 
 export type CardOrderByWithRelationInput = {
@@ -255,8 +254,7 @@ export type CardOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deck?: Prisma.DeckOrderByWithRelationInput
-  challengeStates?: Prisma.ChallengeCardStateOrderByRelationAggregateInput
-  answerEvents?: Prisma.ChallengeAnswerEventOrderByRelationAggregateInput
+  sourceChallengeCards?: Prisma.ChallengeCardOrderByRelationAggregateInput
 }
 
 export type CardWhereUniqueInput = Prisma.AtLeast<{
@@ -272,8 +270,7 @@ export type CardWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
   deck?: Prisma.XOR<Prisma.DeckScalarRelationFilter, Prisma.DeckWhereInput>
-  challengeStates?: Prisma.ChallengeCardStateListRelationFilter
-  answerEvents?: Prisma.ChallengeAnswerEventListRelationFilter
+  sourceChallengeCards?: Prisma.ChallengeCardListRelationFilter
 }, "id">
 
 export type CardOrderByWithAggregationInput = {
@@ -315,8 +312,7 @@ export type CardCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deck: Prisma.DeckCreateNestedOneWithoutCardsInput
-  challengeStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutCardInput
-  answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutCardInput
+  sourceChallengeCards?: Prisma.ChallengeCardCreateNestedManyWithoutSourceDeckCardInput
 }
 
 export type CardUncheckedCreateInput = {
@@ -328,8 +324,7 @@ export type CardUncheckedCreateInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutCardInput
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutCardInput
+  sourceChallengeCards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutSourceDeckCardInput
 }
 
 export type CardUpdateInput = {
@@ -341,8 +336,7 @@ export type CardUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deck?: Prisma.DeckUpdateOneRequiredWithoutCardsNestedInput
-  challengeStates?: Prisma.ChallengeCardStateUpdateManyWithoutCardNestedInput
-  answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutCardNestedInput
+  sourceChallengeCards?: Prisma.ChallengeCardUpdateManyWithoutSourceDeckCardNestedInput
 }
 
 export type CardUncheckedUpdateInput = {
@@ -354,8 +348,7 @@ export type CardUncheckedUpdateInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutCardNestedInput
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutCardNestedInput
+  sourceChallengeCards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutSourceDeckCardNestedInput
 }
 
 export type CardCreateManyInput = {
@@ -441,9 +434,9 @@ export type CardSumOrderByAggregateInput = {
   version?: Prisma.SortOrder
 }
 
-export type CardScalarRelationFilter = {
-  is?: Prisma.CardWhereInput
-  isNot?: Prisma.CardWhereInput
+export type CardNullableScalarRelationFilter = {
+  is?: Prisma.CardWhereInput | null
+  isNot?: Prisma.CardWhereInput | null
 }
 
 export type CardCreateNestedManyWithoutDeckInput = {
@@ -500,32 +493,20 @@ export type NullableDateTimeFieldUpdateOperationsInput = {
   set?: Date | string | null
 }
 
-export type CardCreateNestedOneWithoutChallengeStatesInput = {
-  create?: Prisma.XOR<Prisma.CardCreateWithoutChallengeStatesInput, Prisma.CardUncheckedCreateWithoutChallengeStatesInput>
-  connectOrCreate?: Prisma.CardCreateOrConnectWithoutChallengeStatesInput
+export type CardCreateNestedOneWithoutSourceChallengeCardsInput = {
+  create?: Prisma.XOR<Prisma.CardCreateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedCreateWithoutSourceChallengeCardsInput>
+  connectOrCreate?: Prisma.CardCreateOrConnectWithoutSourceChallengeCardsInput
   connect?: Prisma.CardWhereUniqueInput
 }
 
-export type CardUpdateOneRequiredWithoutChallengeStatesNestedInput = {
-  create?: Prisma.XOR<Prisma.CardCreateWithoutChallengeStatesInput, Prisma.CardUncheckedCreateWithoutChallengeStatesInput>
-  connectOrCreate?: Prisma.CardCreateOrConnectWithoutChallengeStatesInput
-  upsert?: Prisma.CardUpsertWithoutChallengeStatesInput
+export type CardUpdateOneWithoutSourceChallengeCardsNestedInput = {
+  create?: Prisma.XOR<Prisma.CardCreateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedCreateWithoutSourceChallengeCardsInput>
+  connectOrCreate?: Prisma.CardCreateOrConnectWithoutSourceChallengeCardsInput
+  upsert?: Prisma.CardUpsertWithoutSourceChallengeCardsInput
+  disconnect?: Prisma.CardWhereInput | boolean
+  delete?: Prisma.CardWhereInput | boolean
   connect?: Prisma.CardWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CardUpdateToOneWithWhereWithoutChallengeStatesInput, Prisma.CardUpdateWithoutChallengeStatesInput>, Prisma.CardUncheckedUpdateWithoutChallengeStatesInput>
-}
-
-export type CardCreateNestedOneWithoutAnswerEventsInput = {
-  create?: Prisma.XOR<Prisma.CardCreateWithoutAnswerEventsInput, Prisma.CardUncheckedCreateWithoutAnswerEventsInput>
-  connectOrCreate?: Prisma.CardCreateOrConnectWithoutAnswerEventsInput
-  connect?: Prisma.CardWhereUniqueInput
-}
-
-export type CardUpdateOneRequiredWithoutAnswerEventsNestedInput = {
-  create?: Prisma.XOR<Prisma.CardCreateWithoutAnswerEventsInput, Prisma.CardUncheckedCreateWithoutAnswerEventsInput>
-  connectOrCreate?: Prisma.CardCreateOrConnectWithoutAnswerEventsInput
-  upsert?: Prisma.CardUpsertWithoutAnswerEventsInput
-  connect?: Prisma.CardWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.CardUpdateToOneWithWhereWithoutAnswerEventsInput, Prisma.CardUpdateWithoutAnswerEventsInput>, Prisma.CardUncheckedUpdateWithoutAnswerEventsInput>
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CardUpdateToOneWithWhereWithoutSourceChallengeCardsInput, Prisma.CardUpdateWithoutSourceChallengeCardsInput>, Prisma.CardUncheckedUpdateWithoutSourceChallengeCardsInput>
 }
 
 export type CardCreateWithoutDeckInput = {
@@ -536,8 +517,7 @@ export type CardCreateWithoutDeckInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  challengeStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutCardInput
-  answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutCardInput
+  sourceChallengeCards?: Prisma.ChallengeCardCreateNestedManyWithoutSourceDeckCardInput
 }
 
 export type CardUncheckedCreateWithoutDeckInput = {
@@ -548,8 +528,7 @@ export type CardUncheckedCreateWithoutDeckInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutCardInput
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutCardInput
+  sourceChallengeCards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutSourceDeckCardInput
 }
 
 export type CardCreateOrConnectWithoutDeckInput = {
@@ -591,7 +570,7 @@ export type CardScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Card"> | Date | string
 }
 
-export type CardCreateWithoutChallengeStatesInput = {
+export type CardCreateWithoutSourceChallengeCardsInput = {
   id?: string
   segments: Prisma.JsonNullValueInput | runtime.InputJsonValue
   studyViewCount?: number
@@ -600,10 +579,9 @@ export type CardCreateWithoutChallengeStatesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   deck: Prisma.DeckCreateNestedOneWithoutCardsInput
-  answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutCardInput
 }
 
-export type CardUncheckedCreateWithoutChallengeStatesInput = {
+export type CardUncheckedCreateWithoutSourceChallengeCardsInput = {
   id?: string
   deckId: string
   segments: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -612,26 +590,25 @@ export type CardUncheckedCreateWithoutChallengeStatesInput = {
   version?: number
   createdAt?: Date | string
   updatedAt?: Date | string
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutCardInput
 }
 
-export type CardCreateOrConnectWithoutChallengeStatesInput = {
+export type CardCreateOrConnectWithoutSourceChallengeCardsInput = {
   where: Prisma.CardWhereUniqueInput
-  create: Prisma.XOR<Prisma.CardCreateWithoutChallengeStatesInput, Prisma.CardUncheckedCreateWithoutChallengeStatesInput>
+  create: Prisma.XOR<Prisma.CardCreateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedCreateWithoutSourceChallengeCardsInput>
 }
 
-export type CardUpsertWithoutChallengeStatesInput = {
-  update: Prisma.XOR<Prisma.CardUpdateWithoutChallengeStatesInput, Prisma.CardUncheckedUpdateWithoutChallengeStatesInput>
-  create: Prisma.XOR<Prisma.CardCreateWithoutChallengeStatesInput, Prisma.CardUncheckedCreateWithoutChallengeStatesInput>
+export type CardUpsertWithoutSourceChallengeCardsInput = {
+  update: Prisma.XOR<Prisma.CardUpdateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedUpdateWithoutSourceChallengeCardsInput>
+  create: Prisma.XOR<Prisma.CardCreateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedCreateWithoutSourceChallengeCardsInput>
   where?: Prisma.CardWhereInput
 }
 
-export type CardUpdateToOneWithWhereWithoutChallengeStatesInput = {
+export type CardUpdateToOneWithWhereWithoutSourceChallengeCardsInput = {
   where?: Prisma.CardWhereInput
-  data: Prisma.XOR<Prisma.CardUpdateWithoutChallengeStatesInput, Prisma.CardUncheckedUpdateWithoutChallengeStatesInput>
+  data: Prisma.XOR<Prisma.CardUpdateWithoutSourceChallengeCardsInput, Prisma.CardUncheckedUpdateWithoutSourceChallengeCardsInput>
 }
 
-export type CardUpdateWithoutChallengeStatesInput = {
+export type CardUpdateWithoutSourceChallengeCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   segments?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   studyViewCount?: Prisma.IntFieldUpdateOperationsInput | number
@@ -640,10 +617,9 @@ export type CardUpdateWithoutChallengeStatesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deck?: Prisma.DeckUpdateOneRequiredWithoutCardsNestedInput
-  answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutCardNestedInput
 }
 
-export type CardUncheckedUpdateWithoutChallengeStatesInput = {
+export type CardUncheckedUpdateWithoutSourceChallengeCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   deckId?: Prisma.StringFieldUpdateOperationsInput | string
   segments?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -652,71 +628,6 @@ export type CardUncheckedUpdateWithoutChallengeStatesInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutCardNestedInput
-}
-
-export type CardCreateWithoutAnswerEventsInput = {
-  id?: string
-  segments: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  studyViewCount?: number
-  lastStudiedAt?: Date | string | null
-  version?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  deck: Prisma.DeckCreateNestedOneWithoutCardsInput
-  challengeStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutCardInput
-}
-
-export type CardUncheckedCreateWithoutAnswerEventsInput = {
-  id?: string
-  deckId: string
-  segments: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  studyViewCount?: number
-  lastStudiedAt?: Date | string | null
-  version?: number
-  createdAt?: Date | string
-  updatedAt?: Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutCardInput
-}
-
-export type CardCreateOrConnectWithoutAnswerEventsInput = {
-  where: Prisma.CardWhereUniqueInput
-  create: Prisma.XOR<Prisma.CardCreateWithoutAnswerEventsInput, Prisma.CardUncheckedCreateWithoutAnswerEventsInput>
-}
-
-export type CardUpsertWithoutAnswerEventsInput = {
-  update: Prisma.XOR<Prisma.CardUpdateWithoutAnswerEventsInput, Prisma.CardUncheckedUpdateWithoutAnswerEventsInput>
-  create: Prisma.XOR<Prisma.CardCreateWithoutAnswerEventsInput, Prisma.CardUncheckedCreateWithoutAnswerEventsInput>
-  where?: Prisma.CardWhereInput
-}
-
-export type CardUpdateToOneWithWhereWithoutAnswerEventsInput = {
-  where?: Prisma.CardWhereInput
-  data: Prisma.XOR<Prisma.CardUpdateWithoutAnswerEventsInput, Prisma.CardUncheckedUpdateWithoutAnswerEventsInput>
-}
-
-export type CardUpdateWithoutAnswerEventsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  segments?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  studyViewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  lastStudiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  version?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deck?: Prisma.DeckUpdateOneRequiredWithoutCardsNestedInput
-  challengeStates?: Prisma.ChallengeCardStateUpdateManyWithoutCardNestedInput
-}
-
-export type CardUncheckedUpdateWithoutAnswerEventsInput = {
-  id?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
-  segments?: Prisma.JsonNullValueInput | runtime.InputJsonValue
-  studyViewCount?: Prisma.IntFieldUpdateOperationsInput | number
-  lastStudiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  version?: Prisma.IntFieldUpdateOperationsInput | number
-  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutCardNestedInput
 }
 
 export type CardCreateManyDeckInput = {
@@ -737,8 +648,7 @@ export type CardUpdateWithoutDeckInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challengeStates?: Prisma.ChallengeCardStateUpdateManyWithoutCardNestedInput
-  answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutCardNestedInput
+  sourceChallengeCards?: Prisma.ChallengeCardUpdateManyWithoutSourceDeckCardNestedInput
 }
 
 export type CardUncheckedUpdateWithoutDeckInput = {
@@ -749,8 +659,7 @@ export type CardUncheckedUpdateWithoutDeckInput = {
   version?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  challengeStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutCardNestedInput
-  answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutCardNestedInput
+  sourceChallengeCards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutSourceDeckCardNestedInput
 }
 
 export type CardUncheckedUpdateManyWithoutDeckInput = {
@@ -769,13 +678,11 @@ export type CardUncheckedUpdateManyWithoutDeckInput = {
  */
 
 export type CardCountOutputType = {
-  challengeStates: number
-  answerEvents: number
+  sourceChallengeCards: number
 }
 
 export type CardCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  challengeStates?: boolean | CardCountOutputTypeCountChallengeStatesArgs
-  answerEvents?: boolean | CardCountOutputTypeCountAnswerEventsArgs
+  sourceChallengeCards?: boolean | CardCountOutputTypeCountSourceChallengeCardsArgs
 }
 
 /**
@@ -791,15 +698,8 @@ export type CardCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Extensi
 /**
  * CardCountOutputType without action
  */
-export type CardCountOutputTypeCountChallengeStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ChallengeCardStateWhereInput
-}
-
-/**
- * CardCountOutputType without action
- */
-export type CardCountOutputTypeCountAnswerEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ChallengeAnswerEventWhereInput
+export type CardCountOutputTypeCountSourceChallengeCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChallengeCardWhereInput
 }
 
 
@@ -813,8 +713,7 @@ export type CardSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   createdAt?: boolean
   updatedAt?: boolean
   deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
-  challengeStates?: boolean | Prisma.Card$challengeStatesArgs<ExtArgs>
-  answerEvents?: boolean | Prisma.Card$answerEventsArgs<ExtArgs>
+  sourceChallengeCards?: boolean | Prisma.Card$sourceChallengeCardsArgs<ExtArgs>
   _count?: boolean | Prisma.CardCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["card"]>
 
@@ -856,8 +755,7 @@ export type CardSelectScalar = {
 export type CardOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "deckId" | "segments" | "studyViewCount" | "lastStudiedAt" | "version" | "createdAt" | "updatedAt", ExtArgs["result"]["card"]>
 export type CardInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
-  challengeStates?: boolean | Prisma.Card$challengeStatesArgs<ExtArgs>
-  answerEvents?: boolean | Prisma.Card$answerEventsArgs<ExtArgs>
+  sourceChallengeCards?: boolean | Prisma.Card$sourceChallengeCardsArgs<ExtArgs>
   _count?: boolean | Prisma.CardCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CardIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -871,8 +769,7 @@ export type $CardPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name: "Card"
   objects: {
     deck: Prisma.$DeckPayload<ExtArgs>
-    challengeStates: Prisma.$ChallengeCardStatePayload<ExtArgs>[]
-    answerEvents: Prisma.$ChallengeAnswerEventPayload<ExtArgs>[]
+    sourceChallengeCards: Prisma.$ChallengeCardPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1278,8 +1175,7 @@ readonly fields: CardFieldRefs;
 export interface Prisma__CardClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   deck<T extends Prisma.DeckDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeckDefaultArgs<ExtArgs>>): Prisma.Prisma__DeckClient<runtime.Types.Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  challengeStates<T extends Prisma.Card$challengeStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Card$challengeStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeCardStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  answerEvents<T extends Prisma.Card$answerEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Card$answerEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeAnswerEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  sourceChallengeCards<T extends Prisma.Card$sourceChallengeCardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Card$sourceChallengeCardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeCardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1716,51 +1612,27 @@ export type CardDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Internal
 }
 
 /**
- * Card.challengeStates
+ * Card.sourceChallengeCards
  */
-export type Card$challengeStatesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Card$sourceChallengeCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the ChallengeCardState
+   * Select specific fields to fetch from the ChallengeCard
    */
-  select?: Prisma.ChallengeCardStateSelect<ExtArgs> | null
+  select?: Prisma.ChallengeCardSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the ChallengeCardState
+   * Omit specific fields from the ChallengeCard
    */
-  omit?: Prisma.ChallengeCardStateOmit<ExtArgs> | null
+  omit?: Prisma.ChallengeCardOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ChallengeCardStateInclude<ExtArgs> | null
-  where?: Prisma.ChallengeCardStateWhereInput
-  orderBy?: Prisma.ChallengeCardStateOrderByWithRelationInput | Prisma.ChallengeCardStateOrderByWithRelationInput[]
-  cursor?: Prisma.ChallengeCardStateWhereUniqueInput
+  include?: Prisma.ChallengeCardInclude<ExtArgs> | null
+  where?: Prisma.ChallengeCardWhereInput
+  orderBy?: Prisma.ChallengeCardOrderByWithRelationInput | Prisma.ChallengeCardOrderByWithRelationInput[]
+  cursor?: Prisma.ChallengeCardWhereUniqueInput
   take?: number
   skip?: number
-  distinct?: Prisma.ChallengeCardStateScalarFieldEnum | Prisma.ChallengeCardStateScalarFieldEnum[]
-}
-
-/**
- * Card.answerEvents
- */
-export type Card$answerEventsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  /**
-   * Select specific fields to fetch from the ChallengeAnswerEvent
-   */
-  select?: Prisma.ChallengeAnswerEventSelect<ExtArgs> | null
-  /**
-   * Omit specific fields from the ChallengeAnswerEvent
-   */
-  omit?: Prisma.ChallengeAnswerEventOmit<ExtArgs> | null
-  /**
-   * Choose, which related nodes to fetch as well
-   */
-  include?: Prisma.ChallengeAnswerEventInclude<ExtArgs> | null
-  where?: Prisma.ChallengeAnswerEventWhereInput
-  orderBy?: Prisma.ChallengeAnswerEventOrderByWithRelationInput | Prisma.ChallengeAnswerEventOrderByWithRelationInput[]
-  cursor?: Prisma.ChallengeAnswerEventWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ChallengeAnswerEventScalarFieldEnum | Prisma.ChallengeAnswerEventScalarFieldEnum[]
+  distinct?: Prisma.ChallengeCardScalarFieldEnum | Prisma.ChallengeCardScalarFieldEnum[]
 }
 
 /**

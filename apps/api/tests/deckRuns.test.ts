@@ -90,6 +90,7 @@ describe("deck run routes", () => {
       expect(getResponse.status).toBe(200);
       await expect(getResponse.json()).resolves.toMatchObject({
         deckId: deck.id,
+        deckTitle: "국어",
         cursor: 0,
         completedAt: null,
         cards: [{ cardId: card.id, segments }],

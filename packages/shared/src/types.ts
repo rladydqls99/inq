@@ -78,7 +78,7 @@ export type UpdateChallengeRequest = {
 export type ChallengeResponse = {
   id: string;
   name: string;
-  deckId: string;
+  sourceDeckId: string | null;
   deckTitle: string;
   status: ChallengeStatus;
   answerMode: AnswerMode;
@@ -92,9 +92,10 @@ export type ChallengeResponse = {
 };
 
 export type ChallengeCardResponse = {
-  id: string;
+  stateId: string;
   challengeId: string;
-  cardId: string;
+  challengeCardId: string;
+  sourceDeckCardId: string | null;
   segments: QuizSegment[];
   stage: number;
   challengeViewCount: number;
@@ -150,7 +151,7 @@ export type ChallengeRunSessionStatus = "active" | "completed";
 export type ChallengeRunCard = {
   sessionCardId: string;
   stateId: string;
-  cardId: string;
+  challengeCardId: string;
   segments: QuizSegment[];
   queueIndex: number;
   selectedResult: "correct" | "wrong" | null;
@@ -181,6 +182,7 @@ export type DeckRunCard = {
 
 export type DeckRunResponse = {
   deckId: string;
+  deckTitle: string;
   cursor: number;
   completedAt: string | null;
   cards: DeckRunCard[];
@@ -190,10 +192,19 @@ export type UpdateDeckRunRequest = {
   cursor: number;
 };
 
+export type ChallengeCardExport = {
+  id: string;
+  challengeId: string;
+  sourceDeckCardId: string | null;
+  segments: QuizSegment[];
+  createdAt: string;
+  updatedAt: string;
+};
+
 export type ChallengeCardStateExport = {
   id: string;
   challengeId: string;
-  cardId: string;
+  challengeCardId: string;
   stage: number;
   challengeViewCount: number;
   dueAt: string | null;
@@ -208,7 +219,7 @@ export type ChallengeAnswerEventExport = {
   id: string;
   challengeId: string;
   stateId: string;
-  cardId: string;
+  challengeCardId: string;
   sessionCardId: string;
   finalResult: "correct" | "wrong";
   previousStage: number;
@@ -236,10 +247,12 @@ export type DeckRunStateExport = {
 };
 
 export type BackupExport = {
+  schemaVersion: 2;
   exportedAt: string;
   decks: DeckResponse[];
   cards: CardResponse[];
   challenges: ChallengeResponse[];
+  challengeCards: ChallengeCardExport[];
   challengeCardStates: ChallengeCardStateExport[];
   challengeAnswerEvents: ChallengeAnswerEventExport[];
   challengeRunSessions: ChallengeRunSessionExport[];

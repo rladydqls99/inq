@@ -3,6 +3,7 @@ import type {
   BackupExport,
   CardResponse,
   ChallengeAnswerEventExport,
+  ChallengeCardExport,
   ChallengeCardStateExport,
   ChallengeRunCard,
   ChallengeRunSessionExport,
@@ -20,6 +21,7 @@ export async function exportBackup(
     decks,
     cards,
     challenges,
+    challengeCards,
     challengeCardStates,
     challengeAnswerEvents,
     challengeRunSessions,
@@ -28,14 +30,24 @@ export async function exportBackup(
     listDecks(prisma),
     prisma.card.findMany({ orderBy: { createdAt: "asc" } }),
     listChallengeResponses(prisma, now),
-    prisma.challengeCardState.findMany({ orderBy: { createdAt: "asc" } }),
-    prisma.challengeAnswerEvent.findMany({ orderBy: { answeredAt: "asc" } }),
+    prisma.challengeCard.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.challengeCardState.findMany({
+      include: { challengeCard: { select: { challengeId: true } } },
+      orderBy: { createdAt: "asc" },
+    }),
+    prisma.challengeAnswerEvent.findMany({
+      include: { challengeCard: { select: { challengeId: true } } },
+      orderBy: { answeredAt: "asc" },
+    }),
     prisma.challengeRunSession.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.deckRunState.findMany({ orderBy: { updatedAt: "asc" } }),
   ]);
-  const cardMap = new Map(cards.map((card) => [card.id, card]));
+  const challengeCardMap = new Map(
+    challengeCards.map((card) => [card.id, card]),
+  );
 
   return {
+    schemaVersion: 2,
     exportedAt: now.toISOString(),
     decks: decks.map((deck) => ({
       ...deck,
@@ -44,10 +56,11 @@ export async function exportBackup(
     })),
     cards: cards.map(toCardResponse),
     challenges,
+    challengeCards: challengeCards.map(toChallengeCardExport),
     challengeCardStates: challengeCardStates.map(toChallengeCardStateExport),
     challengeAnswerEvents: challengeAnswerEvents.map(toChallengeAnswerEventExport),
     challengeRunSessions: challengeRunSessions.map((session) => {
-      const queue = toChallengeRunQueueExport(session.queue, cardMap);
+      const queue = toChallengeRunQueueExport(session.queue, challengeCardMap);
       const completedAt =
         queue.length === 0
           ? session.completedAt ?? now
@@ -71,19 +84,40 @@ export async function exportBackup(
 
 function toChallengeRunQueueExport(
   queue: unknown,
-  cardMap: Map<string, { segments: unknown }>,
+  challengeCardMap: Map<string, { segments: unknown }>,
 ): ChallengeRunCard[] {
   if (!Array.isArray(queue)) {
     return [];
   }
 
   return (queue as Array<Omit<ChallengeRunCard, "segments">>)
-    .filter((queueCard) => cardMap.has(queueCard.cardId))
+    .filter((queueCard) =>
+      challengeCardMap.has(queueCard.challengeCardId),
+    )
     .map((queueCard, queueIndex) => ({
       ...queueCard,
       queueIndex,
-      segments: cardMap.get(queueCard.cardId)?.segments as QuizSegment[],
+      segments: challengeCardMap.get(queueCard.challengeCardId)
+        ?.segments as QuizSegment[],
     }));
+}
+
+function toChallengeCardExport(card: {
+  id: string;
+  challengeId: string;
+  sourceDeckCardId: string | null;
+  segments: unknown;
+  createdAt: Date;
+  updatedAt: Date;
+}): ChallengeCardExport {
+  return {
+    id: card.id,
+    challengeId: card.challengeId,
+    sourceDeckCardId: card.sourceDeckCardId,
+    segments: card.segments as QuizSegment[],
+    createdAt: card.createdAt.toISOString(),
+    updatedAt: card.updatedAt.toISOString(),
+  };
 }
 
 function toCardResponse(card: {
@@ -110,8 +144,8 @@ function toCardResponse(card: {
 
 function toChallengeCardStateExport(state: {
   id: string;
-  challengeId: string;
-  cardId: string;
+  challengeCardId: string;
+  challengeCard: { challengeId: string };
   stage: number;
   challengeViewCount: number;
   dueAt: Date | null;
@@ -123,8 +157,8 @@ function toChallengeCardStateExport(state: {
 }): ChallengeCardStateExport {
   return {
     id: state.id,
-    challengeId: state.challengeId,
-    cardId: state.cardId,
+    challengeId: state.challengeCard.challengeId,
+    challengeCardId: state.challengeCardId,
     stage: state.stage,
     challengeViewCount: state.challengeViewCount,
     dueAt: state.dueAt?.toISOString() ?? null,
@@ -138,9 +172,9 @@ function toChallengeCardStateExport(state: {
 
 function toChallengeAnswerEventExport(event: {
   id: string;
-  challengeId: string;
   stateId: string;
-  cardId: string;
+  challengeCardId: string;
+  challengeCard: { challengeId: string };
   sessionCardId: string;
   finalResult: string;
   previousStage: number;
@@ -149,9 +183,9 @@ function toChallengeAnswerEventExport(event: {
 }): ChallengeAnswerEventExport {
   return {
     id: event.id,
-    challengeId: event.challengeId,
+    challengeId: event.challengeCard.challengeId,
     stateId: event.stateId,
-    cardId: event.cardId,
+    challengeCardId: event.challengeCardId,
     sessionCardId: event.sessionCardId,
     finalResult: event.finalResult as ChallengeAnswerEventExport["finalResult"],
     previousStage: event.previousStage,

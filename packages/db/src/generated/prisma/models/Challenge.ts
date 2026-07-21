@@ -37,7 +37,8 @@ export type ChallengeSumAggregateOutputType = {
 export type ChallengeMinAggregateOutputType = {
   id: string | null
   name: string | null
-  deckId: string | null
+  sourceDeckId: string | null
+  sourceDeckTitle: string | null
   status: string | null
   answerMode: string | null
   maxStage: number | null
@@ -49,7 +50,8 @@ export type ChallengeMinAggregateOutputType = {
 export type ChallengeMaxAggregateOutputType = {
   id: string | null
   name: string | null
-  deckId: string | null
+  sourceDeckId: string | null
+  sourceDeckTitle: string | null
   status: string | null
   answerMode: string | null
   maxStage: number | null
@@ -61,7 +63,8 @@ export type ChallengeMaxAggregateOutputType = {
 export type ChallengeCountAggregateOutputType = {
   id: number
   name: number
-  deckId: number
+  sourceDeckId: number
+  sourceDeckTitle: number
   status: number
   answerMode: number
   reviewIntervalsDays: number
@@ -84,7 +87,8 @@ export type ChallengeSumAggregateInputType = {
 export type ChallengeMinAggregateInputType = {
   id?: true
   name?: true
-  deckId?: true
+  sourceDeckId?: true
+  sourceDeckTitle?: true
   status?: true
   answerMode?: true
   maxStage?: true
@@ -96,7 +100,8 @@ export type ChallengeMinAggregateInputType = {
 export type ChallengeMaxAggregateInputType = {
   id?: true
   name?: true
-  deckId?: true
+  sourceDeckId?: true
+  sourceDeckTitle?: true
   status?: true
   answerMode?: true
   maxStage?: true
@@ -108,7 +113,8 @@ export type ChallengeMaxAggregateInputType = {
 export type ChallengeCountAggregateInputType = {
   id?: true
   name?: true
-  deckId?: true
+  sourceDeckId?: true
+  sourceDeckTitle?: true
   status?: true
   answerMode?: true
   reviewIntervalsDays?: true
@@ -208,7 +214,8 @@ export type ChallengeGroupByArgs<ExtArgs extends runtime.Types.Extensions.Intern
 export type ChallengeGroupByOutputType = {
   id: string
   name: string
-  deckId: string
+  sourceDeckId: string | null
+  sourceDeckTitle: string
   status: string
   answerMode: string
   reviewIntervalsDays: runtime.JsonValue
@@ -244,7 +251,8 @@ export type ChallengeWhereInput = {
   NOT?: Prisma.ChallengeWhereInput | Prisma.ChallengeWhereInput[]
   id?: Prisma.StringFilter<"Challenge"> | string
   name?: Prisma.StringFilter<"Challenge"> | string
-  deckId?: Prisma.StringFilter<"Challenge"> | string
+  sourceDeckId?: Prisma.StringNullableFilter<"Challenge"> | string | null
+  sourceDeckTitle?: Prisma.StringFilter<"Challenge"> | string
   status?: Prisma.StringFilter<"Challenge"> | string
   answerMode?: Prisma.StringFilter<"Challenge"> | string
   reviewIntervalsDays?: Prisma.JsonFilter<"Challenge">
@@ -252,7 +260,8 @@ export type ChallengeWhereInput = {
   completedAt?: Prisma.DateTimeNullableFilter<"Challenge"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
-  deck?: Prisma.XOR<Prisma.DeckScalarRelationFilter, Prisma.DeckWhereInput>
+  sourceDeck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
+  cards?: Prisma.ChallengeCardListRelationFilter
   cardStates?: Prisma.ChallengeCardStateListRelationFilter
   answerEvents?: Prisma.ChallengeAnswerEventListRelationFilter
   runSessions?: Prisma.ChallengeRunSessionListRelationFilter
@@ -261,7 +270,8 @@ export type ChallengeWhereInput = {
 export type ChallengeOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  deckId?: Prisma.SortOrder
+  sourceDeckId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceDeckTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   answerMode?: Prisma.SortOrder
   reviewIntervalsDays?: Prisma.SortOrder
@@ -269,7 +279,8 @@ export type ChallengeOrderByWithRelationInput = {
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  deck?: Prisma.DeckOrderByWithRelationInput
+  sourceDeck?: Prisma.DeckOrderByWithRelationInput
+  cards?: Prisma.ChallengeCardOrderByRelationAggregateInput
   cardStates?: Prisma.ChallengeCardStateOrderByRelationAggregateInput
   answerEvents?: Prisma.ChallengeAnswerEventOrderByRelationAggregateInput
   runSessions?: Prisma.ChallengeRunSessionOrderByRelationAggregateInput
@@ -281,7 +292,8 @@ export type ChallengeWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.ChallengeWhereInput[]
   NOT?: Prisma.ChallengeWhereInput | Prisma.ChallengeWhereInput[]
   name?: Prisma.StringFilter<"Challenge"> | string
-  deckId?: Prisma.StringFilter<"Challenge"> | string
+  sourceDeckId?: Prisma.StringNullableFilter<"Challenge"> | string | null
+  sourceDeckTitle?: Prisma.StringFilter<"Challenge"> | string
   status?: Prisma.StringFilter<"Challenge"> | string
   answerMode?: Prisma.StringFilter<"Challenge"> | string
   reviewIntervalsDays?: Prisma.JsonFilter<"Challenge">
@@ -289,7 +301,8 @@ export type ChallengeWhereUniqueInput = Prisma.AtLeast<{
   completedAt?: Prisma.DateTimeNullableFilter<"Challenge"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
-  deck?: Prisma.XOR<Prisma.DeckScalarRelationFilter, Prisma.DeckWhereInput>
+  sourceDeck?: Prisma.XOR<Prisma.DeckNullableScalarRelationFilter, Prisma.DeckWhereInput> | null
+  cards?: Prisma.ChallengeCardListRelationFilter
   cardStates?: Prisma.ChallengeCardStateListRelationFilter
   answerEvents?: Prisma.ChallengeAnswerEventListRelationFilter
   runSessions?: Prisma.ChallengeRunSessionListRelationFilter
@@ -298,7 +311,8 @@ export type ChallengeWhereUniqueInput = Prisma.AtLeast<{
 export type ChallengeOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  deckId?: Prisma.SortOrder
+  sourceDeckId?: Prisma.SortOrderInput | Prisma.SortOrder
+  sourceDeckTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   answerMode?: Prisma.SortOrder
   reviewIntervalsDays?: Prisma.SortOrder
@@ -319,7 +333,8 @@ export type ChallengeScalarWhereWithAggregatesInput = {
   NOT?: Prisma.ChallengeScalarWhereWithAggregatesInput | Prisma.ChallengeScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
   name?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
-  deckId?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
+  sourceDeckId?: Prisma.StringNullableWithAggregatesFilter<"Challenge"> | string | null
+  sourceDeckTitle?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
   status?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
   answerMode?: Prisma.StringWithAggregatesFilter<"Challenge"> | string
   reviewIntervalsDays?: Prisma.JsonWithAggregatesFilter<"Challenge">
@@ -332,6 +347,7 @@ export type ChallengeScalarWhereWithAggregatesInput = {
 export type ChallengeCreateInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -339,7 +355,8 @@ export type ChallengeCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  deck: Prisma.DeckCreateNestedOneWithoutChallengesInput
+  sourceDeck?: Prisma.DeckCreateNestedOneWithoutSourceChallengesInput
+  cards?: Prisma.ChallengeCardCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionCreateNestedManyWithoutChallengeInput
@@ -348,7 +365,8 @@ export type ChallengeCreateInput = {
 export type ChallengeUncheckedCreateInput = {
   id?: string
   name: string
-  deckId: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -356,6 +374,7 @@ export type ChallengeUncheckedCreateInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedCreateNestedManyWithoutChallengeInput
@@ -364,6 +383,7 @@ export type ChallengeUncheckedCreateInput = {
 export type ChallengeUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -371,7 +391,8 @@ export type ChallengeUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deck?: Prisma.DeckUpdateOneRequiredWithoutChallengesNestedInput
+  sourceDeck?: Prisma.DeckUpdateOneWithoutSourceChallengesNestedInput
+  cards?: Prisma.ChallengeCardUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUpdateManyWithoutChallengeNestedInput
@@ -380,7 +401,8 @@ export type ChallengeUpdateInput = {
 export type ChallengeUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -388,6 +410,7 @@ export type ChallengeUncheckedUpdateInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedUpdateManyWithoutChallengeNestedInput
@@ -396,7 +419,8 @@ export type ChallengeUncheckedUpdateInput = {
 export type ChallengeCreateManyInput = {
   id?: string
   name: string
-  deckId: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -409,6 +433,7 @@ export type ChallengeCreateManyInput = {
 export type ChallengeUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -421,7 +446,8 @@ export type ChallengeUpdateManyMutationInput = {
 export type ChallengeUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -444,7 +470,8 @@ export type ChallengeOrderByRelationAggregateInput = {
 export type ChallengeCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  deckId?: Prisma.SortOrder
+  sourceDeckId?: Prisma.SortOrder
+  sourceDeckTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   answerMode?: Prisma.SortOrder
   reviewIntervalsDays?: Prisma.SortOrder
@@ -461,7 +488,8 @@ export type ChallengeAvgOrderByAggregateInput = {
 export type ChallengeMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  deckId?: Prisma.SortOrder
+  sourceDeckId?: Prisma.SortOrder
+  sourceDeckTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   answerMode?: Prisma.SortOrder
   maxStage?: Prisma.SortOrder
@@ -473,7 +501,8 @@ export type ChallengeMaxOrderByAggregateInput = {
 export type ChallengeMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   name?: Prisma.SortOrder
-  deckId?: Prisma.SortOrder
+  sourceDeckId?: Prisma.SortOrder
+  sourceDeckTitle?: Prisma.SortOrder
   status?: Prisma.SortOrder
   answerMode?: Prisma.SortOrder
   maxStage?: Prisma.SortOrder
@@ -491,46 +520,64 @@ export type ChallengeScalarRelationFilter = {
   isNot?: Prisma.ChallengeWhereInput
 }
 
-export type ChallengeCreateNestedManyWithoutDeckInput = {
-  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput> | Prisma.ChallengeCreateWithoutDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutDeckInput[]
-  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutDeckInput | Prisma.ChallengeCreateOrConnectWithoutDeckInput[]
-  createMany?: Prisma.ChallengeCreateManyDeckInputEnvelope
+export type ChallengeCreateNestedManyWithoutSourceDeckInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput> | Prisma.ChallengeCreateWithoutSourceDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput[]
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput | Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput[]
+  createMany?: Prisma.ChallengeCreateManySourceDeckInputEnvelope
   connect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
 }
 
-export type ChallengeUncheckedCreateNestedManyWithoutDeckInput = {
-  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput> | Prisma.ChallengeCreateWithoutDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutDeckInput[]
-  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutDeckInput | Prisma.ChallengeCreateOrConnectWithoutDeckInput[]
-  createMany?: Prisma.ChallengeCreateManyDeckInputEnvelope
+export type ChallengeUncheckedCreateNestedManyWithoutSourceDeckInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput> | Prisma.ChallengeCreateWithoutSourceDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput[]
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput | Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput[]
+  createMany?: Prisma.ChallengeCreateManySourceDeckInputEnvelope
   connect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
 }
 
-export type ChallengeUpdateManyWithoutDeckNestedInput = {
-  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput> | Prisma.ChallengeCreateWithoutDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutDeckInput[]
-  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutDeckInput | Prisma.ChallengeCreateOrConnectWithoutDeckInput[]
-  upsert?: Prisma.ChallengeUpsertWithWhereUniqueWithoutDeckInput | Prisma.ChallengeUpsertWithWhereUniqueWithoutDeckInput[]
-  createMany?: Prisma.ChallengeCreateManyDeckInputEnvelope
+export type ChallengeUpdateManyWithoutSourceDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput> | Prisma.ChallengeCreateWithoutSourceDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput[]
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput | Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput[]
+  upsert?: Prisma.ChallengeUpsertWithWhereUniqueWithoutSourceDeckInput | Prisma.ChallengeUpsertWithWhereUniqueWithoutSourceDeckInput[]
+  createMany?: Prisma.ChallengeCreateManySourceDeckInputEnvelope
   set?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   disconnect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   delete?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   connect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
-  update?: Prisma.ChallengeUpdateWithWhereUniqueWithoutDeckInput | Prisma.ChallengeUpdateWithWhereUniqueWithoutDeckInput[]
-  updateMany?: Prisma.ChallengeUpdateManyWithWhereWithoutDeckInput | Prisma.ChallengeUpdateManyWithWhereWithoutDeckInput[]
+  update?: Prisma.ChallengeUpdateWithWhereUniqueWithoutSourceDeckInput | Prisma.ChallengeUpdateWithWhereUniqueWithoutSourceDeckInput[]
+  updateMany?: Prisma.ChallengeUpdateManyWithWhereWithoutSourceDeckInput | Prisma.ChallengeUpdateManyWithWhereWithoutSourceDeckInput[]
   deleteMany?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
 }
 
-export type ChallengeUncheckedUpdateManyWithoutDeckNestedInput = {
-  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput> | Prisma.ChallengeCreateWithoutDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutDeckInput[]
-  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutDeckInput | Prisma.ChallengeCreateOrConnectWithoutDeckInput[]
-  upsert?: Prisma.ChallengeUpsertWithWhereUniqueWithoutDeckInput | Prisma.ChallengeUpsertWithWhereUniqueWithoutDeckInput[]
-  createMany?: Prisma.ChallengeCreateManyDeckInputEnvelope
+export type ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput> | Prisma.ChallengeCreateWithoutSourceDeckInput[] | Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput[]
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput | Prisma.ChallengeCreateOrConnectWithoutSourceDeckInput[]
+  upsert?: Prisma.ChallengeUpsertWithWhereUniqueWithoutSourceDeckInput | Prisma.ChallengeUpsertWithWhereUniqueWithoutSourceDeckInput[]
+  createMany?: Prisma.ChallengeCreateManySourceDeckInputEnvelope
   set?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   disconnect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   delete?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
   connect?: Prisma.ChallengeWhereUniqueInput | Prisma.ChallengeWhereUniqueInput[]
-  update?: Prisma.ChallengeUpdateWithWhereUniqueWithoutDeckInput | Prisma.ChallengeUpdateWithWhereUniqueWithoutDeckInput[]
-  updateMany?: Prisma.ChallengeUpdateManyWithWhereWithoutDeckInput | Prisma.ChallengeUpdateManyWithWhereWithoutDeckInput[]
+  update?: Prisma.ChallengeUpdateWithWhereUniqueWithoutSourceDeckInput | Prisma.ChallengeUpdateWithWhereUniqueWithoutSourceDeckInput[]
+  updateMany?: Prisma.ChallengeUpdateManyWithWhereWithoutSourceDeckInput | Prisma.ChallengeUpdateManyWithWhereWithoutSourceDeckInput[]
   deleteMany?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
+}
+
+export type ChallengeCreateNestedOneWithoutCardsInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutCardsInput, Prisma.ChallengeUncheckedCreateWithoutCardsInput>
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutCardsInput
+  connect?: Prisma.ChallengeWhereUniqueInput
+}
+
+export type ChallengeUpdateOneRequiredWithoutCardsNestedInput = {
+  create?: Prisma.XOR<Prisma.ChallengeCreateWithoutCardsInput, Prisma.ChallengeUncheckedCreateWithoutCardsInput>
+  connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutCardsInput
+  upsert?: Prisma.ChallengeUpsertWithoutCardsInput
+  connect?: Prisma.ChallengeWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ChallengeUpdateToOneWithWhereWithoutCardsInput, Prisma.ChallengeUpdateWithoutCardsInput>, Prisma.ChallengeUncheckedUpdateWithoutCardsInput>
 }
 
 export type ChallengeCreateNestedOneWithoutCardStatesInput = {
@@ -575,9 +622,10 @@ export type ChallengeUpdateOneRequiredWithoutRunSessionsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ChallengeUpdateToOneWithWhereWithoutRunSessionsInput, Prisma.ChallengeUpdateWithoutRunSessionsInput>, Prisma.ChallengeUncheckedUpdateWithoutRunSessionsInput>
 }
 
-export type ChallengeCreateWithoutDeckInput = {
+export type ChallengeCreateWithoutSourceDeckInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -585,14 +633,93 @@ export type ChallengeCreateWithoutDeckInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionCreateNestedManyWithoutChallengeInput
 }
 
-export type ChallengeUncheckedCreateWithoutDeckInput = {
+export type ChallengeUncheckedCreateWithoutSourceDeckInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
+  status?: string
+  answerMode?: string
+  reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  maxStage: number
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutChallengeInput
+  cardStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutChallengeInput
+  answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutChallengeInput
+  runSessions?: Prisma.ChallengeRunSessionUncheckedCreateNestedManyWithoutChallengeInput
+}
+
+export type ChallengeCreateOrConnectWithoutSourceDeckInput = {
+  where: Prisma.ChallengeWhereUniqueInput
+  create: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput>
+}
+
+export type ChallengeCreateManySourceDeckInputEnvelope = {
+  data: Prisma.ChallengeCreateManySourceDeckInput | Prisma.ChallengeCreateManySourceDeckInput[]
+}
+
+export type ChallengeUpsertWithWhereUniqueWithoutSourceDeckInput = {
+  where: Prisma.ChallengeWhereUniqueInput
+  update: Prisma.XOR<Prisma.ChallengeUpdateWithoutSourceDeckInput, Prisma.ChallengeUncheckedUpdateWithoutSourceDeckInput>
+  create: Prisma.XOR<Prisma.ChallengeCreateWithoutSourceDeckInput, Prisma.ChallengeUncheckedCreateWithoutSourceDeckInput>
+}
+
+export type ChallengeUpdateWithWhereUniqueWithoutSourceDeckInput = {
+  where: Prisma.ChallengeWhereUniqueInput
+  data: Prisma.XOR<Prisma.ChallengeUpdateWithoutSourceDeckInput, Prisma.ChallengeUncheckedUpdateWithoutSourceDeckInput>
+}
+
+export type ChallengeUpdateManyWithWhereWithoutSourceDeckInput = {
+  where: Prisma.ChallengeScalarWhereInput
+  data: Prisma.XOR<Prisma.ChallengeUpdateManyMutationInput, Prisma.ChallengeUncheckedUpdateManyWithoutSourceDeckInput>
+}
+
+export type ChallengeScalarWhereInput = {
+  AND?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
+  OR?: Prisma.ChallengeScalarWhereInput[]
+  NOT?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
+  id?: Prisma.StringFilter<"Challenge"> | string
+  name?: Prisma.StringFilter<"Challenge"> | string
+  sourceDeckId?: Prisma.StringNullableFilter<"Challenge"> | string | null
+  sourceDeckTitle?: Prisma.StringFilter<"Challenge"> | string
+  status?: Prisma.StringFilter<"Challenge"> | string
+  answerMode?: Prisma.StringFilter<"Challenge"> | string
+  reviewIntervalsDays?: Prisma.JsonFilter<"Challenge">
+  maxStage?: Prisma.IntFilter<"Challenge"> | number
+  completedAt?: Prisma.DateTimeNullableFilter<"Challenge"> | Date | string | null
+  createdAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
+}
+
+export type ChallengeCreateWithoutCardsInput = {
+  id?: string
+  name: string
+  sourceDeckTitle: string
+  status?: string
+  answerMode?: string
+  reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  maxStage: number
+  completedAt?: Date | string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  sourceDeck?: Prisma.DeckCreateNestedOneWithoutSourceChallengesInput
+  cardStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutChallengeInput
+  answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutChallengeInput
+  runSessions?: Prisma.ChallengeRunSessionCreateNestedManyWithoutChallengeInput
+}
+
+export type ChallengeUncheckedCreateWithoutCardsInput = {
+  id?: string
+  name: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -605,50 +732,60 @@ export type ChallengeUncheckedCreateWithoutDeckInput = {
   runSessions?: Prisma.ChallengeRunSessionUncheckedCreateNestedManyWithoutChallengeInput
 }
 
-export type ChallengeCreateOrConnectWithoutDeckInput = {
+export type ChallengeCreateOrConnectWithoutCardsInput = {
   where: Prisma.ChallengeWhereUniqueInput
-  create: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput>
+  create: Prisma.XOR<Prisma.ChallengeCreateWithoutCardsInput, Prisma.ChallengeUncheckedCreateWithoutCardsInput>
 }
 
-export type ChallengeCreateManyDeckInputEnvelope = {
-  data: Prisma.ChallengeCreateManyDeckInput | Prisma.ChallengeCreateManyDeckInput[]
+export type ChallengeUpsertWithoutCardsInput = {
+  update: Prisma.XOR<Prisma.ChallengeUpdateWithoutCardsInput, Prisma.ChallengeUncheckedUpdateWithoutCardsInput>
+  create: Prisma.XOR<Prisma.ChallengeCreateWithoutCardsInput, Prisma.ChallengeUncheckedCreateWithoutCardsInput>
+  where?: Prisma.ChallengeWhereInput
 }
 
-export type ChallengeUpsertWithWhereUniqueWithoutDeckInput = {
-  where: Prisma.ChallengeWhereUniqueInput
-  update: Prisma.XOR<Prisma.ChallengeUpdateWithoutDeckInput, Prisma.ChallengeUncheckedUpdateWithoutDeckInput>
-  create: Prisma.XOR<Prisma.ChallengeCreateWithoutDeckInput, Prisma.ChallengeUncheckedCreateWithoutDeckInput>
+export type ChallengeUpdateToOneWithWhereWithoutCardsInput = {
+  where?: Prisma.ChallengeWhereInput
+  data: Prisma.XOR<Prisma.ChallengeUpdateWithoutCardsInput, Prisma.ChallengeUncheckedUpdateWithoutCardsInput>
 }
 
-export type ChallengeUpdateWithWhereUniqueWithoutDeckInput = {
-  where: Prisma.ChallengeWhereUniqueInput
-  data: Prisma.XOR<Prisma.ChallengeUpdateWithoutDeckInput, Prisma.ChallengeUncheckedUpdateWithoutDeckInput>
+export type ChallengeUpdateWithoutCardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  answerMode?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  maxStage?: Prisma.IntFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  sourceDeck?: Prisma.DeckUpdateOneWithoutSourceChallengesNestedInput
+  cardStates?: Prisma.ChallengeCardStateUpdateManyWithoutChallengeNestedInput
+  answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutChallengeNestedInput
+  runSessions?: Prisma.ChallengeRunSessionUpdateManyWithoutChallengeNestedInput
 }
 
-export type ChallengeUpdateManyWithWhereWithoutDeckInput = {
-  where: Prisma.ChallengeScalarWhereInput
-  data: Prisma.XOR<Prisma.ChallengeUpdateManyMutationInput, Prisma.ChallengeUncheckedUpdateManyWithoutDeckInput>
-}
-
-export type ChallengeScalarWhereInput = {
-  AND?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
-  OR?: Prisma.ChallengeScalarWhereInput[]
-  NOT?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
-  id?: Prisma.StringFilter<"Challenge"> | string
-  name?: Prisma.StringFilter<"Challenge"> | string
-  deckId?: Prisma.StringFilter<"Challenge"> | string
-  status?: Prisma.StringFilter<"Challenge"> | string
-  answerMode?: Prisma.StringFilter<"Challenge"> | string
-  reviewIntervalsDays?: Prisma.JsonFilter<"Challenge">
-  maxStage?: Prisma.IntFilter<"Challenge"> | number
-  completedAt?: Prisma.DateTimeNullableFilter<"Challenge"> | Date | string | null
-  createdAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"Challenge"> | Date | string
+export type ChallengeUncheckedUpdateWithoutCardsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  answerMode?: Prisma.StringFieldUpdateOperationsInput | string
+  reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  maxStage?: Prisma.IntFieldUpdateOperationsInput | number
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cardStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutChallengeNestedInput
+  answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutChallengeNestedInput
+  runSessions?: Prisma.ChallengeRunSessionUncheckedUpdateManyWithoutChallengeNestedInput
 }
 
 export type ChallengeCreateWithoutCardStatesInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -656,7 +793,8 @@ export type ChallengeCreateWithoutCardStatesInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  deck: Prisma.DeckCreateNestedOneWithoutChallengesInput
+  sourceDeck?: Prisma.DeckCreateNestedOneWithoutSourceChallengesInput
+  cards?: Prisma.ChallengeCardCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionCreateNestedManyWithoutChallengeInput
 }
@@ -664,7 +802,8 @@ export type ChallengeCreateWithoutCardStatesInput = {
 export type ChallengeUncheckedCreateWithoutCardStatesInput = {
   id?: string
   name: string
-  deckId: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -672,6 +811,7 @@ export type ChallengeUncheckedCreateWithoutCardStatesInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedCreateNestedManyWithoutChallengeInput
 }
@@ -695,6 +835,7 @@ export type ChallengeUpdateToOneWithWhereWithoutCardStatesInput = {
 export type ChallengeUpdateWithoutCardStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -702,7 +843,8 @@ export type ChallengeUpdateWithoutCardStatesInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deck?: Prisma.DeckUpdateOneRequiredWithoutChallengesNestedInput
+  sourceDeck?: Prisma.DeckUpdateOneWithoutSourceChallengesNestedInput
+  cards?: Prisma.ChallengeCardUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUpdateManyWithoutChallengeNestedInput
 }
@@ -710,7 +852,8 @@ export type ChallengeUpdateWithoutCardStatesInput = {
 export type ChallengeUncheckedUpdateWithoutCardStatesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -718,6 +861,7 @@ export type ChallengeUncheckedUpdateWithoutCardStatesInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedUpdateManyWithoutChallengeNestedInput
 }
@@ -725,6 +869,7 @@ export type ChallengeUncheckedUpdateWithoutCardStatesInput = {
 export type ChallengeCreateWithoutAnswerEventsInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -732,7 +877,8 @@ export type ChallengeCreateWithoutAnswerEventsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  deck: Prisma.DeckCreateNestedOneWithoutChallengesInput
+  sourceDeck?: Prisma.DeckCreateNestedOneWithoutSourceChallengesInput
+  cards?: Prisma.ChallengeCardCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionCreateNestedManyWithoutChallengeInput
 }
@@ -740,7 +886,8 @@ export type ChallengeCreateWithoutAnswerEventsInput = {
 export type ChallengeUncheckedCreateWithoutAnswerEventsInput = {
   id?: string
   name: string
-  deckId: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -748,6 +895,7 @@ export type ChallengeUncheckedCreateWithoutAnswerEventsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutChallengeInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedCreateNestedManyWithoutChallengeInput
 }
@@ -771,6 +919,7 @@ export type ChallengeUpdateToOneWithWhereWithoutAnswerEventsInput = {
 export type ChallengeUpdateWithoutAnswerEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -778,7 +927,8 @@ export type ChallengeUpdateWithoutAnswerEventsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deck?: Prisma.DeckUpdateOneRequiredWithoutChallengesNestedInput
+  sourceDeck?: Prisma.DeckUpdateOneWithoutSourceChallengesNestedInput
+  cards?: Prisma.ChallengeCardUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUpdateManyWithoutChallengeNestedInput
 }
@@ -786,7 +936,8 @@ export type ChallengeUpdateWithoutAnswerEventsInput = {
 export type ChallengeUncheckedUpdateWithoutAnswerEventsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -794,6 +945,7 @@ export type ChallengeUncheckedUpdateWithoutAnswerEventsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedUpdateManyWithoutChallengeNestedInput
 }
@@ -801,6 +953,7 @@ export type ChallengeUncheckedUpdateWithoutAnswerEventsInput = {
 export type ChallengeCreateWithoutRunSessionsInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -808,7 +961,8 @@ export type ChallengeCreateWithoutRunSessionsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  deck: Prisma.DeckCreateNestedOneWithoutChallengesInput
+  sourceDeck?: Prisma.DeckCreateNestedOneWithoutSourceChallengesInput
+  cards?: Prisma.ChallengeCardCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventCreateNestedManyWithoutChallengeInput
 }
@@ -816,7 +970,8 @@ export type ChallengeCreateWithoutRunSessionsInput = {
 export type ChallengeUncheckedCreateWithoutRunSessionsInput = {
   id?: string
   name: string
-  deckId: string
+  sourceDeckId?: string | null
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -824,6 +979,7 @@ export type ChallengeUncheckedCreateWithoutRunSessionsInput = {
   completedAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  cards?: Prisma.ChallengeCardUncheckedCreateNestedManyWithoutChallengeInput
   cardStates?: Prisma.ChallengeCardStateUncheckedCreateNestedManyWithoutChallengeInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedCreateNestedManyWithoutChallengeInput
 }
@@ -847,6 +1003,7 @@ export type ChallengeUpdateToOneWithWhereWithoutRunSessionsInput = {
 export type ChallengeUpdateWithoutRunSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -854,7 +1011,8 @@ export type ChallengeUpdateWithoutRunSessionsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  deck?: Prisma.DeckUpdateOneRequiredWithoutChallengesNestedInput
+  sourceDeck?: Prisma.DeckUpdateOneWithoutSourceChallengesNestedInput
+  cards?: Prisma.ChallengeCardUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutChallengeNestedInput
 }
@@ -862,7 +1020,8 @@ export type ChallengeUpdateWithoutRunSessionsInput = {
 export type ChallengeUncheckedUpdateWithoutRunSessionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
-  deckId?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -870,13 +1029,15 @@ export type ChallengeUncheckedUpdateWithoutRunSessionsInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutChallengeNestedInput
 }
 
-export type ChallengeCreateManyDeckInput = {
+export type ChallengeCreateManySourceDeckInput = {
   id?: string
   name: string
+  sourceDeckTitle: string
   status?: string
   answerMode?: string
   reviewIntervalsDays: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -886,9 +1047,10 @@ export type ChallengeCreateManyDeckInput = {
   updatedAt?: Date | string
 }
 
-export type ChallengeUpdateWithoutDeckInput = {
+export type ChallengeUpdateWithoutSourceDeckInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -896,14 +1058,16 @@ export type ChallengeUpdateWithoutDeckInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUpdateManyWithoutChallengeNestedInput
 }
 
-export type ChallengeUncheckedUpdateWithoutDeckInput = {
+export type ChallengeUncheckedUpdateWithoutSourceDeckInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -911,14 +1075,16 @@ export type ChallengeUncheckedUpdateWithoutDeckInput = {
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  cards?: Prisma.ChallengeCardUncheckedUpdateManyWithoutChallengeNestedInput
   cardStates?: Prisma.ChallengeCardStateUncheckedUpdateManyWithoutChallengeNestedInput
   answerEvents?: Prisma.ChallengeAnswerEventUncheckedUpdateManyWithoutChallengeNestedInput
   runSessions?: Prisma.ChallengeRunSessionUncheckedUpdateManyWithoutChallengeNestedInput
 }
 
-export type ChallengeUncheckedUpdateManyWithoutDeckInput = {
+export type ChallengeUncheckedUpdateManyWithoutSourceDeckInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceDeckTitle?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
   answerMode?: Prisma.StringFieldUpdateOperationsInput | string
   reviewIntervalsDays?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -934,12 +1100,14 @@ export type ChallengeUncheckedUpdateManyWithoutDeckInput = {
  */
 
 export type ChallengeCountOutputType = {
+  cards: number
   cardStates: number
   answerEvents: number
   runSessions: number
 }
 
 export type ChallengeCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  cards?: boolean | ChallengeCountOutputTypeCountCardsArgs
   cardStates?: boolean | ChallengeCountOutputTypeCountCardStatesArgs
   answerEvents?: boolean | ChallengeCountOutputTypeCountAnswerEventsArgs
   runSessions?: boolean | ChallengeCountOutputTypeCountRunSessionsArgs
@@ -953,6 +1121,13 @@ export type ChallengeCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ex
    * Select specific fields to fetch from the ChallengeCountOutputType
    */
   select?: Prisma.ChallengeCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * ChallengeCountOutputType without action
+ */
+export type ChallengeCountOutputTypeCountCardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.ChallengeCardWhereInput
 }
 
 /**
@@ -980,7 +1155,8 @@ export type ChallengeCountOutputTypeCountRunSessionsArgs<ExtArgs extends runtime
 export type ChallengeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  deckId?: boolean
+  sourceDeckId?: boolean
+  sourceDeckTitle?: boolean
   status?: boolean
   answerMode?: boolean
   reviewIntervalsDays?: boolean
@@ -988,7 +1164,8 @@ export type ChallengeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
+  cards?: boolean | Prisma.Challenge$cardsArgs<ExtArgs>
   cardStates?: boolean | Prisma.Challenge$cardStatesArgs<ExtArgs>
   answerEvents?: boolean | Prisma.Challenge$answerEventsArgs<ExtArgs>
   runSessions?: boolean | Prisma.Challenge$runSessionsArgs<ExtArgs>
@@ -998,7 +1175,8 @@ export type ChallengeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type ChallengeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  deckId?: boolean
+  sourceDeckId?: boolean
+  sourceDeckTitle?: boolean
   status?: boolean
   answerMode?: boolean
   reviewIntervalsDays?: boolean
@@ -1006,13 +1184,14 @@ export type ChallengeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
 }, ExtArgs["result"]["challenge"]>
 
 export type ChallengeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   name?: boolean
-  deckId?: boolean
+  sourceDeckId?: boolean
+  sourceDeckTitle?: boolean
   status?: boolean
   answerMode?: boolean
   reviewIntervalsDays?: boolean
@@ -1020,13 +1199,14 @@ export type ChallengeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   completedAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
 }, ExtArgs["result"]["challenge"]>
 
 export type ChallengeSelectScalar = {
   id?: boolean
   name?: boolean
-  deckId?: boolean
+  sourceDeckId?: boolean
+  sourceDeckTitle?: boolean
   status?: boolean
   answerMode?: boolean
   reviewIntervalsDays?: boolean
@@ -1036,25 +1216,27 @@ export type ChallengeSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ChallengeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "deckId" | "status" | "answerMode" | "reviewIntervalsDays" | "maxStage" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["challenge"]>
+export type ChallengeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "sourceDeckId" | "sourceDeckTitle" | "status" | "answerMode" | "reviewIntervalsDays" | "maxStage" | "completedAt" | "createdAt" | "updatedAt", ExtArgs["result"]["challenge"]>
 export type ChallengeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
+  cards?: boolean | Prisma.Challenge$cardsArgs<ExtArgs>
   cardStates?: boolean | Prisma.Challenge$cardStatesArgs<ExtArgs>
   answerEvents?: boolean | Prisma.Challenge$answerEventsArgs<ExtArgs>
   runSessions?: boolean | Prisma.Challenge$runSessionsArgs<ExtArgs>
   _count?: boolean | Prisma.ChallengeCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ChallengeIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
 }
 export type ChallengeIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  deck?: boolean | Prisma.DeckDefaultArgs<ExtArgs>
+  sourceDeck?: boolean | Prisma.Challenge$sourceDeckArgs<ExtArgs>
 }
 
 export type $ChallengePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Challenge"
   objects: {
-    deck: Prisma.$DeckPayload<ExtArgs>
+    sourceDeck: Prisma.$DeckPayload<ExtArgs> | null
+    cards: Prisma.$ChallengeCardPayload<ExtArgs>[]
     cardStates: Prisma.$ChallengeCardStatePayload<ExtArgs>[]
     answerEvents: Prisma.$ChallengeAnswerEventPayload<ExtArgs>[]
     runSessions: Prisma.$ChallengeRunSessionPayload<ExtArgs>[]
@@ -1062,7 +1244,8 @@ export type $ChallengePayload<ExtArgs extends runtime.Types.Extensions.InternalA
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     name: string
-    deckId: string
+    sourceDeckId: string | null
+    sourceDeckTitle: string
     status: string
     answerMode: string
     reviewIntervalsDays: runtime.JsonValue
@@ -1464,7 +1647,8 @@ readonly fields: ChallengeFieldRefs;
  */
 export interface Prisma__ChallengeClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  deck<T extends Prisma.DeckDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.DeckDefaultArgs<ExtArgs>>): Prisma.Prisma__DeckClient<runtime.Types.Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sourceDeck<T extends Prisma.Challenge$sourceDeckArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Challenge$sourceDeckArgs<ExtArgs>>): Prisma.Prisma__DeckClient<runtime.Types.Result.GetResult<Prisma.$DeckPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  cards<T extends Prisma.Challenge$cardsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Challenge$cardsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeCardPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   cardStates<T extends Prisma.Challenge$cardStatesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Challenge$cardStatesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeCardStatePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   answerEvents<T extends Prisma.Challenge$answerEventsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Challenge$answerEventsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeAnswerEventPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   runSessions<T extends Prisma.Challenge$runSessionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Challenge$runSessionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ChallengeRunSessionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1499,7 +1683,8 @@ export interface Prisma__ChallengeClient<T, Null = never, ExtArgs extends runtim
 export interface ChallengeFieldRefs {
   readonly id: Prisma.FieldRef<"Challenge", 'String'>
   readonly name: Prisma.FieldRef<"Challenge", 'String'>
-  readonly deckId: Prisma.FieldRef<"Challenge", 'String'>
+  readonly sourceDeckId: Prisma.FieldRef<"Challenge", 'String'>
+  readonly sourceDeckTitle: Prisma.FieldRef<"Challenge", 'String'>
   readonly status: Prisma.FieldRef<"Challenge", 'String'>
   readonly answerMode: Prisma.FieldRef<"Challenge", 'String'>
   readonly reviewIntervalsDays: Prisma.FieldRef<"Challenge", 'Json'>
@@ -1903,6 +2088,49 @@ export type ChallengeDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
    * Limit how many Challenges to delete.
    */
   limit?: number
+}
+
+/**
+ * Challenge.sourceDeck
+ */
+export type Challenge$sourceDeckArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Deck
+   */
+  select?: Prisma.DeckSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Deck
+   */
+  omit?: Prisma.DeckOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.DeckInclude<ExtArgs> | null
+  where?: Prisma.DeckWhereInput
+}
+
+/**
+ * Challenge.cards
+ */
+export type Challenge$cardsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the ChallengeCard
+   */
+  select?: Prisma.ChallengeCardSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the ChallengeCard
+   */
+  omit?: Prisma.ChallengeCardOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ChallengeCardInclude<ExtArgs> | null
+  where?: Prisma.ChallengeCardWhereInput
+  orderBy?: Prisma.ChallengeCardOrderByWithRelationInput | Prisma.ChallengeCardOrderByWithRelationInput[]
+  cursor?: Prisma.ChallengeCardWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.ChallengeCardScalarFieldEnum | Prisma.ChallengeCardScalarFieldEnum[]
 }
 
 /**

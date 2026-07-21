@@ -38,7 +38,7 @@ describe("challenge routes", () => {
       const created = await createResponse.json();
       expect(created).toMatchObject({
         name: "중간고사",
-        deckId: deck.id,
+        sourceDeckId: deck.id,
         deckTitle: "국어",
         status: "active",
         answerMode: "manual",
@@ -569,7 +569,8 @@ describe("challenge routes", () => {
       await expect(response.json()).resolves.toMatchObject([
         {
           challengeId: challenge.id,
-          cardId: card.id,
+          challengeCardId: expect.any(String),
+          sourceDeckCardId: card.id,
           segments,
           stage: 0,
           challengeViewCount: 0,
@@ -596,6 +597,77 @@ describe("challenge routes", () => {
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
         error: "challenge_not_found",
+      });
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("keeps challenge content after source card edits and source deck deletion", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const sourceCard = await createCard(prisma, { deckId: deck.id, segments });
+      const challenge = await createChallenge(prisma, {
+        name: "독립 복습",
+        deckId: deck.id,
+        reviewIntervalsDays: [3, 5, 10],
+      });
+
+      await prisma.card.update({
+        where: { id: sourceCard.id },
+        data: {
+          segments: [
+            { type: "text", value: "수정된 " },
+            { type: "answer", id: "answer-1", value: "원본 카드" },
+          ],
+        },
+      });
+
+      const cardsBeforeDelete = await app.request(
+        `/api/challenges/${challenge.id}/cards`,
+        { headers: { cookie } },
+      );
+      await expect(cardsBeforeDelete.json()).resolves.toMatchObject([
+        { segments, sourceDeckCardId: sourceCard.id },
+      ]);
+
+      const deleteResponse = await app.request(`/api/decks/${deck.id}`, {
+        method: "DELETE",
+        headers: { cookie },
+      });
+      expect(deleteResponse.status).toBe(204);
+
+      const listResponse = await app.request("/api/challenges", {
+        headers: { cookie },
+      });
+      await expect(listResponse.json()).resolves.toMatchObject([
+        {
+          id: challenge.id,
+          sourceDeckId: null,
+          deckTitle: "국어",
+          progress: { totalCards: 1 },
+        },
+      ]);
+
+      const cardsAfterDelete = await app.request(
+        `/api/challenges/${challenge.id}/cards`,
+        { headers: { cookie } },
+      );
+      await expect(cardsAfterDelete.json()).resolves.toMatchObject([
+        { segments, sourceDeckCardId: null },
+      ]);
+
+      const updateResponse = await app.request(
+        `/api/challenges/${challenge.id}/update-from-deck`,
+        { method: "POST", headers: { cookie } },
+      );
+      expect(updateResponse.status).toBe(409);
+      await expect(updateResponse.json()).resolves.toEqual({
+        error: "source_deck_unavailable",
       });
     } finally {
       await cleanup();

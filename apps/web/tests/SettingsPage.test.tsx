@@ -6,10 +6,12 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SettingsPage } from "../src/features/settings/SettingsPage";
+import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/features/runners/vehicleControlSettings";
 
 describe("SettingsPage", () => {
   afterEach(() => {
     cleanup();
+    window.localStorage.clear();
     vi.restoreAllMocks();
   });
 
@@ -18,6 +20,33 @@ describe("SettingsPage", () => {
 
     expect(screen.queryByRole("heading", { name: "PIN" })).toBeNull();
     expect(screen.queryByRole("button", { name: "PIN 변경" })).toBeNull();
+  });
+
+  it("enables vehicle control by default and persists changes on this device", async () => {
+    const user = userEvent.setup();
+
+    renderSettings();
+
+    const vehicleControl = screen.getByRole("switch", {
+      name: /덱 학습 차량 제어/,
+    }) as HTMLInputElement;
+    expect(vehicleControl.checked).toBe(true);
+    expect(window.localStorage.getItem(VEHICLE_CONTROL_STORAGE_KEY)).toBeNull();
+
+    await user.click(vehicleControl);
+
+    expect(vehicleControl.checked).toBe(false);
+    expect(window.localStorage.getItem(VEHICLE_CONTROL_STORAGE_KEY)).toBe(
+      "false",
+    );
+
+    cleanup();
+    renderSettings();
+    expect(
+      (screen.getByRole("switch", {
+        name: /덱 학습 차량 제어/,
+      }) as HTMLInputElement).checked,
+    ).toBe(false);
   });
 
   it("exports backup data", async () => {

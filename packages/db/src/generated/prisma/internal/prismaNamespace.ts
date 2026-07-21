@@ -387,6 +387,7 @@ export const ModelName = {
   Deck: 'Deck',
   Card: 'Card',
   Challenge: 'Challenge',
+  ChallengeCard: 'ChallengeCard',
   ChallengeCardState: 'ChallengeCardState',
   ChallengeAnswerEvent: 'ChallengeAnswerEvent',
   ChallengeRunSession: 'ChallengeRunSession',
@@ -407,7 +408,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "deck" | "card" | "challenge" | "challengeCardState" | "challengeAnswerEvent" | "challengeRunSession" | "deckRunState" | "pinSettings"
+    modelProps: "deck" | "card" | "challenge" | "challengeCard" | "challengeCardState" | "challengeAnswerEvent" | "challengeRunSession" | "deckRunState" | "pinSettings"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -630,6 +631,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ChallengeCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ChallengeCountAggregateOutputType> | number
+        }
+      }
+    }
+    ChallengeCard: {
+      payload: Prisma.$ChallengeCardPayload<ExtArgs>
+      fields: Prisma.ChallengeCardFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ChallengeCardFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ChallengeCardFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        findFirst: {
+          args: Prisma.ChallengeCardFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ChallengeCardFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        findMany: {
+          args: Prisma.ChallengeCardFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>[]
+        }
+        create: {
+          args: Prisma.ChallengeCardCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        createMany: {
+          args: Prisma.ChallengeCardCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ChallengeCardCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>[]
+        }
+        delete: {
+          args: Prisma.ChallengeCardDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        update: {
+          args: Prisma.ChallengeCardUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        deleteMany: {
+          args: Prisma.ChallengeCardDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ChallengeCardUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ChallengeCardUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>[]
+        }
+        upsert: {
+          args: Prisma.ChallengeCardUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ChallengeCardPayload>
+        }
+        aggregate: {
+          args: Prisma.ChallengeCardAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateChallengeCard>
+        }
+        groupBy: {
+          args: Prisma.ChallengeCardGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChallengeCardGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ChallengeCardCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ChallengeCardCountAggregateOutputType> | number
         }
       }
     }
@@ -1066,7 +1141,8 @@ export type CardScalarFieldEnum = (typeof CardScalarFieldEnum)[keyof typeof Card
 export const ChallengeScalarFieldEnum = {
   id: 'id',
   name: 'name',
-  deckId: 'deckId',
+  sourceDeckId: 'sourceDeckId',
+  sourceDeckTitle: 'sourceDeckTitle',
   status: 'status',
   answerMode: 'answerMode',
   reviewIntervalsDays: 'reviewIntervalsDays',
@@ -1079,10 +1155,22 @@ export const ChallengeScalarFieldEnum = {
 export type ChallengeScalarFieldEnum = (typeof ChallengeScalarFieldEnum)[keyof typeof ChallengeScalarFieldEnum]
 
 
+export const ChallengeCardScalarFieldEnum = {
+  id: 'id',
+  challengeId: 'challengeId',
+  sourceDeckCardId: 'sourceDeckCardId',
+  segments: 'segments',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ChallengeCardScalarFieldEnum = (typeof ChallengeCardScalarFieldEnum)[keyof typeof ChallengeCardScalarFieldEnum]
+
+
 export const ChallengeCardStateScalarFieldEnum = {
   id: 'id',
   challengeId: 'challengeId',
-  cardId: 'cardId',
+  challengeCardId: 'challengeCardId',
   stage: 'stage',
   challengeViewCount: 'challengeViewCount',
   dueAt: 'dueAt',
@@ -1100,7 +1188,7 @@ export const ChallengeAnswerEventScalarFieldEnum = {
   id: 'id',
   challengeId: 'challengeId',
   stateId: 'stateId',
-  cardId: 'cardId',
+  challengeCardId: 'challengeCardId',
   sessionCardId: 'sessionCardId',
   finalResult: 'finalResult',
   previousStage: 'previousStage',
@@ -1346,6 +1434,7 @@ export type GlobalOmitConfig = {
   deck?: Prisma.DeckOmit
   card?: Prisma.CardOmit
   challenge?: Prisma.ChallengeOmit
+  challengeCard?: Prisma.ChallengeCardOmit
   challengeCardState?: Prisma.ChallengeCardStateOmit
   challengeAnswerEvent?: Prisma.ChallengeAnswerEventOmit
   challengeRunSession?: Prisma.ChallengeRunSessionOmit

@@ -12,7 +12,7 @@ export type ChallengeAnswerResult = "correct" | "wrong";
 
 export type ChallengeCardStateSnapshot = {
   stateId: string;
-  cardId: string;
+  challengeCardId: string;
   stage: number;
   dueAt: Date | null;
   completedAt: Date | null;
@@ -21,7 +21,7 @@ export type ChallengeCardStateSnapshot = {
 export type ChallengeRunQueueCard = {
   sessionCardId: string;
   stateId: string;
-  cardId: string;
+  challengeCardId: string;
   queueIndex: number;
   startingStage: number;
   selectedResult: ChallengeAnswerResult | null;
@@ -97,7 +97,7 @@ export function buildChallengeRunQueue(
     .map((state, index) => ({
       sessionCardId: state.stateId,
       stateId: state.stateId,
-      cardId: state.cardId,
+      challengeCardId: state.challengeCardId,
       queueIndex: index,
       startingStage: state.stage,
       selectedResult: null,
@@ -167,7 +167,7 @@ export async function getOrCreateChallengeRunState(
 
   const states = await prisma.challengeCardState.findMany({
     where: {
-      challengeId,
+      challengeCard: { challengeId },
       completedAt: null,
       OR: [{ dueAt: null }, { dueAt: { lte: now } }],
     },
@@ -176,7 +176,7 @@ export async function getOrCreateChallengeRunState(
   const queue = buildChallengeRunQueue(
     states.map((state) => ({
       stateId: state.id,
-      cardId: state.cardId,
+      challengeCardId: state.challengeCardId,
       stage: state.stage,
       dueAt: state.dueAt,
       completedAt: state.completedAt,
@@ -186,7 +186,7 @@ export async function getOrCreateChallengeRunState(
     queue.length === 0
       ? await prisma.challengeCardState.count({
           where: {
-            challengeId,
+            challengeCard: { challengeId },
             completedAt: null,
           },
         })
@@ -316,7 +316,7 @@ export async function submitChallengeRunResult(
       data: {
         challengeId: input.challengeId,
         stateId: updatedCard.stateId,
-        cardId: updatedCard.cardId,
+        challengeCardId: updatedCard.challengeCardId,
         sessionCardId: updatedCard.sessionCardId,
         finalResult: input.finalResult,
         previousStage: applied.transition.event.previousStage,
@@ -327,7 +327,7 @@ export async function submitChallengeRunResult(
 
     const remainingCards = await transaction.challengeCardState.count({
       where: {
-        challengeId: input.challengeId,
+        challengeCard: { challengeId: input.challengeId },
         completedAt: null,
       },
     });
@@ -366,14 +366,18 @@ async function toChallengeRunState(
   },
 ): Promise<ChallengeRunState> {
   let queue = parseQueue(session.queue);
-  const cards = await prisma.card.findMany({
+  const challengeCards = await prisma.challengeCard.findMany({
     where: {
-      id: { in: queue.map((card) => card.cardId) },
+      id: { in: queue.map((card) => card.challengeCardId) },
     },
   });
-  const cardsById = new Map(cards.map((card) => [card.id, card]));
+  const challengeCardsById = new Map(
+    challengeCards.map((card) => [card.id, card]),
+  );
   const validQueue = reindexQueue(
-    queue.filter((queueCard) => cardsById.has(queueCard.cardId)),
+    queue.filter((queueCard) =>
+      challengeCardsById.has(queueCard.challengeCardId),
+    ),
   );
 
   if (validQueue.length !== queue.length) {
@@ -399,17 +403,21 @@ async function toChallengeRunState(
     status: session.status as ChallengeRunState["status"],
     cursor: session.cursor,
     cards: queue.map((queueCard): ChallengeRunCard => {
-      const card = cardsById.get(queueCard.cardId);
+      const challengeCard = challengeCardsById.get(
+        queueCard.challengeCardId,
+      );
 
-      if (!card) {
-        throw new Error(`Card not found after queue cleanup: ${queueCard.cardId}`);
+      if (!challengeCard) {
+        throw new Error(
+          `Challenge card not found after queue cleanup: ${queueCard.challengeCardId}`,
+        );
       }
 
       return {
         sessionCardId: queueCard.sessionCardId,
         stateId: queueCard.stateId,
-        cardId: queueCard.cardId,
-        segments: card.segments as QuizSegment[],
+        challengeCardId: queueCard.challengeCardId,
+        segments: challengeCard.segments as QuizSegment[],
         queueIndex: queueCard.queueIndex,
         selectedResult: queueCard.selectedResult,
       };

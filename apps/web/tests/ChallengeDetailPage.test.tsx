@@ -62,7 +62,7 @@ function challenge() {
   return {
     id: "challenge-1",
     name: "중간고사",
-    deckId: "deck-1",
+    sourceDeckId: "deck-1",
     deckTitle: "국어",
     status: "active",
     answerMode: "manual",
@@ -83,9 +83,10 @@ function challenge() {
 
 function challengeCard() {
   return {
-    id: "state-1",
+    stateId: "state-1",
     challengeId: "challenge-1",
-    cardId: "card-1",
+    challengeCardId: "challenge-card-1",
+    sourceDeckCardId: "card-1",
     segments: [
       { type: "text", value: "훈민정음을 만든 왕은 " },
       { type: "answer", id: "answer-1", value: "세종대왕" },

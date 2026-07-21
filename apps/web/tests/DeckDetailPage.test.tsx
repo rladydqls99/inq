@@ -6,10 +6,18 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DeckDetailPage } from "../src/features/decks/DeckDetailPage";
+import {
+  primeDeckVehicleControlFromUserGesture,
+  releasePrimedDeckVehicleControl,
+} from "../src/features/runners/MediaSessionController";
 
 describe("DeckDetailPage", () => {
   afterEach(() => {
     cleanup();
+    releasePrimedDeckVehicleControl();
+    window.localStorage.clear();
+    Reflect.deleteProperty(navigator, "mediaSession");
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -89,6 +97,62 @@ describe("DeckDetailPage", () => {
       expect.any(Object),
     );
     expect(await screen.findByText("덱 학습 화면")).toBeTruthy();
+  });
+
+  it("starts local silent audio in the study-start user gesture", async () => {
+    Object.defineProperty(navigator, "mediaSession", {
+      configurable: true,
+      value: { metadata: null, setActionHandler: vi.fn() },
+    });
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn(() => "blob:inq-silence"),
+      revokeObjectURL: vi.fn(),
+    });
+    const play = vi
+      .spyOn(HTMLMediaElement.prototype, "play")
+      .mockResolvedValue(undefined);
+    vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+    vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+    mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+      "/api/decks/deck-1/run": deckRun({ cursor: 0, completedAt: null }),
+    });
+
+    renderDeckDetail();
+
+    await userEvent
+      .setup()
+      .click(await screen.findByRole("button", { name: "학습 시작" }));
+
+    expect(play).toHaveBeenCalledTimes(1);
+  });
+
+  it("cleans up primed audio when leaving before the runner handoff", async () => {
+    Object.defineProperty(navigator, "mediaSession", {
+      configurable: true,
+      value: { metadata: null, setActionHandler: vi.fn() },
+    });
+    const revokeObjectURL = vi.fn();
+    vi.stubGlobal("URL", {
+      createObjectURL: vi.fn(() => "blob:inq-silence"),
+      revokeObjectURL,
+    });
+    vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+    const pause = vi
+      .spyOn(HTMLMediaElement.prototype, "pause")
+      .mockImplementation(() => {});
+    vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+    mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+    });
+
+    renderDeckDetail();
+    await screen.findByRole("button", { name: "학습 시작" });
+    primeDeckVehicleControlFromUserGesture();
+    cleanup();
+
+    expect(pause).toHaveBeenCalledTimes(1);
+    expect(revokeObjectURL).toHaveBeenCalledWith("blob:inq-silence");
   });
 
   it("shows an error when loading cards fails", async () => {
@@ -226,6 +290,7 @@ function card(input: {
 function deckRun(input: { cursor: number; completedAt: string | null }) {
   return {
     deckId: "deck-1",
+    deckTitle: "국어",
     cursor: input.cursor,
     completedAt: input.completedAt,
     cards: [

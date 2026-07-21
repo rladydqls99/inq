@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PencilLine, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
@@ -6,6 +6,10 @@ import type { CardResponse, DeckResponse, DeckRunResponse } from "@inq/shared";
 import { apiRequest } from "../../api/client";
 import { CardListHeader } from "../../components/CardListHeader";
 import { QuizTextRenderer } from "../../components/QuizTextRenderer";
+import {
+  primeDeckVehicleControlFromUserGesture,
+  releasePrimedDeckVehicleControl,
+} from "../runners/MediaSessionController";
 
 export function DeckDetailPage() {
   const { deckId } = useParams();
@@ -17,6 +21,20 @@ export function DeckDetailPage() {
   const [deleteError, setDeleteError] = useState(false);
   const [startError, setStartError] = useState(false);
   const [starting, setStarting] = useState(false);
+  const mountedRef = useRef(true);
+  const handOffPrimedAudioRef = useRef(false);
+
+  useEffect(() => {
+    mountedRef.current = true;
+
+    return () => {
+      mountedRef.current = false;
+
+      if (!handOffPrimedAudioRef.current) {
+        releasePrimedDeckVehicleControl();
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (!deckId) {
@@ -74,6 +92,8 @@ export function DeckDetailPage() {
       return;
     }
 
+    primeDeckVehicleControlFromUserGesture();
+    handOffPrimedAudioRef.current = false;
     setStartError(false);
     setStarting(true);
 
@@ -89,11 +109,23 @@ export function DeckDetailPage() {
         await apiRequest(`/decks/${deckId}/run/restart`, { method: "POST" });
       }
 
+      if (!mountedRef.current) {
+        releasePrimedDeckVehicleControl();
+        return;
+      }
+
+      handOffPrimedAudioRef.current = true;
       navigate(`/decks/${deckId}/run`);
     } catch {
-      setStartError(true);
+      releasePrimedDeckVehicleControl();
+
+      if (mountedRef.current) {
+        setStartError(true);
+      }
     } finally {
-      setStarting(false);
+      if (mountedRef.current) {
+        setStarting(false);
+      }
     }
   }
 

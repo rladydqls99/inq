@@ -131,6 +131,32 @@ describe("ChallengeListPage", () => {
 
     expect(await screen.findByText("챌린지 목록을 불러오지 못했습니다.")).toBeTruthy();
   });
+
+  it("disables deck refresh when the source deck has been deleted", async () => {
+    mockFetchByPath({
+      "/api/challenges": [
+        challenge({
+          id: "challenge-1",
+          name: "보존된 챌린지",
+          sourceDeckId: null,
+        }),
+      ],
+    });
+
+    renderChallengeListPage();
+
+    const listItem = await screen.findByTestId("challenge-row-challenge-1");
+    await userEvent
+      .setup()
+      .click(within(listItem).getByRole("button", { name: "보존된 챌린지 메뉴" }));
+    const updateButton = within(listItem).getByRole("button", {
+      name: "덱에서 카드 갱신",
+    });
+    expect((updateButton as HTMLButtonElement).disabled).toBe(true);
+    expect(updateButton.getAttribute("title")).toBe(
+      "원본 덱이 삭제되어 카드를 갱신할 수 없습니다.",
+    );
+  });
 });
 
 function renderChallengeListPage() {
@@ -182,11 +208,12 @@ function challenge(input: {
   id: string;
   name: string;
   currentStageCounts?: Record<number, number>;
+  sourceDeckId?: string | null;
 }) {
   return {
     id: input.id,
     name: input.name,
-    deckId: "deck-1",
+    sourceDeckId: input.sourceDeckId === undefined ? "deck-1" : input.sourceDeckId,
     deckTitle: "국어",
     status: "active",
     answerMode: "manual",
