@@ -35,10 +35,60 @@ describe("DeckDetailPage", () => {
       await findByTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."),
     ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "국어" })).toBeTruthy();
+    expect(screen.getByRole("button", { name: "학습 시작" })).toBeTruthy();
     expect(screen.getByText("조선").className).toContain("is-study");
     expect(screen.getByRole("link", { name: "카드 수정" }).getAttribute("href")).toBe(
       "/cards/card-1/edit",
     );
+  });
+
+  it("restarts a completed deck run before opening the study screen", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+      "/api/decks/deck-1/run": deckRun({
+        cursor: 1,
+        completedAt: "2026-07-21T00:00:00.000Z",
+      }),
+      "/api/decks/deck-1/run/restart": {
+        deckId: "deck-1",
+        cursor: 0,
+        completedAt: null,
+        cards: [],
+      },
+    });
+
+    renderDeckDetail();
+
+    await user.click(await screen.findByRole("button", { name: "학습 시작" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1/run/restart",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(await screen.findByText("덱 학습 화면")).toBeTruthy();
+  });
+
+  it("resumes an unfinished deck run without resetting its cursor", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+      "/api/decks/deck-1/run": deckRun({ cursor: 1, completedAt: null }),
+    });
+
+    renderDeckDetail();
+
+    await user.click(await screen.findByRole("button", { name: "학습 시작" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1/run",
+      expect.any(Object),
+    );
+    expect(fetchMock).not.toHaveBeenCalledWith(
+      "/api/decks/deck-1/run/restart",
+      expect.any(Object),
+    );
+    expect(await screen.findByText("덱 학습 화면")).toBeTruthy();
   });
 
   it("shows an error when loading cards fails", async () => {
@@ -108,6 +158,7 @@ function renderDeckDetail() {
     <MemoryRouter initialEntries={["/decks/deck-1/manage"]}>
       <Routes>
         <Route path="/decks/:deckId/manage" element={<DeckDetailPage />} />
+        <Route path="/decks/:deckId/run" element={<div>덱 학습 화면</div>} />
       </Routes>
     </MemoryRouter>,
   );
@@ -169,6 +220,18 @@ function card(input: {
     version: input.version ?? 1,
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
+  };
+}
+
+function deckRun(input: { cursor: number; completedAt: string | null }) {
+  return {
+    deckId: "deck-1",
+    cursor: input.cursor,
+    completedAt: input.completedAt,
+    cards: [
+      { cardId: "card-1", segments: defaultSegments() },
+      { cardId: "card-2", segments: defaultSegments() },
+    ],
   };
 }
 

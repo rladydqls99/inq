@@ -172,6 +172,112 @@ textarea {
   transform: scale(0.98);
 }
 
+.pwa-install-prompt {
+  position: fixed;
+  right: max(16px, calc((100vw - 720px) / 2 + 16px));
+  bottom: calc(
+    var(--bottom-tab-height) + env(safe-area-inset-bottom, 0px) + 12px
+  );
+  left: max(16px, calc((100vw - 720px) / 2 + 16px));
+  z-index: 30;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) 44px;
+  align-items: start;
+  gap: 12px;
+  border-radius: 12px;
+  padding: 16px;
+  background: var(--inq-surface);
+  color: var(--inq-ink);
+  box-shadow: 0 4px 8px rgb(13 22 15 / 18%);
+  animation: pwa-install-prompt-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pwa-install-prompt__icon {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--inq-highlight);
+  color: var(--inq-on-highlight);
+}
+
+.pwa-install-prompt__content {
+  display: grid;
+  min-width: 0;
+  gap: 6px;
+}
+
+.pwa-install-prompt__content strong {
+  color: var(--inq-ink);
+  font-size: var(--text-title-size);
+  font-weight: var(--text-title-weight);
+  line-height: var(--text-title-leading);
+  letter-spacing: var(--text-title-tracking);
+  text-wrap: balance;
+}
+
+.pwa-install-prompt__content p {
+  margin: 0;
+  color: var(--inq-ink-soft);
+  font-size: var(--text-label-size);
+  font-weight: var(--text-body-weight);
+  line-height: var(--text-label-leading);
+  text-wrap: pretty;
+}
+
+.pwa-install-prompt__install-button {
+  min-height: 48px;
+  margin-top: 6px;
+  border: 0;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: var(--inq-ink);
+  color: var(--inq-canvas);
+  cursor: pointer;
+  font-size: var(--text-label-size);
+  font-weight: var(--text-label-weight);
+  line-height: var(--text-label-leading);
+  transition:
+    background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.pwa-install-prompt__close-button {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 0;
+  background: transparent;
+  color: var(--inq-ink-soft);
+  cursor: pointer;
+}
+
+.pwa-install-prompt__install-button:focus-visible,
+.pwa-install-prompt__close-button:focus-visible {
+  outline: 3px solid var(--inq-highlight-strong);
+  outline-offset: 2px;
+}
+
+.pwa-install-prompt__install-button:active {
+  transform: scale(0.98);
+}
+
+@keyframes pwa-install-prompt-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .quiz-text {
   margin: 0;
   color: var(--inq-ink);
@@ -958,6 +1064,15 @@ textarea {
   .home-state a:hover {
     background: var(--inq-ink-soft);
   }
+
+  .pwa-install-prompt__install-button:hover {
+    background: var(--inq-ink-soft);
+  }
+
+  .pwa-install-prompt__close-button:hover {
+    background: var(--inq-line);
+    color: var(--inq-ink);
+  }
 }
 
 @media (min-width: 48rem) {
@@ -994,6 +1109,14 @@ textarea {
     --inq-error: #ffb4ab;
     --inq-success: #9bd5a4;
   }
+
+  .pwa-install-prompt {
+    --inq-canvas: #101511;
+    --inq-surface: #1a211c;
+    --inq-ink: #f7f9f7;
+    --inq-ink-soft: #c9d0ca;
+    --inq-line: #3a453d;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -1002,8 +1125,17 @@ textarea {
   .home-primary-action,
   .home-upcoming__row,
   .home-state button,
-  .home-state a {
+  .home-state a,
+  .pwa-install-prompt__install-button {
     transition: none;
+  }
+
+  .pwa-install-prompt {
+    animation: none;
+  }
+
+  .pwa-install-prompt__install-button:active {
+    transform: none;
   }
 
   .home-skeleton,
@@ -2123,10 +2255,12 @@ textarea {
   min-height: 48px;
   align-items: center;
   justify-content: center;
+  border: 0;
   border-radius: 8px;
   padding: 0 18px;
   background: var(--inq-ink);
   color: var(--inq-canvas);
+  cursor: pointer;
   font-size: var(--text-label-size);
   font-weight: var(--text-label-weight);
   line-height: var(--text-label-leading);
@@ -2135,6 +2269,12 @@ textarea {
   transition:
     background-color 180ms cubic-bezier(0.22, 1, 0.36, 1),
     transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.card-list-header__start:disabled {
+  background: var(--inq-line);
+  color: var(--inq-ink-soft);
+  cursor: default;
 }
 
 .card-list-header__start:focus-visible {
@@ -2147,7 +2287,7 @@ textarea {
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .card-list-header__start:hover {
+  .card-list-header__start:not(:disabled):hover {
     background: var(--inq-ink-soft);
   }
 }

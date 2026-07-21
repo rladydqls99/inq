@@ -1,6 +1,7 @@
 import { createBrowserRouter, Outlet, RouterProvider } from "react-router-dom";
 
 import { PinGate } from "./components/PinGate";
+import { PwaInstallPrompt } from "./components/PwaInstallPrompt";
 import { ChallengeDetailPage } from "./features/challenges/ChallengeDetailPage";
 import { ChallengeListPage } from "./features/challenges/ChallengeListPage";
 import { HomePage } from "./features/challenges/HomePage";
@@ -56,7 +57,12 @@ const router = createBrowserRouter([
 ]);
 
 export function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <>
+      <RouterProvider router={router} />
+      <PwaInstallPrompt />
+    </>
+  );
 }
 
 function AuthenticatedRoutes() {

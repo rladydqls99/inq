@@ -20,6 +20,7 @@ type CardPlayerProps = {
   currentIndex: number;
   totalCards: number;
   selectedResult?: "correct" | "wrong" | null;
+  initiallyRevealed?: boolean;
   autoAdvanceSeconds?: number;
   canPrevious?: boolean;
   canNext?: boolean;
@@ -35,6 +36,7 @@ export function CardPlayer({
   currentIndex,
   totalCards,
   selectedResult = null,
+  initiallyRevealed = false,
   autoAdvanceSeconds,
   canPrevious = true,
   canNext = true,
@@ -43,10 +45,12 @@ export function CardPlayer({
   onResult,
   onAnswerReveal,
 }: CardPlayerProps) {
-  const [answerRevealed, setAnswerRevealed] = useState(selectedResult !== null);
+  const [answerRevealed, setAnswerRevealed] = useState(
+    initiallyRevealed || selectedResult !== null,
+  );
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
-  const revealed = answerRevealed || selectedResult !== null;
+  const revealed = initiallyRevealed || answerRevealed || selectedResult !== null;
   const tone: AnswerTone =
     mode === "study" ? "study" : selectedResult === "wrong" ? "wrong" : "correct";
   const displayIndex = Math.min(Math.max(currentIndex + 1, 1), totalCards);

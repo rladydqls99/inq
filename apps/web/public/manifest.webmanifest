@@ -1,13 +1,14 @@
 {
   "name": "inq Quiz",
   "short_name": "inq",
-  "description": "Personal PIN-protected quiz practice app.",
+  "description": "직접 만든 문제로 매일 가볍게 복습하는 개인 퀴즈 앱",
+  "lang": "ko-KR",
   "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#f7f7f5",
-  "theme_color": "#166534",
+  "background_color": "#fcfcfc",
+  "theme_color": "#0d160f",
   "icons": [
     {
       "src": "/icons/icon-192.png",

@@ -7,15 +7,12 @@ import { CardPlayer } from "../../components/CardPlayer";
 import { PageHeader } from "../../components/PageHeader";
 import { attachMediaSessionHandlers } from "./MediaSessionController";
 
-const AUTO_ADVANCE_SECONDS = 5;
-
 export function DeckRunnerPage() {
   const { deckId } = useParams();
   const [runState, setRunState] = useState<DeckRunResponse | null>(null);
   const [cursor, setCursor] = useState(0);
   const [loadError, setLoadError] = useState(false);
   const [moveError, setMoveError] = useState(false);
-  const [answerRevealed, setAnswerRevealed] = useState(false);
 
   useEffect(() => {
     if (!deckId) {
@@ -44,28 +41,11 @@ export function DeckRunnerPage() {
   }, [deckId]);
 
   useEffect(() => {
-    if (
-      !answerRevealed ||
-      !runState ||
-      runState.completedAt ||
-      cursor >= runState.cards.length
-    ) {
-      return;
-    }
-
-    const timeoutId = window.setTimeout(() => {
-      void moveTo(cursor + 1);
-    }, AUTO_ADVANCE_SECONDS * 1000);
-
-    return () => window.clearTimeout(timeoutId);
-  }, [answerRevealed, cursor, runState]);
-
-  useEffect(() => {
     return attachMediaSessionHandlers({
       onNext: () => void moveTo(cursor + 1),
       onPrevious: () => void moveTo(cursor - 1),
     });
-  }, [answerRevealed, cursor, runState]);
+  }, [cursor, runState]);
 
   if (loadError) {
     return <div className="list-empty">덱 실행 정보를 불러오지 못했습니다.</div>;
@@ -87,10 +67,7 @@ export function DeckRunnerPage() {
       Math.max(nextCursor, 0),
       runState.cards.length,
     );
-    const wasAnswerRevealed = answerRevealed;
-
     setMoveError(false);
-    setAnswerRevealed(false);
 
     try {
       const nextRunState = await apiRequest<DeckRunResponse>(`/decks/${deckId}/run`, {
@@ -101,7 +78,6 @@ export function DeckRunnerPage() {
       setRunState(nextRunState);
       setCursor(nextRunState.cursor);
     } catch {
-      setAnswerRevealed(wasAnswerRevealed);
       setMoveError(true);
     }
   }
@@ -120,14 +96,11 @@ export function DeckRunnerPage() {
           segments={currentCard.segments}
           currentIndex={cursor}
           totalCards={runState.cards.length}
-          {...(answerRevealed
-            ? { autoAdvanceSeconds: AUTO_ADVANCE_SECONDS }
-            : {})}
+          initiallyRevealed
           canPrevious={cursor > 0}
           canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
-          onAnswerReveal={() => setAnswerRevealed(true)}
         />
         {moveError ? <div className="list-empty">카드를 이동하지 못했습니다.</div> : null}
       </div>

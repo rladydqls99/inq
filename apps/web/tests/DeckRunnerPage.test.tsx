@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -9,63 +9,23 @@ import { DeckRunnerPage } from "../src/features/runners/DeckRunnerPage";
 
 describe("DeckRunnerPage", () => {
   afterEach(() => {
-    vi.useRealTimers();
     cleanup();
     vi.restoreAllMocks();
   });
 
-  it("loads a deck run and reveals inline answers on demand", async () => {
-    const user = userEvent.setup();
+  it("loads a deck run with inline answers already revealed", async () => {
     mockFetchByPath({
       "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
     });
 
     renderDeckRunner();
 
-    expect(await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
-    expect(screen.queryByText("5초")).toBeNull();
-    await user.click(screen.getByRole("button", { name: "정답 보기" }));
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다."))).toBeTruthy();
+    expect(
+      await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다.")),
+    ).toBeTruthy();
+    expect(screen.queryByRole("button", { name: "정답 보기" })).toBeNull();
     expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
-    expect(screen.getByText("5초")).toBeTruthy();
-  });
-
-  it("starts the five-second auto advance only after the answer is revealed", async () => {
-    const fetchMock = mockFetchByPath({
-      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
-    });
-
-    renderDeckRunner();
-
-    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
-    vi.useFakeTimers();
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(5000);
-    });
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-
-    fireEvent.click(screen.getByRole("button", { name: "정답 보기" }));
-    expect(screen.getByText("5초")).toBeTruthy();
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(4999);
-    });
-
-    expect(fetchMock).toHaveBeenCalledTimes(1);
-
-    await act(async () => {
-      await vi.advanceTimersByTimeAsync(1);
-    });
-
-    expect(fetchMock).toHaveBeenCalledWith(
-      "/api/decks/deck-1/run",
-      expect.objectContaining({
-        method: "PATCH",
-        body: JSON.stringify({ cursor: 1 }),
-      }),
-    );
+    expect(screen.queryByText("5초")).toBeNull();
   });
 
   it("shows an error when loading a deck run fails", async () => {
@@ -90,7 +50,7 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
+    await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -100,7 +60,7 @@ describe("DeckRunnerPage", () => {
         body: JSON.stringify({ cursor: 1 }),
       }),
     );
-    expect(await screen.findByText(matchesTextContent("수도는 ____이다."))).toBeTruthy();
+    expect(await screen.findByText(matchesTextContent("수도는 서울이다."))).toBeTruthy();
   });
 
   it("shows an error and keeps the current card when moving fails", async () => {
@@ -114,11 +74,13 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
+    await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____이다."))).toBeTruthy();
+    expect(
+      screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다.")),
+    ).toBeTruthy();
   });
 
   it("returns to the deck list when loading a completed run", async () => {
@@ -140,7 +102,7 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("수도는 ____이다."));
+    await screen.findByText(matchesTextContent("수도는 서울이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
