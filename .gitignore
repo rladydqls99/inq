@@ -10,6 +10,7 @@ coverage/
 .turbo/
 .vite/
 
+.playwright-cli
 playwright-report/
 test-results/
 
@@ -27,3 +28,4 @@ deploy/data/
 docker-data/
 
 .DS_Store
+

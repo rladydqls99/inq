@@ -40,7 +40,7 @@ test("desktop upload previews and confirms valid markdown", async ({ page }) => 
   await page.getByRole("button", { name: "검증하기" }).click();
 
   await expect(page.getByText("1장 검증 완료")).toBeVisible();
-  await expect(page.getByText("훈민정음을 만든 ____이다.")).toBeVisible();
+  await expect(page.getByText("훈민정음을 만든 세종대왕이다.")).toBeVisible();
   await page.getByRole("button", { name: "카드 만들기" }).click();
   await expect(page.getByText("1장의 카드를 만들었습니다.")).toBeVisible();
   await expect(page.getByLabel("마크다운 내용")).toHaveValue("");

@@ -10,7 +10,6 @@ type QuizPreviewProps = {
 export function QuizPreview({ segments }: QuizPreviewProps) {
   return (
     <div className="quiz-preview">
-      <QuizTextRenderer mode="prompt" segments={segments} />
       <QuizTextRenderer mode="revealed" segments={segments} tone="study" />
       <span className="quiz-preview__count">{getAnswers(segments).length}</span>
     </div>

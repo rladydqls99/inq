@@ -66,7 +66,7 @@ export function parseMarkdownImport(markdown: string): ImportPreviewResponse {
 
     previewCards.push({
       blockIndex: block.blockIndex,
-      segments: parsedBlock.segments,
+      segments: normalizeTextSegments(parsedBlock.segments),
     });
   }
 
@@ -246,4 +246,31 @@ function locationForIndex(block: MarkdownBlock, index: number): Location {
 
 function firstNonEmptyLine(text: string): string | null {
   return text.split("\n").find((line) => line.trim().length > 0) ?? null;
+}
+
+function normalizeTextSegments(segments: QuizSegment[]): QuizSegment[] {
+  const normalized = segments.map((segment) =>
+    segment.type === "text"
+      ? { ...segment, value: segment.value.replace(/\s+/g, " ") }
+      : segment,
+  );
+  const textIndexes = normalized.reduce<number[]>((indexes, segment, index) => {
+    if (segment.type === "text") {
+      indexes.push(index);
+    }
+    return indexes;
+  }, []);
+
+  const firstTextIndex = textIndexes[0];
+  const lastTextIndex = textIndexes.at(-1);
+
+  if (firstTextIndex !== undefined && normalized[firstTextIndex]?.type === "text") {
+    normalized[firstTextIndex].value = normalized[firstTextIndex].value.trimStart();
+  }
+
+  if (lastTextIndex !== undefined && normalized[lastTextIndex]?.type === "text") {
+    normalized[lastTextIndex].value = normalized[lastTextIndex].value.trimEnd();
+  }
+
+  return normalized;
 }

@@ -50,6 +50,19 @@ describe("parseMarkdownImport", () => {
     ]);
   });
 
+  it("collapses whitespace inside a card while preserving inline spacing", () => {
+    const result = parseMarkdownImport(
+      "  조선의\n   왕은 [ 세종대왕 ]\n 이다.  ",
+    );
+
+    expect(result.errors).toEqual([]);
+    expect(result.previewCards[0]?.segments).toEqual([
+      { type: "text", value: "조선의 왕은 " },
+      { type: "answer", id: "answer-1", value: "세종대왕" },
+      { type: "text", value: " 이다." },
+    ]);
+  });
+
   it("splits cards only when a trimmed line equals separator", () => {
     const result = parseMarkdownImport(
       [
