@@ -54,6 +54,14 @@ textarea {
   font: inherit;
 }
 
+/* iOS Safari zooms text fields smaller than 16px; keep every editable control stable. */
+input:not([type="checkbox"]):not([type="radio"]),
+select,
+textarea {
+  font-size: max(1rem, 1em);
+  scroll-margin-block: 16px;
+}
+
 .mobile-app-shell {
   min-height: 100dvh;
   padding-bottom: calc(
@@ -109,6 +117,7 @@ textarea {
   padding-bottom: env(safe-area-inset-bottom, 0px);
   border-top: 1px solid var(--inq-line);
   background: var(--inq-canvas);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .bottom-tab-nav__inner {
@@ -190,6 +199,7 @@ textarea {
   color: var(--inq-ink);
   box-shadow: 0 4px 8px rgb(13 22 15 / 18%);
   animation: pwa-install-prompt-in 180ms cubic-bezier(0.22, 1, 0.36, 1);
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .pwa-install-prompt__icon {
@@ -1278,6 +1288,17 @@ textarea {
   font-size: 30px;
   font-weight: 720;
   line-height: 1;
+  transition: transform 180ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (max-width: 560px) {
+  /* Keep fixed controls out of the IME area; the focused field remains scrollable. */
+  body:has(input:focus, select:focus, textarea:focus) .bottom-tab-nav,
+  body:has(input:focus, select:focus, textarea:focus) .floating-add-button,
+  body:has(input:focus, select:focus, textarea:focus) .pwa-install-prompt {
+    pointer-events: none;
+    transform: translateY(calc(100% + env(safe-area-inset-bottom, 0px)));
+  }
 }
 
 .challenge-list-page,
@@ -2107,6 +2128,9 @@ textarea {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .bottom-tab-nav,
+  .pwa-install-prompt,
+  .floating-add-button,
   .challenge-form button,
   .modal__header .icon-button {
     transition: none;
