@@ -38,14 +38,12 @@ export function createApp(options?: {
   app.use("/api/challenges", authMiddleware({ prisma, env }));
   app.use("/api/challenges/*", authMiddleware({ prisma, env }));
   app.use("/api/import/*", authMiddleware({ prisma, env }));
-  app.use("/api/imports/*", authMiddleware({ prisma, env }));
   app.use("/api/backup/*", authMiddleware({ prisma, env }));
   app.route("/api/decks", createDeckRoutes({ prisma }));
   app.route("/api/decks", createDeckRunRoutes({ prisma }));
   app.route("/api", createCardRoutes({ prisma }));
   app.route("/api/challenges", createChallengeRoutes({ prisma }));
   app.route("/api/import", createImportRoutes({ prisma }));
-  app.route("/api/imports", createImportRoutes({ prisma }));
   app.route("/api/backup", createBackupRoutes({ prisma }));
 
   return app;

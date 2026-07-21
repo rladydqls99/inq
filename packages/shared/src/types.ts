@@ -17,12 +17,6 @@ export type UnlockResponse = {
   expiresAt: string;
 };
 
-export type ChangePinRequest = {
-  currentPin: string;
-  nextPin: string;
-  nextPinConfirm: string;
-};
-
 export type CreateDeckRequest = {
   title: string;
 };

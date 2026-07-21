@@ -522,8 +522,7 @@ textarea {
   background: #f7f7f5;
 }
 
-.pin-form,
-.pin-change-form {
+.pin-form {
   display: grid;
   width: min(100%, 360px);
   gap: 14px;
@@ -535,8 +534,7 @@ textarea {
   letter-spacing: 0;
 }
 
-.pin-form label,
-.pin-change-form label {
+.pin-form label {
   display: grid;
   gap: 6px;
   color: #40403c;
@@ -544,8 +542,7 @@ textarea {
   font-weight: 700;
 }
 
-.pin-form input,
-.pin-change-form input {
+.pin-form input {
   min-height: 44px;
   border: 1px solid #d2d2ca;
   border-radius: 8px;
@@ -554,8 +551,7 @@ textarea {
   color: #171717;
 }
 
-.pin-form button,
-.pin-change-form button {
+.pin-form button {
   min-height: 44px;
   border: 0;
   border-radius: 8px;
@@ -2614,8 +2610,7 @@ textarea {
   font-weight: 760;
 }
 
-.settings-action span,
-.pin-change-form span {
+.settings-action span {
   color: #166534;
   font-size: 13px;
   font-weight: 800;
