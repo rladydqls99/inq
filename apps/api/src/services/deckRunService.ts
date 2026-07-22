@@ -1,7 +1,6 @@
 import type { PrismaClient } from "@inq/db";
 import {
   getDeckRunState,
-  restartDeckRun,
   updateDeckRunCursor,
 } from "@inq/db/repositories/runs";
 import type { DeckRunResponse, QuizSegment } from "@inq/shared";
@@ -94,15 +93,6 @@ export async function updateDeckRun(
       },
     });
   });
-
-  return getDeckRunResponse(prisma, deckId);
-}
-
-export async function restartDeckRunResponse(
-  prisma: PrismaClient,
-  deckId: string,
-): Promise<DeckRunResponse> {
-  await restartDeckRun(prisma, deckId);
 
   return getDeckRunResponse(prisma, deckId);
 }

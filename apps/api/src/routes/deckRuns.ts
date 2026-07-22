@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
+import { restartDeckRun } from "@inq/db/repositories/runs";
 import {
   getDeckRunResponse,
-  restartDeckRunResponse,
   updateDeckRun,
 } from "../services/deckRunService";
 
@@ -60,9 +60,8 @@ export function createDeckRunRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "deck_not_found" }, 404);
     }
 
-    return context.json(
-      await restartDeckRunResponse(options.prisma, deckId),
-    );
+    await restartDeckRun(options.prisma, deckId);
+    return context.json(await getDeckRunResponse(options.prisma, deckId));
   });
 
   return route;

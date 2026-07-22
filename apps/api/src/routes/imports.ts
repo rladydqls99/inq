@@ -1,9 +1,9 @@
 import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
+import { parseMarkdownImport } from "@inq/shared";
 import {
   confirmMarkdownImport,
-  previewMarkdownImport,
 } from "../services/importService";
 
 export function createImportRoutes(options: { prisma: PrismaClient }) {
@@ -17,7 +17,7 @@ export function createImportRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "markdown_required" }, 400);
     }
 
-    return context.json(previewMarkdownImport(markdown));
+    return context.json(parseMarkdownImport(markdown));
   });
 
   route.post("/markdown/confirm", async (context) => {

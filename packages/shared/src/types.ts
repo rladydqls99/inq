@@ -1,12 +1,6 @@
-export type AnswerMode = "manual";
-
 export type QuizSegment =
   | { type: "text"; value: string }
   | { type: "answer"; id: string; value: string };
-
-export type PinSetupRequest = {
-  pin: string;
-};
 
 export type UnlockRequest = {
   pin: string;
@@ -75,7 +69,7 @@ export type ChallengeResponse = {
   sourceDeckId: string | null;
   deckTitle: string;
   status: ChallengeStatus;
-  answerMode: AnswerMode;
+  answerMode: "manual";
   reviewIntervalsDays: number[];
   maxStage: number;
   dueCount: number;

@@ -1,7 +1,6 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 
 import type {
-  AnswerMode,
   BackupExport,
   CardResponse,
   ChallengeResponse,
@@ -20,7 +19,7 @@ describe("shared domain types", () => {
       { type: "answer", id: "answer-1", value: "세종대왕" },
       { type: "text", value: "이다." },
     ];
-    const answerMode: AnswerMode = "manual";
+    const answerMode = "manual" as const;
 
     expect(segments).toHaveLength(3);
     expect(answerMode).toBe("manual");
@@ -36,7 +35,7 @@ describe("shared domain types", () => {
       QuizSegment[]
     >();
     expectTypeOf<ChallengeResponse>().toHaveProperty("answerMode").toEqualTypeOf<
-      AnswerMode
+      "manual"
     >();
     expectTypeOf<ImportPreviewResponse>()
       .toHaveProperty("previewCards")

@@ -2,10 +2,6 @@ import type { PrismaClient } from "@inq/db";
 import { createCard } from "@inq/db/repositories/cards";
 import { parseMarkdownImport } from "@inq/shared";
 
-export function previewMarkdownImport(markdown: string) {
-  return parseMarkdownImport(markdown);
-}
-
 export async function confirmMarkdownImport(
   prisma: PrismaClient,
   input: { deckId: string; markdown: string },
