@@ -103,7 +103,9 @@ async function cacheFirst(request) {
     return cachedResponse;
   }
 
-  const response = await fetch(request);
+  const response = await fetch(request).catch(
+    () => new Response(null, { status: 503 }),
+  );
 
   if (response.ok) {
     const cache = await caches.open(CACHE_NAME);
