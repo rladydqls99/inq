@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
-import type { DeckResponse } from "@inq/shared";
-import { apiRequest } from "../../api/client";
+import { useChallengeMutation } from "@/entities/challenges/api";
+import { useDecks } from "@/entities/decks/api";
 
 type ChallengeFormProps = {
   onCreated: () => Promise<void> | void;
@@ -14,33 +14,19 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
   const [intervalOne, setIntervalOne] = useState("3");
   const [intervalTwo, setIntervalTwo] = useState("5");
   const [intervalThree, setIntervalThree] = useState("10");
-  const [decks, setDecks] = useState<DeckResponse[]>([]);
-  const [deckLoadError, setDeckLoadError] = useState(false);
   const [error, setError] = useState(false);
-  const parsedIntervals = parseIntervals([intervalOne, intervalTwo, intervalThree]);
+  const { data: decks = [], isError: deckLoadError } = useDecks();
+  const createChallenge = useChallengeMutation();
+  const parsedIntervals = parseIntervals([
+    intervalOne,
+    intervalTwo,
+    intervalThree,
+  ]);
   const trimmedName = name.trim();
 
   useEffect(() => {
-    let mounted = true;
-
-    apiRequest<DeckResponse[]>("/decks")
-      .then((response) => {
-        if (mounted) {
-          setDecks(response);
-          setDeckId(presetDeckId ?? response[0]?.id ?? "");
-          setDeckLoadError(false);
-        }
-      })
-      .catch(() => {
-        if (mounted) {
-          setDeckLoadError(true);
-        }
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, [presetDeckId]);
+    setDeckId((current) => (presetDeckId ?? current) || decks[0]?.id || "");
+  }, [decks, presetDeckId]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,13 +38,10 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
     setError(false);
 
     try {
-      await apiRequest("/challenges", {
-        method: "POST",
-        body: JSON.stringify({
-          name: trimmedName,
-          deckId,
-          reviewIntervalsDays: parsedIntervals,
-        }),
+      await createChallenge.mutateAsync({
+        name: trimmedName,
+        deckId,
+        reviewIntervalsDays: parsedIntervals,
       });
 
       setName("");
@@ -132,7 +115,10 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
           />
         </label>
       </div>
-      <button type="submit" disabled={!trimmedName || !deckId || !parsedIntervals}>
+      <button
+        type="submit"
+        disabled={!trimmedName || !deckId || !parsedIntervals}
+      >
         등록하기
       </button>
       {deckLoadError ? <span>덱 목록을 불러오지 못했습니다.</span> : null}
@@ -149,7 +135,9 @@ function parseIntervals(values: string[]): number[] | null {
   }
 
   const intervals = parts.map(Number);
-  return intervals.every((interval) => Number.isInteger(interval) && interval > 0)
+  return intervals.every(
+    (interval) => Number.isInteger(interval) && interval > 0,
+  )
     ? intervals
     : null;
 }

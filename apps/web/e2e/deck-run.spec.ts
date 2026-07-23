@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("deck runner reveals answers and persists next cursor", async ({ page }) => {
+test("deck runner reveals answers and persists next cursor", async ({
+  page,
+}) => {
   await page.route("**/api/auth/status", async (route) => {
     await route.fulfill({
       contentType: "application/json",

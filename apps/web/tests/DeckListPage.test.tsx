@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DeckListPage } from "../src/features/decks/DeckListPage";
+import { DeckListPage } from "../src/pages/decks/DeckListPage";
 
 describe("DeckListPage", () => {
   afterEach(() => {
@@ -49,15 +49,23 @@ describe("DeckListPage", () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
       "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 2 })],
-      "/api/decks/deck-1": deck({ id: "deck-1", title: "국어 수정", cardCount: 2 }),
+      "/api/decks/deck-1": deck({
+        id: "deck-1",
+        title: "국어 수정",
+        cardCount: 2,
+      }),
       "/api/challenges": { id: "challenge-1" },
     });
 
     renderDeckListPage();
 
     const listItem = await screen.findByTestId("deck-row-deck-1");
-    await user.click(within(listItem).getByRole("button", { name: "국어 메뉴" }));
-    await user.click(within(listItem).getByRole("button", { name: "이름 변경" }));
+    await user.click(
+      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+    );
+    await user.click(
+      within(listItem).getByRole("button", { name: "이름 변경" }),
+    );
     const titleInput = within(listItem).getByLabelText("덱 이름");
     await user.clear(titleInput);
     await user.type(titleInput, "국어 수정");
@@ -72,9 +80,11 @@ describe("DeckListPage", () => {
     );
 
     await user.click(
-      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+      within(listItem).getByRole("button", { name: "국어 수정 메뉴" }),
     );
-    await user.click(within(listItem).getByRole("button", { name: "챌린지 등록" }));
+    await user.click(
+      within(listItem).getByRole("button", { name: "챌린지 등록" }),
+    );
     await user.type(await screen.findByLabelText("챌린지 이름"), "중간고사");
     await user.click(screen.getByRole("button", { name: "등록하기" }));
     expect(fetchMock).toHaveBeenCalledWith(
@@ -89,7 +99,9 @@ describe("DeckListPage", () => {
       }),
     );
 
-    await user.click(within(listItem).getByRole("button", { name: "국어 메뉴" }));
+    await user.click(
+      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+    );
     await user.click(within(listItem).getByRole("button", { name: "삭제" }));
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1",
@@ -104,7 +116,9 @@ describe("DeckListPage", () => {
 
     renderDeckListPage();
 
-    expect(await screen.findByText("덱 목록을 불러오지 못했습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("덱 목록을 불러오지 못했습니다."),
+    ).toBeTruthy();
   });
 });
 
@@ -127,11 +141,15 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
     const rawResponse = responsesByPath[path] ?? {};
 
     if (path === "/api/decks" && init?.method === "POST") {
-      return Promise.resolve(jsonResponse(deck({ id: "created-deck", title: "영어", cardCount: 0 })));
+      return Promise.resolve(
+        jsonResponse(deck({ id: "created-deck", title: "영어", cardCount: 0 })),
+      );
     }
 
     const response =
-      typeof rawResponse === "function" ? rawResponse(input, init) : rawResponse;
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
     const body = isMockErrorResponse(response) ? response.body : response;
 

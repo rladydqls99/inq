@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { SettingsPage } from "../src/features/settings/SettingsPage";
-import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/features/runners/vehicleControlSettings";
+import { SettingsPage } from "../src/pages/settings/SettingsPage";
+import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 
 describe("SettingsPage", () => {
   afterEach(() => {
@@ -43,9 +43,11 @@ describe("SettingsPage", () => {
     cleanup();
     renderSettings();
     expect(
-      (screen.getByRole("switch", {
-        name: /덱 학습 차량 제어/,
-      }) as HTMLInputElement).checked,
+      (
+        screen.getByRole("switch", {
+          name: /덱 학습 차량 제어/,
+        }) as HTMLInputElement
+      ).checked,
     ).toBe(false);
   });
 

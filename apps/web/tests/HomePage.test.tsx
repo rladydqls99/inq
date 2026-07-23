@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { HomePage } from "../src/features/challenges/HomePage";
+import { HomePage } from "../src/pages/challenges/HomePage";
 
 describe("HomePage", () => {
   afterEach(() => {
@@ -43,9 +43,9 @@ describe("HomePage", () => {
     expect(screen.getByText("2문제").getAttribute("aria-label")).toBe(
       "오늘 풀 문제는 2개입니다.",
     );
-    expect(screen.getByRole("link", { name: "복습 시작" }).getAttribute("href")).toBe(
-      "/challenges/soon/run",
-    );
+    expect(
+      screen.getByRole("link", { name: "복습 시작" }).getAttribute("href"),
+    ).toBe("/challenges/soon/run");
   });
 
   it("does not duplicate the featured challenge in the next-review list", async () => {
@@ -56,7 +56,9 @@ describe("HomePage", () => {
 
     renderHomePage();
 
-    const nextSection = await screen.findByRole("region", { name: "다음 복습" });
+    const nextSection = await screen.findByRole("region", {
+      name: "다음 복습",
+    });
     expect(within(nextSection).queryByText("대표 복습")).toBeNull();
     expect(within(nextSection).getByText("다음 복습 항목")).toBeTruthy();
     expect(
@@ -123,7 +125,9 @@ describe("HomePage", () => {
     expect(
       await screen.findByRole("heading", { name: "오늘 복습 완료" }),
     ).toBeTruthy();
-    expect(screen.getByText(/다음 복습은 .*7월 12일.*시작할 수 있어요/)).toBeTruthy();
+    expect(
+      screen.getByText(/다음 복습은 .*7월 12일.*시작할 수 있어요/),
+    ).toBeTruthy();
     const nextSection = screen.getByRole("region", { name: "다음 복습" });
     expect(within(nextSection).getByText("가장 가까운 일정")).toBeTruthy();
     expect(within(nextSection).getByText("나중 일정")).toBeTruthy();
@@ -157,7 +161,10 @@ describe("HomePage", () => {
     const pendingResponse = new Promise<Response>((resolve) => {
       resolveFetch = resolve;
     });
-    vi.stubGlobal("fetch", vi.fn(() => pendingResponse));
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(() => pendingResponse),
+    );
 
     const { container } = renderHomePage();
 
@@ -166,7 +173,9 @@ describe("HomePage", () => {
         name: "오늘의 복습을 불러오는 중입니다.",
       }),
     ).toBeTruthy();
-    expect(container.querySelectorAll(".home-skeleton").length).toBeGreaterThan(0);
+    expect(container.querySelectorAll(".home-skeleton").length).toBeGreaterThan(
+      0,
+    );
     expect(screen.queryByRole("heading", { name: "다음 복습" })).toBeNull();
     expect(screen.queryByText("첫 복습을 만들어 보세요")).toBeNull();
 
@@ -236,7 +245,9 @@ function mockChallenges(challenges: ReturnType<typeof challenge>[]) {
     const path = typeof input === "string" ? input : input.toString();
 
     if (path !== "/api/challenges") {
-      return Promise.resolve(jsonResponse({ error: `Unexpected path: ${path}` }, 500));
+      return Promise.resolve(
+        jsonResponse({ error: `Unexpected path: ${path}` }, 500),
+      );
     }
 
     return Promise.resolve(jsonResponse(challenges));

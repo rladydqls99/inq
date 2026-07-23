@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "./test-utils";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizTextRenderer } from "../src/components/QuizTextRenderer";
+import { QuizTextRenderer } from "../src/shared/ui/QuizTextRenderer";
 
 const segments: QuizSegment[] = [
   { type: "text", value: "훈민정음을 만든 " },
@@ -22,7 +22,9 @@ describe("QuizTextRenderer", () => {
   it("renders answer segments as blanks in prompt mode", () => {
     render(<QuizTextRenderer mode="prompt" segments={segments} />);
 
-    expect(getByTextContent("훈민정음을 만든 ____의 왕은 ____이다.")).toBeTruthy();
+    expect(
+      getByTextContent("훈민정음을 만든 ____의 왕은 ____이다."),
+    ).toBeTruthy();
   });
 
   it("renders revealed answers inline instead of below the sentence", () => {

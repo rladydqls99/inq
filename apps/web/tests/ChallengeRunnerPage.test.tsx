@@ -1,18 +1,11 @@
 // @vitest-environment jsdom
 
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen, waitFor } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ChallengeRunnerPage } from "../src/features/runners/ChallengeRunnerPage";
+import { ChallengeRunnerPage } from "../src/pages/challenges/ChallengeRunnerPage";
 
 describe("ChallengeRunnerPage", () => {
   afterEach(() => {
@@ -118,7 +111,9 @@ describe("ChallengeRunnerPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("챌린지 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("챌린지 실행 정보를 불러오지 못했습니다."),
+    ).toBeTruthy();
     expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
@@ -304,7 +299,9 @@ function matchesTextContent(element: Element | null, text: string) {
     return false;
   }
 
-  return Array.from(element.children).every((child) => child.textContent !== text);
+  return Array.from(element.children).every(
+    (child) => child.textContent !== text,
+  );
 }
 
 function mockFetch(
@@ -320,32 +317,46 @@ function mockFetch(
     const path = typeof input === "string" ? input : input.toString();
     const state = runState(options);
 
-    if (path === "/api/challenges/challenge-1/run" && init?.method === "PATCH") {
+    if (
+      path === "/api/challenges/challenge-1/run" &&
+      init?.method === "PATCH"
+    ) {
       if (options.failMove) {
         return Promise.resolve(jsonResponse({ error: "move_failed" }, 500));
       }
 
       const body = JSON.parse(init.body as string) as { cursor: number };
-      const nextState = options.moveWrongToBack ? moveFirstCardToBack(state) : state;
-      return Promise.resolve(jsonResponse({ ...nextState, cursor: body.cursor }));
+      const nextState = options.moveWrongToBack
+        ? moveFirstCardToBack(state)
+        : state;
+      return Promise.resolve(
+        jsonResponse({ ...nextState, cursor: body.cursor }),
+      );
     }
 
     if (path === "/api/challenges/challenge-1/run") {
       if (options.failLoad) {
-        return Promise.resolve(jsonResponse({ error: "challenge_not_found" }, 404));
+        return Promise.resolve(
+          jsonResponse({ error: "challenge_not_found" }, 404),
+        );
       }
 
       return Promise.resolve(jsonResponse(state));
     }
 
-    if (path === "/api/challenges/challenge-1/results" && init?.method === "POST") {
+    if (
+      path === "/api/challenges/challenge-1/results" &&
+      init?.method === "POST"
+    ) {
       if (options.failResult) {
         return Promise.resolve(jsonResponse({ error: "result_failed" }, 500));
       }
 
       return Promise.resolve(
         jsonResponse({
-          runState: options.moveWrongToBack ? moveFirstCardToBack(state) : state,
+          runState: options.moveWrongToBack
+            ? moveFirstCardToBack(state)
+            : state,
           progress: {},
         }),
       );

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { UploadPage } from "../src/features/upload/UploadPage";
+import { UploadPage } from "../src/pages/upload/UploadPage";
 
 describe("UploadPage", () => {
   afterEach(() => {
@@ -44,7 +44,10 @@ describe("UploadPage", () => {
       }),
     );
     expect(await screen.findByRole("option", { name: "한국사" })).toBeTruthy();
-    expect(screen.getByLabelText("덱 선택")).toHaveProperty("value", "created-deck");
+    expect(screen.getByLabelText("덱 선택")).toHaveProperty(
+      "value",
+      "created-deck",
+    );
   });
 
   it("validates markdown from the source pane and creates cards from the preview pane", async () => {
@@ -74,7 +77,9 @@ describe("UploadPage", () => {
     const previewPane = screen.getByTestId("upload-preview-pane");
     await user.click(within(sourcePane).getByLabelText("마크다운 내용"));
     await user.paste("훈민정음을 만든 [세종대왕]이다.");
-    await user.click(within(sourcePane).getByRole("button", { name: "검증하기" }));
+    await user.click(
+      within(sourcePane).getByRole("button", { name: "검증하기" }),
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/import/markdown/preview",
@@ -84,7 +89,9 @@ describe("UploadPage", () => {
       }),
     );
     expect(await within(previewPane).findByText("1장 검증 완료")).toBeTruthy();
-    await user.click(within(previewPane).getByRole("button", { name: "카드 만들기" }));
+    await user.click(
+      within(previewPane).getByRole("button", { name: "카드 만들기" }),
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/import/markdown/confirm",
@@ -122,14 +129,24 @@ describe("UploadPage", () => {
     renderUploadPage();
 
     const sourcePane = await screen.findByTestId("upload-source-pane");
-    await user.type(within(sourcePane).getByLabelText("마크다운 내용"), "정답 괄호가 없다.");
-    await user.click(within(sourcePane).getByRole("button", { name: "검증하기" }));
+    await user.type(
+      within(sourcePane).getByLabelText("마크다운 내용"),
+      "정답 괄호가 없다.",
+    );
+    await user.click(
+      within(sourcePane).getByRole("button", { name: "검증하기" }),
+    );
 
     expect(await within(sourcePane).findByText("1행")).toBeTruthy();
     expect(
-      within(sourcePane).getByText("정답 구간이 없습니다. 정답은 대괄호로 감싸 주세요."),
+      within(sourcePane).getByText(
+        "정답 구간이 없습니다. 정답은 대괄호로 감싸 주세요.",
+      ),
     ).toBeTruthy();
-    expect((screen.getByRole("button", { name: "카드 만들기" }) as HTMLButtonElement).disabled).toBe(true);
+    expect(
+      (screen.getByRole("button", { name: "카드 만들기" }) as HTMLButtonElement)
+        .disabled,
+    ).toBe(true);
   });
 });
 
@@ -152,11 +169,15 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
     const rawResponse = responsesByPath[path] ?? {};
 
     if (path === "/api/decks" && init?.method === "POST") {
-      return Promise.resolve(jsonResponse(deck({ id: "created-deck", title: "한국사" })));
+      return Promise.resolve(
+        jsonResponse(deck({ id: "created-deck", title: "한국사" })),
+      );
     }
 
     const response =
-      typeof rawResponse === "function" ? rawResponse(input, init) : rawResponse;
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
     const body = isMockErrorResponse(response) ? response.body : response;
 

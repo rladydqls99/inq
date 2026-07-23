@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, waitFor } from "@testing-library/react";
+import { cleanup, render, screen, waitFor } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { PinGate } from "../src/components/PinGate";
+import { PinGate } from "../src/features/auth/PinGate";
 
 describe("PinGate", () => {
   afterEach(() => {
@@ -21,7 +21,9 @@ describe("PinGate", () => {
       </PinGate>,
     );
 
-    expect(await screen.findByRole("heading", { name: "잠금 해제" })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "잠금 해제" }),
+    ).toBeTruthy();
     expect(screen.queryByText("Private content")).toBeNull();
   });
 
@@ -49,7 +51,9 @@ describe("PinGate", () => {
     expect(await screen.findByText("Private content")).toBeTruthy();
     window.dispatchEvent(new Event("inq:locked"));
 
-    expect(await screen.findByRole("heading", { name: "잠금 해제" })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "잠금 해제" }),
+    ).toBeTruthy();
     expect(screen.queryByText("Private content")).toBeNull();
   });
 

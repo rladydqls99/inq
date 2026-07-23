@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "./test-utils";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizPreview } from "../src/components/QuizPreview";
+import { QuizPreview } from "../src/shared/ui/QuizPreview";
 
 describe("QuizPreview", () => {
   afterEach(() => {
@@ -20,7 +20,12 @@ describe("QuizPreview", () => {
 
     render(<QuizPreview segments={segments} />);
 
-    expect(screen.getByText("조선의 왕은 세종대왕 이다.")).toBeTruthy();
+    expect(
+      screen.getByText(
+        (_content, element) =>
+          element?.textContent === "조선의 왕은 세종대왕 이다.",
+      ),
+    ).toBeTruthy();
     expect(screen.queryByText("조선의 왕은 ____ 이다.")).toBeNull();
   });
 });

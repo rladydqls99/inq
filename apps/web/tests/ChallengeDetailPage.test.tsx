@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, render, screen } from "./test-utils";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ChallengeDetailPage } from "../src/features/challenges/ChallengeDetailPage";
+import { ChallengeDetailPage } from "../src/pages/challenges/ChallengeDetailPage";
 
 describe("ChallengeDetailPage", () => {
   afterEach(() => {
@@ -20,12 +20,14 @@ describe("ChallengeDetailPage", () => {
 
     renderChallengeDetail();
 
-    expect(await screen.findByRole("heading", { name: "중간고사" })).toBeTruthy();
+    expect(
+      await screen.findByRole("heading", { name: "중간고사" }),
+    ).toBeTruthy();
     expect(screen.getByText("챌린지 카드")).toBeTruthy();
     expect(screen.getByText("국어 덱 · 카드 1장")).toBeTruthy();
-    expect(screen.getByRole("link", { name: "학습 시작" }).getAttribute("href")).toBe(
-      "/challenges/challenge-1/run",
-    );
+    expect(
+      screen.getByRole("link", { name: "학습 시작" }).getAttribute("href"),
+    ).toBe("/challenges/challenge-1/run");
     expect(screen.getByText("세종대왕").className).toContain("is-study");
   });
 });

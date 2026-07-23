@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("desktop upload previews and confirms valid markdown", async ({ page }) => {
+test("desktop upload previews and confirms valid markdown", async ({
+  page,
+}) => {
   await mockUnlocked(page);
   await page.route("**/api/decks", async (route) => {
     await route.fulfill({
@@ -36,7 +38,9 @@ test("desktop upload previews and confirms valid markdown", async ({ page }) => 
   });
 
   await page.goto("/upload");
-  await page.getByLabel("마크다운 내용").fill("훈민정음을 만든 [세종대왕]이다.");
+  await page
+    .getByLabel("마크다운 내용")
+    .fill("훈민정음을 만든 [세종대왕]이다.");
   await page.getByRole("button", { name: "검증하기" }).click();
 
   await expect(page.getByText("1장 검증 완료")).toBeVisible();
@@ -79,7 +83,9 @@ test("desktop upload shows validation errors", async ({ page }) => {
   await page.getByRole("button", { name: "검증하기" }).click();
 
   await expect(page.getByText("missing_answer")).toBeVisible();
-  await expect(page.getByRole("button", { name: "카드 만들기" })).toBeDisabled();
+  await expect(
+    page.getByRole("button", { name: "카드 만들기" }),
+  ).toBeDisabled();
 });
 
 async function mockUnlocked(page: import("@playwright/test").Page) {

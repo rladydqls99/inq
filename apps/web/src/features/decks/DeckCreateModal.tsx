@@ -1,8 +1,8 @@
 import { useState } from "react";
 
 import type { DeckResponse } from "@inq/shared";
-import { apiRequest } from "../../api/client";
-import { Modal } from "../../components/Modal";
+import { useDeckMutation } from "@/entities/decks/api";
+import { Modal } from "@/shared/ui/Modal";
 
 type DeckCreateModalProps = {
   onClose: () => void;
@@ -12,6 +12,7 @@ type DeckCreateModalProps = {
 export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState(false);
+  const createDeck = useDeckMutation();
   const trimmedTitle = title.trim();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
@@ -24,10 +25,7 @@ export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
     setError(false);
 
     try {
-      const deck = await apiRequest<DeckResponse>("/decks", {
-        method: "POST",
-        body: JSON.stringify({ title: trimmedTitle }),
-      });
+      const deck = await createDeck.mutateAsync({ title: trimmedTitle });
       await onCreated(deck);
       onClose();
     } catch {
@@ -51,7 +49,9 @@ export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
         <button type="submit" disabled={!trimmedTitle}>
           만들기
         </button>
-        {error ? <span className="form-error">덱을 생성하지 못했습니다.</span> : null}
+        {error ? (
+          <span className="form-error">덱을 생성하지 못했습니다.</span>
+        ) : null}
       </form>
     </Modal>
   );

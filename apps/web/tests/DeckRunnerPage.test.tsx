@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { act, cleanup, render, screen, waitFor } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DeckRunnerPage } from "../src/features/runners/DeckRunnerPage";
-import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/features/runners/vehicleControlSettings";
+import { DeckRunnerPage } from "../src/pages/decks/DeckRunnerPage";
+import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 
 describe("DeckRunnerPage", () => {
   afterEach(() => {
@@ -29,15 +29,17 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     expect(
-      await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다.")),
+      await screen.findByText(
+        matchesTextContent("훈민정음을 만든 세종대왕이다."),
+      ),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "정답 보기" })).toBeNull();
-    expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "다음 카드로 이동" }),
+    ).toBeTruthy();
     expect(screen.queryByText("5초")).toBeNull();
     expect(
-      await screen.findByText(
-        "이 브라우저는 차량 제어를 지원하지 않습니다.",
-      ),
+      await screen.findByText("이 브라우저는 차량 제어를 지원하지 않습니다."),
     ).toBeTruthy();
   });
 
@@ -51,7 +53,9 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    expect(await screen.findByText("덱 실행 정보를 불러오지 못했습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("덱 실행 정보를 불러오지 못했습니다."),
+    ).toBeTruthy();
     expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
@@ -63,7 +67,9 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다."));
+    await screen.findByText(
+      matchesTextContent("훈민정음을 만든 세종대왕이다."),
+    );
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -73,13 +79,18 @@ describe("DeckRunnerPage", () => {
         body: JSON.stringify({ cursor: 1 }),
       }),
     );
-    expect(await screen.findByText(matchesTextContent("수도는 서울이다."))).toBeTruthy();
+    expect(
+      await screen.findByText(matchesTextContent("수도는 서울이다.")),
+    ).toBeTruthy();
   });
 
   it("shows an error and keeps the current card when moving fails", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
-      "/api/decks/deck-1/run": (_input: RequestInfo | URL, init?: RequestInit) =>
+      "/api/decks/deck-1/run": (
+        _input: RequestInfo | URL,
+        init?: RequestInit,
+      ) =>
         init?.method === "PATCH"
           ? { body: { error: "move_failed" }, status: 500 }
           : deckRun({ cursor: 0 }),
@@ -87,7 +98,9 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("훈민정음을 만든 세종대왕이다."));
+    await screen.findByText(
+      matchesTextContent("훈민정음을 만든 세종대왕이다."),
+    );
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
@@ -98,7 +111,10 @@ describe("DeckRunnerPage", () => {
 
   it("returns to the deck list when loading a completed run", async () => {
     mockFetchByPath({
-      "/api/decks/deck-1/run": deckRun({ cursor: 2, completedAt: "2026-06-25T00:00:00.000Z" }),
+      "/api/decks/deck-1/run": deckRun({
+        cursor: 2,
+        completedAt: "2026-06-25T00:00:00.000Z",
+      }),
     });
 
     renderDeckRunner();
@@ -247,9 +263,9 @@ describe("DeckRunnerPage", () => {
       await screen.findByText("차량 제어 준비에 실패했습니다."),
     ).toBeTruthy();
     controls.play.mockResolvedValueOnce(undefined);
-    await userEvent.setup().click(
-      screen.getByRole("button", { name: "다시 시도" }),
-    );
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "다시 시도" }));
     expect(await screen.findByText("차량 제어 준비됨")).toBeTruthy();
 
     Object.defineProperty(document, "visibilityState", {
@@ -282,11 +298,9 @@ function installVehicleControls() {
   const handlers = new Map<string, (() => void) | null>();
   const mediaSession = {
     metadata: null as Record<string, unknown> | null,
-    setActionHandler: vi.fn(
-      (action: string, handler: (() => void) | null) => {
-        handlers.set(action, handler);
-      },
-    ),
+    setActionHandler: vi.fn((action: string, handler: (() => void) | null) => {
+      handlers.set(action, handler);
+    }),
   };
   Object.defineProperty(navigator, "mediaSession", {
     configurable: true,
@@ -402,7 +416,9 @@ function deckRun(input: { cursor: number; completedAt?: string | null }) {
 function matchesTextContent(expected: string) {
   return (_content: string, element: Element | null) =>
     element?.textContent === expected &&
-    Array.from(element.children).every((child) => child.textContent !== expected);
+    Array.from(element.children).every(
+      (child) => child.textContent !== expected,
+    );
 }
 
 function isMockErrorResponse(

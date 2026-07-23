@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ChallengeListPage } from "../src/features/challenges/ChallengeListPage";
+import { ChallengeListPage } from "../src/pages/challenges/ChallengeListPage";
 
 describe("ChallengeListPage", () => {
   afterEach(() => {
@@ -88,8 +88,12 @@ describe("ChallengeListPage", () => {
     renderChallengeListPage();
 
     const listItem = await screen.findByTestId("challenge-row-challenge-1");
-    await user.click(within(listItem).getByRole("button", { name: "중간고사 메뉴" }));
-    await user.click(within(listItem).getByRole("button", { name: "이름 변경" }));
+    await user.click(
+      within(listItem).getByRole("button", { name: "중간고사 메뉴" }),
+    );
+    await user.click(
+      within(listItem).getByRole("button", { name: "이름 변경" }),
+    );
     const nameInput = within(listItem).getByLabelText("챌린지 이름");
     await user.clear(nameInput);
     await user.type(nameInput, "기말고사");
@@ -106,8 +110,12 @@ describe("ChallengeListPage", () => {
     await user.click(
       within(listItem).getByRole("button", { name: "중간고사 메뉴" }),
     );
-    await user.click(within(listItem).getByRole("button", { name: "덱에서 카드 갱신" }));
-    expect(await screen.findByText("2장의 카드가 추가되었습니다.")).toBeTruthy();
+    await user.click(
+      within(listItem).getByRole("button", { name: "덱에서 카드 갱신" }),
+    );
+    expect(
+      await screen.findByText("2장의 카드가 추가되었습니다."),
+    ).toBeTruthy();
 
     await user.click(
       within(listItem).getByRole("button", { name: "중간고사 메뉴" }),
@@ -129,7 +137,9 @@ describe("ChallengeListPage", () => {
 
     renderChallengeListPage();
 
-    expect(await screen.findByText("챌린지 목록을 불러오지 못했습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("챌린지 목록을 불러오지 못했습니다."),
+    ).toBeTruthy();
   });
 
   it("disables deck refresh when the source deck has been deleted", async () => {
@@ -148,7 +158,9 @@ describe("ChallengeListPage", () => {
     const listItem = await screen.findByTestId("challenge-row-challenge-1");
     await userEvent
       .setup()
-      .click(within(listItem).getByRole("button", { name: "보존된 챌린지 메뉴" }));
+      .click(
+        within(listItem).getByRole("button", { name: "보존된 챌린지 메뉴" }),
+      );
     const updateButton = within(listItem).getByRole("button", {
       name: "덱에서 카드 갱신",
     });
@@ -178,15 +190,21 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
     const rawResponse = responsesByPath[path] ?? {};
 
     if (path === "/api/challenges" && init?.method === "POST") {
-      return Promise.resolve(jsonResponse(challenge({ id: "created", name: "새 챌린지" }), 201));
+      return Promise.resolve(
+        jsonResponse(challenge({ id: "created", name: "새 챌린지" }), 201),
+      );
     }
 
     if (path === "/api/challenges/challenge-1" && init?.method === "PATCH") {
-      return Promise.resolve(jsonResponse(challenge({ id: "challenge-1", name: "기말고사" })));
+      return Promise.resolve(
+        jsonResponse(challenge({ id: "challenge-1", name: "기말고사" })),
+      );
     }
 
     const response =
-      typeof rawResponse === "function" ? rawResponse(input, init) : rawResponse;
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
     const status = isMockErrorResponse(response) ? response.status : 200;
     const body = isMockErrorResponse(response) ? response.body : response;
 
@@ -213,7 +231,8 @@ function challenge(input: {
   return {
     id: input.id,
     name: input.name,
-    sourceDeckId: input.sourceDeckId === undefined ? "deck-1" : input.sourceDeckId,
+    sourceDeckId:
+      input.sourceDeckId === undefined ? "deck-1" : input.sourceDeckId,
     deckTitle: "국어",
     status: "active",
     answerMode: "manual",

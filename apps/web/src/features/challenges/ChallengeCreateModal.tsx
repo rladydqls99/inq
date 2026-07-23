@@ -1,4 +1,4 @@
-import { Modal } from "../../components/Modal";
+import { Modal } from "@/shared/ui/Modal";
 import { ChallengeForm } from "./ChallengeForm";
 
 type ChallengeCreateModalProps = {

@@ -1,15 +1,15 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "@testing-library/react";
+import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { DeckDetailPage } from "../src/features/decks/DeckDetailPage";
+import { DeckDetailPage } from "../src/pages/decks/DeckDetailPage";
 import {
   primeDeckVehicleControlFromUserGesture,
   releasePrimedDeckVehicleControl,
-} from "../src/features/runners/MediaSessionController";
+} from "../src/pages/decks/MediaSessionController";
 
 describe("DeckDetailPage", () => {
   afterEach(() => {
@@ -45,9 +45,9 @@ describe("DeckDetailPage", () => {
     expect(screen.getByRole("heading", { name: "국어" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "학습 시작" })).toBeTruthy();
     expect(screen.getByText("조선").className).toContain("is-study");
-    expect(screen.getByRole("link", { name: "카드 수정" }).getAttribute("href")).toBe(
-      "/cards/card-1/edit",
-    );
+    expect(
+      screen.getByRole("link", { name: "카드 수정" }).getAttribute("href"),
+    ).toBe("/cards/card-1/edit");
   });
 
   it("restarts a completed deck run before opening the study screen", async () => {
@@ -165,7 +165,9 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    expect(await screen.findByText("카드 목록을 불러오지 못했습니다.")).toBeTruthy();
+    expect(
+      await screen.findByText("카드 목록을 불러오지 못했습니다."),
+    ).toBeTruthy();
     expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
@@ -177,12 +179,16 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    const listItem = await findByTextContent("훈민정음을 만든 왕은 세종대왕이다.");
+    const listItem = await findByTextContent(
+      "훈민정음을 만든 왕은 세종대왕이다.",
+    );
     const cardItem = listItem.closest("article");
 
     expect(cardItem).not.toBeNull();
     await user.click(
-      within(cardItem as HTMLElement).getByRole("button", { name: "카드 삭제" }),
+      within(cardItem as HTMLElement).getByRole("button", {
+        name: "카드 삭제",
+      }),
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -204,16 +210,22 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
 
-    const listItem = await findByTextContent("훈민정음을 만든 왕은 세종대왕이다.");
+    const listItem = await findByTextContent(
+      "훈민정음을 만든 왕은 세종대왕이다.",
+    );
     const cardItem = listItem.closest("article");
 
     expect(cardItem).not.toBeNull();
     await user.click(
-      within(cardItem as HTMLElement).getByRole("button", { name: "카드 삭제" }),
+      within(cardItem as HTMLElement).getByRole("button", {
+        name: "카드 삭제",
+      }),
     );
 
     expect(await screen.findByText("카드를 삭제하지 못했습니다.")).toBeTruthy();
-    expect(queryByTextContent("훈민정음을 만든 왕은 세종대왕이다.")).toBeTruthy();
+    expect(
+      queryByTextContent("훈민정음을 만든 왕은 세종대왕이다."),
+    ).toBeTruthy();
   });
 });
 
@@ -333,5 +345,7 @@ function matchesTextContent(element: Element | null, text: string) {
     return false;
   }
 
-  return Array.from(element.children).every((child) => child.textContent !== text);
+  return Array.from(element.children).every(
+    (child) => child.textContent !== text,
+  );
 }

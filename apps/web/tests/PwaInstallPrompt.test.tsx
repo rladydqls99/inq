@@ -1,10 +1,10 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, render, screen } from "@testing-library/react";
+import { act, cleanup, render, screen } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { PwaInstallPrompt } from "../src/components/PwaInstallPrompt";
+import { PwaInstallPrompt } from "../src/shared/ui/PwaInstallPrompt";
 
 describe("PwaInstallPrompt", () => {
   afterEach(() => {
@@ -42,7 +42,9 @@ describe("PwaInstallPrompt", () => {
 
     expect(await screen.findByText("inq를 홈 화면에 추가하세요")).toBeTruthy();
     expect(
-      screen.getByText("브라우저의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요."),
+      screen.getByText(
+        "브라우저의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요.",
+      ),
     ).toBeTruthy();
     expect(screen.queryByRole("button", { name: "앱 설치" })).toBeNull();
   });

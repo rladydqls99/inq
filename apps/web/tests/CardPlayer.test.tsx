@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { CardPlayer } from "../src/components/CardPlayer";
+import { CardPlayer } from "../src/shared/ui/CardPlayer";
 
 const segments: QuizSegment[] = [
   { type: "text", value: "훈민정음의 창제자는 " },
@@ -111,7 +111,9 @@ describe("CardPlayer", () => {
     );
 
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "다음 카드로 이동" }),
+    ).toBeTruthy();
     expect(onAnswerReveal).toHaveBeenCalledTimes(1);
   });
 
@@ -128,7 +130,9 @@ describe("CardPlayer", () => {
 
     expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
     expect(screen.queryByRole("button", { name: "정답 보기" })).toBeNull();
-    expect(screen.getByRole("button", { name: "다음 카드로 이동" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", { name: "다음 카드로 이동" }),
+    ).toBeTruthy();
   });
 
   it("counts down and exposes a next-problem action after scoring", () => {
@@ -175,7 +179,9 @@ describe("CardPlayer", () => {
 
     const player = screen.getByRole("region", { name: "퀴즈 카드 2/4" });
     expect(screen.getByText("2 / 4")).toBeTruthy();
-    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe("2");
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe(
+      "2",
+    );
 
     fireEvent.touchStart(player, {
       changedTouches: [{ clientX: 240, clientY: 200 }],

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { apiRequest } from "../../api/client";
+import { useDeckMutation } from "@/entities/decks/api";
 
 type DeckFormProps = {
   onCreated: () => Promise<void> | void;
@@ -9,6 +9,7 @@ type DeckFormProps = {
 export function DeckForm({ onCreated }: DeckFormProps) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState(false);
+  const createDeck = useDeckMutation();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -16,10 +17,7 @@ export function DeckForm({ onCreated }: DeckFormProps) {
     setError(false);
 
     try {
-      await apiRequest("/decks", {
-        method: "POST",
-        body: JSON.stringify({ title }),
-      });
+      await createDeck.mutateAsync({ title });
 
       setTitle("");
       await onCreated();
@@ -31,7 +29,7 @@ export function DeckForm({ onCreated }: DeckFormProps) {
   return (
     <form className="compact-form" onSubmit={submit}>
       <label>
-          덱 이름
+        덱 이름
         <input
           value={title}
           onChange={(event) => {

@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { CardEditPage } from "../src/features/decks/CardEditPage";
+import { CardEditPage } from "../src/pages/decks/CardEditPage";
 
 describe("CardEditPage", () => {
   afterEach(() => {
@@ -20,17 +20,20 @@ describe("CardEditPage", () => {
 
     renderCardEdit();
 
-    expect(((await screen.findByLabelText("본문 1")) as HTMLTextAreaElement).value).toBe(
-      "훈민정음을 만든 ",
-    );
+    expect(
+      ((await screen.findByLabelText("본문 1")) as HTMLTextAreaElement).value,
+    ).toBe("훈민정음을 만든 ");
     expect((screen.getByLabelText("정답 1") as HTMLTextAreaElement).value).toBe(
       "조선",
     );
     expect((screen.getByLabelText("정답 2") as HTMLTextAreaElement).value).toBe(
       "세종대왕",
     );
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 ____의 왕은 ____이다."))).toBeTruthy();
-    expect(screen.getByText(matchesTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."))).toBeTruthy();
+    expect(
+      screen.getByText(
+        matchesTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."),
+      ),
+    ).toBeTruthy();
   });
 
   it("shows an error when loading a card fails", async () => {
@@ -135,7 +138,9 @@ describe("CardEditPage", () => {
     await user.type(answerInput, "대한민국");
     fireEvent.click(screen.getByRole("button", { name: "저장" }));
 
-    expect(await screen.findByText("카드가 이미 변경되었습니다. 다시 열어 주세요.")).toBeTruthy();
+    expect(
+      await screen.findByText("카드가 이미 변경되었습니다. 다시 열어 주세요."),
+    ).toBeTruthy();
     expect(screen.queryByText("저장되었습니다.")).toBeNull();
   });
 });
@@ -152,7 +157,9 @@ function renderCardEdit() {
 
 type MockResponse = unknown | { body: unknown; status: number };
 
-function mockFetchByPath(responsesByPath: Record<string, MockResponse | MockResponse[]>) {
+function mockFetchByPath(
+  responsesByPath: Record<string, MockResponse | MockResponse[]>,
+) {
   const queues = new Map(
     Object.entries(responsesByPath).map(([path, response]) => [
       path,
@@ -178,7 +185,9 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse | MockResp
   return fetchMock;
 }
 
-function isMockErrorResponse(response: MockResponse): response is { body: unknown; status: number } {
+function isMockErrorResponse(
+  response: MockResponse,
+): response is { body: unknown; status: number } {
   return (
     Boolean(response) &&
     typeof response === "object" &&
@@ -210,5 +219,7 @@ function card() {
 function matchesTextContent(expected: string) {
   return (_content: string, element: Element | null) =>
     element?.textContent === expected &&
-    Array.from(element.children).every((child) => child.textContent !== expected);
+    Array.from(element.children).every(
+      (child) => child.textContent !== expected,
+    );
 }

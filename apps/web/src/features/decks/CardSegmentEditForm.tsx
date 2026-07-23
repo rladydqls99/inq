@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizPreview } from "../../components/QuizPreview";
+import { QuizPreview } from "@/shared/ui/QuizPreview";
 
 type CardSegmentEditFormProps = {
   segments: QuizSegment[];

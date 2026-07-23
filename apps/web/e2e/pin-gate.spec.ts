@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("direct desktop upload URL is protected by the PIN gate", async ({ page }) => {
+test("direct desktop upload URL is protected by the PIN gate", async ({
+  page,
+}) => {
   await page.route("**/api/auth/status", async (route) => {
     await route.fulfill({
       contentType: "application/json",

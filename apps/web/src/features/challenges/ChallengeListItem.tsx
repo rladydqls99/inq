@@ -1,7 +1,7 @@
 import type { ChallengeResponse } from "@inq/shared";
 import { Link } from "react-router-dom";
 
-import { ProgressSummary } from "../../components/ProgressSummary";
+import { ProgressSummary } from "@/shared/ui/ProgressSummary";
 
 type ChallengeListItemProps = {
   challenge: ChallengeResponse;

@@ -1,6 +1,8 @@
 import { expect, test } from "@playwright/test";
 
-test("challenge runner reveals inline answers when self-scoring", async ({ page }) => {
+test("challenge runner reveals inline answers when self-scoring", async ({
+  page,
+}) => {
   const runState = {
     sessionId: "session-1",
     challengeId: "challenge-1",
@@ -28,17 +30,23 @@ test("challenge runner reveals inline answers when self-scoring", async ({ page 
       body: JSON.stringify({ pinConfigured: true, unlocked: true }),
     });
   });
-  await page.route("**/api/challenges/challenge-1/run", async (route, request) => {
-    if (request.method() === "PATCH") {
+  await page.route(
+    "**/api/challenges/challenge-1/run",
+    async (route, request) => {
+      if (request.method() === "PATCH") {
+        await route.fulfill({
+          contentType: "application/json",
+          body: JSON.stringify({ ...runState, cursor: 1 }),
+        });
+        return;
+      }
+
       await route.fulfill({
         contentType: "application/json",
-        body: JSON.stringify({ ...runState, cursor: 1 }),
+        body: JSON.stringify(runState),
       });
-      return;
-    }
-
-    await route.fulfill({ contentType: "application/json", body: JSON.stringify(runState) });
-  });
+    },
+  );
   await page.route("**/api/challenges/challenge-1/results", async (route) => {
     await route.fulfill({
       contentType: "application/json",
