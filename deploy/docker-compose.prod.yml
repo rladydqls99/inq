@@ -18,6 +18,7 @@ services:
       PIN_LOCKOUT_SECONDS: ${PIN_LOCKOUT_SECONDS:-300}
       INITIAL_PIN: ${INITIAL_PIN:?INITIAL_PIN must be set}
       SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET must be set}
+      SONIOX_API_KEY: ${SONIOX_API_KEY:-}
     volumes:
       - inq-sqlite:/data
     healthcheck:

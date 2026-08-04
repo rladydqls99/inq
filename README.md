@@ -71,6 +71,7 @@ verification, updates, and troubleshooting, see
    DOMAIN=quiz.example.com
    SESSION_SECRET=replace-with-the-generated-random-value
    INITIAL_PIN=replace-with-your-pin
+   SONIOX_API_KEY=replace-with-your-soniox-api-key
    ```
 
 4. Build and start the public stack:
