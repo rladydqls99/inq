@@ -18,6 +18,7 @@ type CardPlayerProps = {
   totalCards: number;
   selectedResult?: "correct" | "wrong" | null;
   initiallyRevealed?: boolean;
+  answerRevealed?: boolean;
   autoAdvanceSeconds?: number;
   canPrevious?: boolean;
   canNext?: boolean;
@@ -34,6 +35,7 @@ export function CardPlayer({
   totalCards,
   selectedResult = null,
   initiallyRevealed = false,
+  answerRevealed: controlledAnswerRevealed,
   autoAdvanceSeconds,
   canPrevious = true,
   canNext = true,
@@ -48,7 +50,8 @@ export function CardPlayer({
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
 
   const revealed =
-    initiallyRevealed || answerRevealed || selectedResult !== null;
+    controlledAnswerRevealed ??
+    (initiallyRevealed || answerRevealed || selectedResult !== null);
   const tone: AnswerTone =
     mode === "study"
       ? "study"

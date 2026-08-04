@@ -21,7 +21,7 @@ describe("DeckRunnerPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads a deck run with inline answers already revealed", async () => {
+  it("hides answers until the learner reveals them", async () => {
     mockFetchByPath({
       "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
     });
@@ -29,18 +29,41 @@ describe("DeckRunnerPage", () => {
     renderDeckRunner();
 
     expect(
-      await screen.findByText(
-        matchesTextContent("훈민정음을 만든 세종대왕이다."),
-      ),
+      await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다.")),
     ).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "정답 보기" })).toBeNull();
+    expect(screen.getByRole("button", { name: "정답 보기" })).toBeTruthy();
     expect(
-      screen.getByRole("button", { name: "다음 카드로 이동" }),
-    ).toBeTruthy();
+      screen.queryByRole("button", { name: "다음 카드로 이동" }),
+    ).toBeNull();
     expect(screen.queryByText("5초")).toBeNull();
     expect(
       await screen.findByText("이 브라우저는 차량 제어를 지원하지 않습니다."),
     ).toBeTruthy();
+  });
+
+  it("reveals before advancing with nexttrack", async () => {
+    const controls = installVehicleControls();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
+    });
+
+    renderDeckRunner();
+
+    expect(await screen.findByText("차량 제어 준비됨")).toBeTruthy();
+    act(() => controls.handlers.get("nexttrack")?.());
+
+    expect(
+      await screen.findByText(
+        matchesTextContent("훈민정음을 만든 세종대왕이다."),
+      ),
+    ).toBeTruthy();
+    expect(patchCalls(fetchMock)).toHaveLength(0);
+
+    act(() => controls.handlers.get("nexttrack")?.());
+    expect(
+      await screen.findByText(matchesTextContent("수도는 ____이다.")),
+    ).toBeTruthy();
+    expect(patchCalls(fetchMock)).toHaveLength(1);
   });
 
   it("shows an error when loading a deck run fails", async () => {
@@ -67,9 +90,7 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(
-      matchesTextContent("훈민정음을 만든 세종대왕이다."),
-    );
+    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -80,7 +101,7 @@ describe("DeckRunnerPage", () => {
       }),
     );
     expect(
-      await screen.findByText(matchesTextContent("수도는 서울이다.")),
+      await screen.findByText(matchesTextContent("수도는 ____이다.")),
     ).toBeTruthy();
   });
 
@@ -98,14 +119,12 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(
-      matchesTextContent("훈민정음을 만든 세종대왕이다."),
-    );
+    await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(await screen.findByText("카드를 이동하지 못했습니다.")).toBeTruthy();
     expect(
-      screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다.")),
+      screen.getByText(matchesTextContent("훈민정음을 만든 ____이다.")),
     ).toBeTruthy();
   });
 
@@ -131,7 +150,7 @@ describe("DeckRunnerPage", () => {
 
     renderDeckRunner();
 
-    await screen.findByText(matchesTextContent("수도는 서울이다."));
+    await screen.findByText(matchesTextContent("수도는 ____이다."));
     await user.click(screen.getByRole("button", { name: "다음 카드" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -162,6 +181,10 @@ describe("DeckRunnerPage", () => {
     const nextTrack = controls.handlers.get("nexttrack");
     expect(typeof nextTrack).toBe("function");
 
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "정답 보기" }));
+
     act(() => {
       nextTrack?.();
       nextTrack?.();
@@ -169,7 +192,7 @@ describe("DeckRunnerPage", () => {
     });
 
     expect(
-      await screen.findByText(matchesTextContent("수도는 서울이다.")),
+      await screen.findByText(matchesTextContent("수도는 ____이다.")),
     ).toBeTruthy();
     expect(patchCalls(fetchMock)).toHaveLength(1);
     await waitFor(() => {
@@ -200,7 +223,7 @@ describe("DeckRunnerPage", () => {
     await Promise.resolve();
     expect(patchCalls(fetchMock)).toHaveLength(0);
     expect(
-      screen.getByText(matchesTextContent("훈민정음을 만든 세종대왕이다.")),
+      screen.getByText(matchesTextContent("훈민정음을 만든 ____이다.")),
     ).toBeTruthy();
   });
 
@@ -215,18 +238,18 @@ describe("DeckRunnerPage", () => {
     expect(await screen.findByText("차량 제어 준비됨")).toBeTruthy();
     act(() => controls.handlers.get("previoustrack")?.());
     expect(
-      await screen.findByText(
-        matchesTextContent("훈민정음을 만든 세종대왕이다."),
-      ),
+      await screen.findByText(matchesTextContent("훈민정음을 만든 ____이다.")),
     ).toBeTruthy();
     expect(patchCalls(fetchMock)[0]?.[1]).toEqual(
       expect.objectContaining({ body: JSON.stringify({ cursor: 0 }) }),
     );
 
     act(() => controls.handlers.get("nexttrack")?.());
+    act(() => controls.handlers.get("nexttrack")?.());
     expect(
-      await screen.findByText(matchesTextContent("수도는 서울이다.")),
+      await screen.findByText(matchesTextContent("수도는 ____이다.")),
     ).toBeTruthy();
+    act(() => controls.handlers.get("nexttrack")?.());
     act(() => controls.handlers.get("nexttrack")?.());
     expect(await screen.findByText("덱 목록")).toBeTruthy();
     expect(patchCalls(fetchMock)[2]?.[1]).toEqual(

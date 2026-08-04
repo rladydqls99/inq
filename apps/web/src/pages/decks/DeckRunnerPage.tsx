@@ -19,6 +19,7 @@ import {
 export function DeckRunnerPage() {
   const { deckId } = useParams();
   const [moveError, setMoveError] = useState(false);
+  const [revealedCardId, setRevealedCardId] = useState<string | null>(null);
   const { data: runState, isError: loadError } = useDeckRun(deckId);
   const moveMutation = useMoveDeckRun(deckId);
   const cursor = runState?.cursor ?? 0;
@@ -31,6 +32,7 @@ export function DeckRunnerPage() {
     );
   const runStateRef = useRef<DeckRunResponse | null>(null);
   const cursorRef = useRef(0);
+  const revealedCardIdRef = useRef<string | null>(null);
   const movingRef = useRef(false);
   const moveToRef = useRef<(nextCursor: number) => Promise<void>>(
     async () => {},
@@ -39,6 +41,7 @@ export function DeckRunnerPage() {
 
   runStateRef.current = runState ?? null;
   cursorRef.current = cursor;
+  revealedCardIdRef.current = revealedCardId;
 
   useEffect(() => {
     function syncSetting(event: Event) {
@@ -125,7 +128,16 @@ export function DeckRunnerPage() {
       deckTitle: currentRunState.deckTitle,
       currentIndex: cursorRef.current,
       totalCards: currentRunState.cards.length,
-      onNext: () => void moveToRef.current(cursorRef.current + 1),
+      onNext: () => {
+        const currentCard = runStateRef.current?.cards[cursorRef.current];
+
+        if (currentCard && revealedCardIdRef.current !== currentCard.cardId) {
+          setRevealedCardId(currentCard.cardId);
+          return;
+        }
+
+        void moveToRef.current(cursorRef.current + 1);
+      },
       onPrevious: () => void moveToRef.current(cursorRef.current - 1),
       onStatusChange: setVehicleControlStatus,
     });
@@ -211,11 +223,12 @@ export function DeckRunnerPage() {
           segments={currentCard.segments}
           currentIndex={cursor}
           totalCards={runState.cards.length}
-          initiallyRevealed
+          answerRevealed={revealedCardId === currentCard.cardId}
           canPrevious={!moveMutation.isPending && cursor > 0}
           canNext={!moveMutation.isPending && cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
+          onAnswerReveal={() => setRevealedCardId(currentCard.cardId)}
         />
         {moveError ? (
           <div className="list-empty" role="alert">

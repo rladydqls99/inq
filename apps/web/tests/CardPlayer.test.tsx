@@ -135,6 +135,32 @@ describe("CardPlayer", () => {
     ).toBeTruthy();
   });
 
+  it("uses a controlled study reveal state", () => {
+    const { rerender } = render(
+      <CardPlayer
+        segments={segments}
+        mode="study"
+        currentIndex={0}
+        totalCards={2}
+        answerRevealed={false}
+      />,
+    );
+
+    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
+
+    rerender(
+      <CardPlayer
+        segments={segments}
+        mode="study"
+        currentIndex={0}
+        totalCards={2}
+        answerRevealed
+      />,
+    );
+
+    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
+  });
+
   it("counts down and exposes a next-problem action after scoring", () => {
     vi.useFakeTimers();
     const onNext = vi.fn();
