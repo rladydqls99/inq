@@ -28,7 +28,7 @@ describe("SettingsPage", () => {
     renderSettings();
 
     const vehicleControl = screen.getByRole("switch", {
-      name: /덱 학습 차량 제어/,
+      name: /학습 차량 제어/,
     }) as HTMLInputElement;
     expect(vehicleControl.checked).toBe(true);
     expect(window.localStorage.getItem(VEHICLE_CONTROL_STORAGE_KEY)).toBeNull();
@@ -45,7 +45,7 @@ describe("SettingsPage", () => {
     expect(
       (
         screen.getByRole("switch", {
-          name: /덱 학습 차량 제어/,
+          name: /학습 차량 제어/,
         }) as HTMLInputElement
       ).checked,
     ).toBe(false);

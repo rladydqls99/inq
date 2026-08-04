@@ -4,6 +4,7 @@ import { Link, useParams } from "react-router-dom";
 import { useChallengeCards, useChallenges } from "@/entities/challenges/api";
 import { CardListHeader } from "@/shared/ui/CardListHeader";
 import { QuizTextRenderer } from "@/shared/ui/QuizTextRenderer";
+import { primeVehicleControlFromUserGesture } from "@/widgets/vehicleControl";
 
 export function ChallengeDetailPage() {
   const { challengeId } = useParams();
@@ -35,6 +36,7 @@ export function ChallengeDetailPage() {
             <Link
               className="card-list-header__start"
               to={`/challenges/${challengeId}/run`}
+              onClick={primeVehicleControlFromUserGesture}
             >
               학습 시작
             </Link>

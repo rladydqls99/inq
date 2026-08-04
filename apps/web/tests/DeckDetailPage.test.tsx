@@ -7,14 +7,14 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DeckDetailPage } from "../src/pages/decks/DeckDetailPage";
 import {
-  primeDeckVehicleControlFromUserGesture,
-  releasePrimedDeckVehicleControl,
-} from "../src/pages/decks/MediaSessionController";
+  primeVehicleControlFromUserGesture,
+  releasePrimedVehicleControl,
+} from "../src/widgets/vehicleControl";
 
 describe("DeckDetailPage", () => {
   afterEach(() => {
     cleanup();
-    releasePrimedDeckVehicleControl();
+    releasePrimedVehicleControl();
     window.localStorage.clear();
     Reflect.deleteProperty(navigator, "mediaSession");
     vi.unstubAllGlobals();
@@ -148,7 +148,7 @@ describe("DeckDetailPage", () => {
 
     renderDeckDetail();
     await screen.findByRole("button", { name: "학습 시작" });
-    primeDeckVehicleControlFromUserGesture();
+    primeVehicleControlFromUserGesture();
     cleanup();
 
     expect(pause).toHaveBeenCalledTimes(1);

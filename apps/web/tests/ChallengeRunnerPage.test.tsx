@@ -11,7 +11,13 @@ describe("ChallengeRunnerPage", () => {
   afterEach(() => {
     vi.useRealTimers();
     cleanup();
+    window.localStorage.clear();
     Reflect.deleteProperty(navigator, "mediaSession");
+    Object.defineProperty(document, "visibilityState", {
+      configurable: true,
+      value: "visible",
+    });
+    vi.unstubAllGlobals();
     vi.restoreAllMocks();
   });
 
@@ -74,12 +80,60 @@ describe("ChallengeRunnerPage", () => {
     });
   });
 
-  it("never registers Media Session handlers for challenge study", async () => {
-    const setActionHandler = vi.fn();
-    Object.defineProperty(navigator, "mediaSession", {
-      configurable: true,
-      value: { metadata: null, setActionHandler },
-    });
+  it("moves with media controls and restores each saved result state", async () => {
+    const controls = installVehicleControls();
+    const fetchMock = mockFetch({ selectedResults: ["correct", "wrong"] });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    expect(await screen.findByText("차량 제어 준비됨")).toBeTruthy();
+    expect(
+      screen.getByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
+      ),
+    ).toBeTruthy();
+    expect(
+      screen
+        .getByRole("button", { name: "맞았어요" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(screen.getByText("세종대왕").className).toContain("is-correct");
+
+    act(() => controls.handlers.get("nexttrack")?.());
+
+    expect(
+      await screen.findByText((_, element) =>
+        matchesTextContent(element, "조선의 수도는 한양이다."),
+      ),
+    ).toBeTruthy();
+    expect(
+      screen
+        .getByRole("button", { name: "틀렸어요" })
+        .getAttribute("aria-pressed"),
+    ).toBe("true");
+    expect(screen.getByText("한양").className).toContain("is-wrong");
+
+    act(() => controls.handlers.get("previoustrack")?.());
+
+    expect(
+      await screen.findByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
+      ),
+    ).toBeTruthy();
+    expect(patchCalls(fetchMock)).toHaveLength(2);
+  });
+
+  it("does not reveal an unanswered card after media navigation", async () => {
+    const controls = installVehicleControls();
     mockFetch();
 
     render(
@@ -93,8 +147,19 @@ describe("ChallengeRunnerPage", () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText("1 / 2")).toBeTruthy();
-    expect(setActionHandler).not.toHaveBeenCalled();
+    expect(await screen.findByText("차량 제어 준비됨")).toBeTruthy();
+    act(() => controls.handlers.get("nexttrack")?.());
+
+    expect(
+      await screen.findByText((_, element) =>
+        matchesTextContent(element, "조선의 수도는 ____이다."),
+      ),
+    ).toBeTruthy();
+    expect(
+      screen.queryByText((_, element) =>
+        matchesTextContent(element, "조선의 수도는 한양이다."),
+      ),
+    ).toBeNull();
   });
 
   it("shows an error when loading a challenge run fails", async () => {
@@ -304,6 +369,47 @@ function matchesTextContent(element: Element | null, text: string) {
   );
 }
 
+function installVehicleControls() {
+  const handlers = new Map<string, (() => void) | null>();
+  const mediaSession = {
+    metadata: null as Record<string, unknown> | null,
+    setActionHandler: vi.fn((action: string, handler: (() => void) | null) => {
+      handlers.set(action, handler);
+    }),
+  };
+  Object.defineProperty(navigator, "mediaSession", {
+    configurable: true,
+    value: mediaSession,
+  });
+
+  class FakeMediaMetadata {
+    title?: string;
+    artist?: string;
+    album?: string;
+
+    constructor(init: MediaMetadataInit) {
+      Object.assign(this, init);
+    }
+  }
+
+  vi.stubGlobal("MediaMetadata", FakeMediaMetadata);
+  vi.stubGlobal("URL", {
+    createObjectURL: vi.fn(() => "blob:inq-silence"),
+    revokeObjectURL: vi.fn(),
+  });
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue(undefined);
+  vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+  vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
+
+  return { handlers };
+}
+
+function patchCalls(fetchMock: ReturnType<typeof vi.fn>) {
+  return fetchMock.mock.calls.filter(
+    (call) => (call[1] as RequestInit | undefined)?.method === "PATCH",
+  );
+}
+
 function mockFetch(
   options: {
     cardCount?: number;
@@ -311,6 +417,7 @@ function mockFetch(
     failMove?: boolean;
     failResult?: boolean;
     moveWrongToBack?: boolean;
+    selectedResults?: Array<"correct" | "wrong" | null>;
   } = {},
 ) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -386,7 +493,12 @@ function jsonResponse(body: unknown, status = 200) {
   });
 }
 
-function runState(options: { cardCount?: number } = {}) {
+function runState(
+  options: {
+    cardCount?: number;
+    selectedResults?: Array<"correct" | "wrong" | null>;
+  } = {},
+) {
   const cards = [
     {
       sessionCardId: "session-card-1",
@@ -412,7 +524,12 @@ function runState(options: { cardCount?: number } = {}) {
         { type: "text", value: "이다." },
       ],
     },
-  ].slice(0, options.cardCount ?? 2);
+  ]
+    .slice(0, options.cardCount ?? 2)
+    .map((card, index) => ({
+      ...card,
+      selectedResult: options.selectedResults?.[index] ?? card.selectedResult,
+    }));
 
   return {
     sessionId: "session-1",

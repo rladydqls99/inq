@@ -11,9 +11,9 @@ import {
 import { CardListHeader } from "@/shared/ui/CardListHeader";
 import { QuizTextRenderer } from "@/shared/ui/QuizTextRenderer";
 import {
-  primeDeckVehicleControlFromUserGesture,
-  releasePrimedDeckVehicleControl,
-} from "./MediaSessionController";
+  primeVehicleControlFromUserGesture,
+  releasePrimedVehicleControl,
+} from "@/widgets/vehicleControl";
 
 export function DeckDetailPage() {
   const { deckId } = useParams();
@@ -39,7 +39,7 @@ export function DeckDetailPage() {
       mountedRef.current = false;
 
       if (!handOffPrimedAudioRef.current) {
-        releasePrimedDeckVehicleControl();
+        releasePrimedVehicleControl();
       }
     };
   }, []);
@@ -59,7 +59,7 @@ export function DeckDetailPage() {
       return;
     }
 
-    primeDeckVehicleControlFromUserGesture();
+    primeVehicleControlFromUserGesture();
     handOffPrimedAudioRef.current = false;
     setStartError(false);
 
@@ -67,14 +67,14 @@ export function DeckDetailPage() {
       await startRunMutation.mutateAsync();
 
       if (!mountedRef.current) {
-        releasePrimedDeckVehicleControl();
+        releasePrimedVehicleControl();
         return;
       }
 
       handOffPrimedAudioRef.current = true;
       navigate(`/decks/${deckId}/run`);
     } catch {
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
 
       if (mountedRef.current) {
         setStartError(true);

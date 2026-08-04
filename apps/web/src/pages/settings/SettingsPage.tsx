@@ -38,9 +38,9 @@ export function SettingsPage() {
           <h2>차량 제어</h2>
           <label className="settings-toggle">
             <span className="settings-toggle__copy">
-              <strong>덱 학습 차량 제어</strong>
+              <strong>학습 차량 제어</strong>
               <span id="vehicle-control-description">
-                덱 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
+                덱·챌린지 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
               </span>
             </span>
             <input

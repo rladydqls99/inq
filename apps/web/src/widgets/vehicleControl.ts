@@ -18,7 +18,7 @@ type MediaSessionHandlers = {
 export type VehicleControlStatus =
   "preparing" | "ready" | "disabled" | "unsupported" | "failed";
 
-type DeckMediaSessionControllerOptions = MediaSessionHandlers & {
+type VehicleMediaSessionControllerOptions = MediaSessionHandlers & {
   deckTitle: string;
   currentIndex: number;
   totalCards: number;
@@ -32,12 +32,12 @@ type ManagedSilentAudio = {
 
 let primedAudio: ManagedSilentAudio | null = null;
 
-export function primeDeckVehicleControlFromUserGesture() {
+export function primeVehicleControlFromUserGesture() {
   if (!isVehicleControlEnabled() || !getMediaSession()) {
     return;
   }
 
-  releasePrimedDeckVehicleControl();
+  releasePrimedVehicleControl();
 
   try {
     primedAudio = createSilentAudio();
@@ -49,7 +49,7 @@ export function primeDeckVehicleControlFromUserGesture() {
   }
 }
 
-export function releasePrimedDeckVehicleControl() {
+export function releasePrimedVehicleControl() {
   if (!primedAudio) {
     return;
   }
@@ -58,12 +58,12 @@ export function releasePrimedDeckVehicleControl() {
   primedAudio = null;
 }
 
-export class DeckMediaSessionController {
+export class VehicleMediaSessionController {
   private audio: ManagedSilentAudio | null = null;
   private disposed = false;
-  private options: DeckMediaSessionControllerOptions;
+  private options: VehicleMediaSessionControllerOptions;
 
-  constructor(options: DeckMediaSessionControllerOptions) {
+  constructor(options: VehicleMediaSessionControllerOptions) {
     this.options = options;
   }
 
@@ -75,7 +75,7 @@ export class DeckMediaSessionController {
     const mediaSession = getMediaSession();
 
     if (!mediaSession || typeof MediaMetadata === "undefined") {
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
       this.options.onStatusChange("unsupported");
       return;
     }

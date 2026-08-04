@@ -6,10 +6,10 @@ import { useDeckRun, useMoveDeckRun } from "@/entities/decks/api";
 import { CardPlayer } from "@/shared/ui/CardPlayer";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import {
-  DeckMediaSessionController,
-  releasePrimedDeckVehicleControl,
+  VehicleMediaSessionController,
+  releasePrimedVehicleControl,
   type VehicleControlStatus,
-} from "./MediaSessionController";
+} from "@/widgets/vehicleControl";
 import {
   isVehicleControlEnabled,
   VEHICLE_CONTROL_CHANGE_EVENT,
@@ -37,7 +37,7 @@ export function DeckRunnerPage() {
   const moveToRef = useRef<(nextCursor: number) => Promise<void>>(
     async () => {},
   );
-  const mediaControllerRef = useRef<DeckMediaSessionController | null>(null);
+  const mediaControllerRef = useRef<VehicleMediaSessionController | null>(null);
 
   runStateRef.current = runState ?? null;
   cursorRef.current = cursor;
@@ -118,13 +118,13 @@ export function DeckRunnerPage() {
     }
 
     if (!vehicleControlEnabled) {
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
       setVehicleControlStatus("disabled");
       return;
     }
 
     const currentRunState = runStateRef.current;
-    const controller = new DeckMediaSessionController({
+    const controller = new VehicleMediaSessionController({
       deckTitle: currentRunState.deckTitle,
       currentIndex: cursorRef.current,
       totalCards: currentRunState.cards.length,
@@ -146,7 +146,7 @@ export function DeckRunnerPage() {
     function handleVisibilityChange() {
       if (document.visibilityState === "hidden") {
         controller.suspend();
-        releasePrimedDeckVehicleControl();
+        releasePrimedVehicleControl();
         return;
       }
 
@@ -157,7 +157,7 @@ export function DeckRunnerPage() {
 
     if (document.visibilityState === "hidden") {
       controller.suspend();
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
     } else {
       void controller.prepare();
     }
@@ -165,7 +165,7 @@ export function DeckRunnerPage() {
     return () => {
       document.removeEventListener("visibilitychange", handleVisibilityChange);
       controller.destroy();
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
 
       if (mediaControllerRef.current === controller) {
         mediaControllerRef.current = null;
@@ -187,7 +187,7 @@ export function DeckRunnerPage() {
 
   useEffect(() => {
     return () => {
-      releasePrimedDeckVehicleControl();
+      releasePrimedVehicleControl();
     };
   }, []);
 
