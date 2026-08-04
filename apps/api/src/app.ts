@@ -10,11 +10,9 @@ import { createChallengeRoutes } from "./routes/challenges";
 import { createDeckRunRoutes } from "./routes/deckRuns";
 import { createDeckRoutes } from "./routes/decks";
 import { createImportRoutes } from "./routes/imports";
+import { createVoiceRoutes } from "./routes/voice";
 
-export function createApp(options?: {
-  prisma?: PrismaClient;
-  env?: ApiEnv;
-}) {
+export function createApp(options?: { prisma?: PrismaClient; env?: ApiEnv }) {
   const app = new Hono();
   const prisma = options?.prisma ?? defaultPrisma;
   const env = options?.env ?? loadEnv();
@@ -39,12 +37,14 @@ export function createApp(options?: {
   app.use("/api/challenges/*", authMiddleware({ prisma, env }));
   app.use("/api/import/*", authMiddleware({ prisma, env }));
   app.use("/api/backup/*", authMiddleware({ prisma, env }));
+  app.use("/api/voice/*", authMiddleware({ prisma, env }));
   app.route("/api/decks", createDeckRoutes({ prisma }));
   app.route("/api/decks", createDeckRunRoutes({ prisma }));
   app.route("/api", createCardRoutes({ prisma }));
   app.route("/api/challenges", createChallengeRoutes({ prisma }));
   app.route("/api/import", createImportRoutes({ prisma }));
   app.route("/api/backup", createBackupRoutes({ prisma }));
+  app.route("/api/voice", createVoiceRoutes({ env }));
 
   return app;
 }

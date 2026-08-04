@@ -1,7 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Navigate, useParams } from "react-router-dom";
 
-import type { DeckRunResponse } from "@inq/shared";
+import { getAnswers, type DeckRunResponse } from "@inq/shared";
 import { useDeckRun, useMoveDeckRun } from "@/entities/decks/api";
 import { CardPlayer } from "@/shared/ui/CardPlayer";
 import { PageHeader } from "@/shared/ui/PageHeader";
@@ -15,6 +15,12 @@ import {
   VEHICLE_CONTROL_CHANGE_EVENT,
   VEHICLE_CONTROL_STORAGE_KEY,
 } from "@/widgets/vehicleControlSettings";
+import { useVoiceAnswer } from "@/widgets/useVoiceAnswer";
+import {
+  isVoiceAnswerEnabled,
+  VOICE_ANSWER_CHANGE_EVENT,
+  VOICE_ANSWER_STORAGE_KEY,
+} from "@/widgets/voiceAnswerSettings";
 
 export function DeckRunnerPage() {
   const { deckId } = useParams();
@@ -30,6 +36,11 @@ export function DeckRunnerPage() {
     useState<VehicleControlStatus>(() =>
       isVehicleControlEnabled() ? "preparing" : "disabled",
     );
+  const [voiceAnswerEnabled, setVoiceAnswerEnabled] =
+    useState(isVoiceAnswerEnabled);
+  const [pageVisible, setPageVisible] = useState(
+    () => document.visibilityState !== "hidden",
+  );
   const runStateRef = useRef<DeckRunResponse | null>(null);
   const cursorRef = useRef(0);
   const revealedCardIdRef = useRef<string | null>(null);
@@ -65,6 +76,41 @@ export function DeckRunnerPage() {
     return () => {
       window.removeEventListener("storage", syncSetting);
       window.removeEventListener(VEHICLE_CONTROL_CHANGE_EVENT, syncSetting);
+    };
+  }, []);
+
+  useEffect(() => {
+    function syncVisibility() {
+      setPageVisible(document.visibilityState !== "hidden");
+    }
+
+    document.addEventListener("visibilitychange", syncVisibility);
+    return () =>
+      document.removeEventListener("visibilitychange", syncVisibility);
+  }, []);
+
+  useEffect(() => {
+    function syncSetting(event: Event) {
+      if (
+        event instanceof StorageEvent &&
+        event.key !== VOICE_ANSWER_STORAGE_KEY
+      ) {
+        return;
+      }
+
+      setVoiceAnswerEnabled(
+        event instanceof CustomEvent && typeof event.detail === "boolean"
+          ? event.detail
+          : isVoiceAnswerEnabled(),
+      );
+    }
+
+    window.addEventListener("storage", syncSetting);
+    window.addEventListener(VOICE_ANSWER_CHANGE_EVENT, syncSetting);
+
+    return () => {
+      window.removeEventListener("storage", syncSetting);
+      window.removeEventListener(VOICE_ANSWER_CHANGE_EVENT, syncSetting);
     };
   }, []);
 
@@ -191,6 +237,23 @@ export function DeckRunnerPage() {
     };
   }, []);
 
+  const currentCard = runState?.cards[cursor];
+  const voiceAnswers = useMemo(
+    () => (currentCard ? getAnswers(currentCard.segments) : []),
+    [currentCard],
+  );
+  const revealVoiceAnswer = useCallback(() => {
+    if (currentCard) setRevealedCardId(currentCard.cardId);
+  }, [currentCard]);
+  const voiceFeedback = useVoiceAnswer({
+    enabled: voiceAnswerEnabled,
+    answers: voiceAnswers,
+    active: Boolean(
+      pageVisible && currentCard && revealedCardId !== currentCard.cardId,
+    ),
+    onCorrect: revealVoiceAnswer,
+  });
+
   if (loadError) {
     return (
       <div className="list-empty">덱 실행 정보를 불러오지 못했습니다.</div>
@@ -201,7 +264,6 @@ export function DeckRunnerPage() {
     return <div className="list-empty">불러오는 중입니다.</div>;
   }
 
-  const currentCard = runState.cards[cursor];
   const completed =
     Boolean(runState.completedAt) || cursor >= runState.cards.length;
 
@@ -229,6 +291,7 @@ export function DeckRunnerPage() {
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
           onAnswerReveal={() => setRevealedCardId(currentCard.cardId)}
+          voiceFeedback={voiceFeedback}
         />
         {moveError ? (
           <div className="list-empty" role="alert">

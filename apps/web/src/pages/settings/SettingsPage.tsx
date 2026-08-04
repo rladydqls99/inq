@@ -7,6 +7,10 @@ import {
   isVehicleControlEnabled,
   setVehicleControlEnabled,
 } from "@/widgets/vehicleControlSettings";
+import {
+  isVoiceAnswerEnabled,
+  setVoiceAnswerEnabled,
+} from "@/widgets/voiceAnswerSettings";
 
 export function SettingsPage() {
   const [lockError, setLockError] = useState(false);
@@ -14,10 +18,17 @@ export function SettingsPage() {
   const [vehicleControlEnabled, setVehicleControlEnabledState] = useState(
     isVehicleControlEnabled,
   );
+  const [voiceAnswerEnabled, setVoiceAnswerEnabledState] =
+    useState(isVoiceAnswerEnabled);
 
   function updateVehicleControl(enabled: boolean) {
     setVehicleControlEnabledState(enabled);
     setVehicleControlEnabled(enabled);
+  }
+
+  function updateVoiceAnswer(enabled: boolean) {
+    setVoiceAnswerEnabledState(enabled);
+    setVoiceAnswerEnabled(enabled);
   }
 
   async function lock() {
@@ -49,6 +60,24 @@ export function SettingsPage() {
               checked={vehicleControlEnabled}
               aria-describedby="vehicle-control-description"
               onChange={(event) => updateVehicleControl(event.target.checked)}
+            />
+          </label>
+        </section>
+        <section className="settings-section">
+          <h2>음성 정답 판정</h2>
+          <label className="settings-toggle">
+            <span className="settings-toggle__copy">
+              <strong>음성으로 정답 확인</strong>
+              <span id="voice-answer-description">
+                덱 학습 중 마이크 음성이 Soniox로 전송되어 정답을 판정합니다.
+              </span>
+            </span>
+            <input
+              type="checkbox"
+              role="switch"
+              checked={voiceAnswerEnabled}
+              aria-describedby="voice-answer-description"
+              onChange={(event) => updateVoiceAnswer(event.target.checked)}
             />
           </label>
         </section>

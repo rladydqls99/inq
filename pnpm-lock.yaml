@@ -66,6 +66,9 @@ importers:
       '@inq/shared':
         specifier: workspace:*
         version: link:../../packages/shared
+      '@soniox/client':
+        specifier: ^2.2.0
+        version: 2.2.0
       '@tanstack/react-query':
         specifier: ^5.101.4
         version: 5.101.4(react@19.2.7)
@@ -1031,6 +1034,9 @@ packages:
 
   '@rtsao/scc@1.1.0':
     resolution: {integrity: sha512-zt6OdqaDoOnJ1ZYsCYGt9YmWzDXl4vQdKTyJev62gFhRGKdx7mcT54V9KIjg+d2wi9EXsPvAPKe7i7WjfVWB8g==}
+
+  '@soniox/client@2.2.0':
+    resolution: {integrity: sha512-LPvv5Ee39DvxuCP+ArI43SueUSLXDI2thkPJYpc2/zBJM1yXrrrYpdAtkqQ1QXOPiQeGvH0a+q3b5rNiF7JYcw==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -3437,6 +3443,8 @@ snapshots:
     optional: true
 
   '@rtsao/scc@1.1.0': {}
+
+  '@soniox/client@2.2.0': {}
 
   '@standard-schema/spec@1.1.0': {}
 

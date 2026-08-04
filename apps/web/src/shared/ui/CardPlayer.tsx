@@ -26,6 +26,11 @@ type CardPlayerProps = {
   onNext?: () => void;
   onResult?: (result: "correct" | "wrong") => void;
   onAnswerReveal?: () => void;
+  voiceFeedback?:
+    | { status: "listening"; transcript: string }
+    | { status: "wrong"; transcript: string }
+    | { status: "error"; message: string }
+    | null;
 };
 
 export function CardPlayer({
@@ -43,6 +48,7 @@ export function CardPlayer({
   onNext,
   onResult,
   onAnswerReveal,
+  voiceFeedback = null,
 }: CardPlayerProps) {
   const [answerRevealed, setAnswerRevealed] = useState(
     initiallyRevealed || selectedResult !== null,
@@ -210,6 +216,20 @@ export function CardPlayer({
           <ChevronRight aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
       </div>
+
+      {voiceFeedback ? (
+        <div
+          className={`card-player__voice-feedback is-${voiceFeedback.status}`}
+          role={voiceFeedback.status === "error" ? "alert" : "status"}
+          aria-live="polite"
+        >
+          {voiceFeedback.status === "listening" ? "듣는 중" : null}
+          {voiceFeedback.status === "wrong"
+            ? `인식: ${voiceFeedback.transcript} · 다시 말해보세요`
+            : null}
+          {voiceFeedback.status === "error" ? voiceFeedback.message : null}
+        </div>
+      ) : null}
 
       {mode === "challenge" ? (
         <div className="card-player__result-controls" aria-label="학습 결과">

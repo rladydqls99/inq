@@ -474,6 +474,19 @@ textarea {
   gap: 8px;
 }
 
+.card-player__voice-feedback {
+  min-height: 20px;
+  color: var(--inq-ink-soft);
+  font-size: 13px;
+  font-weight: 650;
+  text-align: center;
+}
+
+.card-player__voice-feedback.is-wrong,
+.card-player__voice-feedback.is-error {
+  color: var(--inq-error);
+}
+
 .card-player__result-button {
   width: 100%;
   border: 0;

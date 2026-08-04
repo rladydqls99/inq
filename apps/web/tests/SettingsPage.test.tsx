@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SettingsPage } from "../src/pages/settings/SettingsPage";
 import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
+import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
 
 describe("SettingsPage", () => {
   afterEach(() => {
@@ -49,6 +50,21 @@ describe("SettingsPage", () => {
         }) as HTMLInputElement
       ).checked,
     ).toBe(false);
+  });
+
+  it("keeps voice answer checking off until enabled on this device", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const voiceAnswer = screen.getByRole("switch", {
+      name: /음성으로 정답 확인/,
+    }) as HTMLInputElement;
+    expect(voiceAnswer.checked).toBe(false);
+
+    await user.click(voiceAnswer);
+
+    expect(voiceAnswer.checked).toBe(true);
+    expect(window.localStorage.getItem(VOICE_ANSWER_STORAGE_KEY)).toBe("true");
   });
 
   it("exports backup data", async () => {

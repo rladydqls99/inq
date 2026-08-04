@@ -5,6 +5,7 @@ export type ApiEnv = {
   secureCookies: boolean;
   pinMaxAttempts: number;
   pinLockoutSeconds: number;
+  sonioxApiKey?: string;
 };
 
 const DEFAULT_PIN_SESSION_TTL_SECONDS = 60 * 60 * 24;
@@ -13,6 +14,8 @@ const DEFAULT_PIN_MAX_ATTEMPTS = 10;
 const DEFAULT_PIN_LOCKOUT_SECONDS = 5 * 60;
 
 export function loadEnv(environment = process.env): ApiEnv {
+  const sonioxApiKey = environment.SONIOX_API_KEY?.trim();
+
   return {
     sessionSecret: readSessionSecret(environment),
     pinSessionTtlSeconds: readPinSessionTtlSeconds(environment),
@@ -26,6 +29,7 @@ export function loadEnv(environment = process.env): ApiEnv {
       environment.PIN_LOCKOUT_SECONDS,
       DEFAULT_PIN_LOCKOUT_SECONDS,
     ),
+    ...(sonioxApiKey ? { sonioxApiKey } : {}),
   };
 }
 
