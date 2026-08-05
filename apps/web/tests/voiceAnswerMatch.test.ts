@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 
-import { matchesVoiceAnswer } from "../src/widgets/voiceAnswerMatch";
+import { matchingVoiceAnswerIds } from "../src/widgets/voiceAnswerMatch";
 
-describe("matchesVoiceAnswer", () => {
-  it("requires every answer while allowing surrounding spoken words", () => {
-    expect(matchesVoiceAnswer("정답은 세종 대왕입니다", ["세종"])).toBe(true);
-    expect(
-      matchesVoiceAnswer("조선의 왕은 세종대왕입니다", ["조선", "세종대왕"]),
-    ).toBe(true);
-    expect(matchesVoiceAnswer("세종대왕입니다", ["조선", "세종대왕"])).toBe(
-      false,
-    );
+describe("matchingVoiceAnswerIds", () => {
+  it("returns only the answer IDs spoken in the transcript", () => {
+    const answers = [
+      { id: "answer-hunmin", value: "훈민정음" },
+      { id: "answer-sejong", value: "세종" },
+    ];
+
+    expect(matchingVoiceAnswerIds("세종", answers)).toEqual(["answer-sejong"]);
+    expect(matchingVoiceAnswerIds("훈민정음 세종", answers)).toEqual([
+      "answer-hunmin",
+      "answer-sejong",
+    ]);
+    expect(matchingVoiceAnswerIds("태종", answers)).toEqual([]);
   });
 });

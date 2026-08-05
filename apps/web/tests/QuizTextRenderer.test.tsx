@@ -4,7 +4,7 @@ import { cleanup, render, screen } from "./test-utils";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizTextRenderer } from "../src/shared/ui/QuizTextRenderer";
+import { ChallengeQuizText } from "../src/features/challenges/ChallengeQuizText";
 
 const segments: QuizSegment[] = [
   { type: "text", value: "훈민정음을 만든 " },
@@ -14,13 +14,13 @@ const segments: QuizSegment[] = [
   { type: "text", value: "이다." },
 ];
 
-describe("QuizTextRenderer", () => {
+describe("ChallengeQuizText", () => {
   afterEach(() => {
     cleanup();
   });
 
   it("renders answer segments as blanks in prompt mode", () => {
-    render(<QuizTextRenderer mode="prompt" segments={segments} />);
+    render(<ChallengeQuizText mode="prompt" segments={segments} />);
 
     expect(
       getByTextContent("훈민정음을 만든 ____의 왕은 ____이다."),
@@ -28,7 +28,7 @@ describe("QuizTextRenderer", () => {
   });
 
   it("renders revealed answers inline instead of below the sentence", () => {
-    render(<QuizTextRenderer mode="revealed" segments={segments} />);
+    render(<ChallengeQuizText mode="revealed" segments={segments} />);
 
     expect(
       getByTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."),
@@ -37,17 +37,17 @@ describe("QuizTextRenderer", () => {
 
   it("applies answer tone classes", () => {
     const { rerender } = render(
-      <QuizTextRenderer mode="revealed" segments={segments} tone="correct" />,
+      <ChallengeQuizText mode="revealed" segments={segments} tone="correct" />,
     );
     expect(screen.getByText("조선").className).toContain("is-correct");
 
     rerender(
-      <QuizTextRenderer mode="revealed" segments={segments} tone="wrong" />,
+      <ChallengeQuizText mode="revealed" segments={segments} tone="wrong" />,
     );
     expect(screen.getByText("조선").className).toContain("is-wrong");
 
     rerender(
-      <QuizTextRenderer mode="revealed" segments={segments} tone="study" />,
+      <ChallengeQuizText mode="revealed" segments={segments} tone="study" />,
     );
     expect(screen.getByText("조선").className).toContain("is-study");
   });

@@ -2,9 +2,7 @@ import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
 
 import { useChallengeCards, useChallenges } from "@/entities/challenges/api";
-import { CardListHeader } from "@/shared/ui/CardListHeader";
-import { QuizTextRenderer } from "@/shared/ui/QuizTextRenderer";
-import { primeVehicleControlFromUserGesture } from "@/widgets/vehicleControl";
+import { ChallengeQuizText } from "@/features/challenges/ChallengeQuizText";
 
 export function ChallengeDetailPage() {
   const { challengeId } = useParams();
@@ -21,28 +19,31 @@ export function ChallengeDetailPage() {
 
   return (
     <section className="page card-list-page">
-      <CardListHeader
-        context="챌린지 카드"
-        title={challenge?.name ?? "챌린지 카드"}
-        meta={
-          loading
-            ? "카드를 불러오는 중"
-            : challenge
-              ? `${challenge.deckTitle} 덱 · 카드 ${cards.length}장`
-              : `카드 ${cards.length}장`
-        }
-        action={
-          challengeId ? (
-            <Link
-              className="card-list-header__start"
-              to={`/challenges/${challengeId}/run`}
-              onClick={primeVehicleControlFromUserGesture}
-            >
-              학습 시작
-            </Link>
-          ) : null
-        }
-      />
+      <header className="card-list-header">
+        <p className="card-list-header__context">챌린지 카드</p>
+        <div className="card-list-header__main">
+          <div className="card-list-header__copy">
+            <h1>{challenge?.name ?? "챌린지 카드"}</h1>
+            <p>
+              {loading
+                ? "카드를 불러오는 중"
+                : challenge
+                  ? `${challenge.deckTitle} 덱 · 카드 ${cards.length}장`
+                  : `카드 ${cards.length}장`}
+            </p>
+          </div>
+          {challengeId ? (
+            <div className="card-list-header__action">
+              <Link
+                className="card-list-header__start"
+                to={`/challenges/${challengeId}/run`}
+              >
+                학습 시작
+              </Link>
+            </div>
+          ) : null}
+        </div>
+      </header>
       {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
       {loadError ? (
         <div className="list-empty">챌린지 카드를 불러오지 못했습니다.</div>
@@ -53,7 +54,7 @@ export function ChallengeDetailPage() {
       <div className="card-editor-list">
         {cards.map((card) => (
           <article key={card.challengeCardId} className="card-editor">
-            <QuizTextRenderer
+            <ChallengeQuizText
               className="card-editor__revealed"
               mode="revealed"
               segments={card.segments}

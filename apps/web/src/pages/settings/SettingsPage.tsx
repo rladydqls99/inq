@@ -51,7 +51,7 @@ export function SettingsPage() {
             <span className="settings-toggle__copy">
               <strong>학습 차량 제어</strong>
               <span id="vehicle-control-description">
-                덱·챌린지 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
+                덱 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
               </span>
             </span>
             <input
@@ -69,7 +69,8 @@ export function SettingsPage() {
             <span className="settings-toggle__copy">
               <strong>음성으로 정답 확인</strong>
               <span id="voice-answer-description">
-                덱 학습 중 마이크 음성이 Soniox로 전송되어 정답을 판정합니다.
+                챌린지 학습 중 마이크 음성이 Soniox로 전송되어 정답을
+                판정합니다.
               </span>
             </span>
             <input

@@ -1,21 +1,18 @@
 import type { QuizSegment } from "@inq/shared";
 
-export type QuizTextMode = "prompt" | "revealed";
-export type AnswerTone = "neutral" | "correct" | "wrong" | "study";
-
-type QuizTextRendererProps = {
+type DeckQuizTextProps = {
   segments: QuizSegment[];
-  mode: QuizTextMode;
-  tone?: AnswerTone;
+  mode: "prompt" | "revealed";
+  tone?: "neutral" | "study";
   className?: string;
 };
 
-export function QuizTextRenderer({
+export function DeckQuizText({
   segments,
   mode,
   tone = "neutral",
   className,
-}: QuizTextRendererProps) {
+}: DeckQuizTextProps) {
   return (
     <p className={["quiz-text", className].filter(Boolean).join(" ")}>
       {segments.map((segment, index) => {
@@ -23,15 +20,11 @@ export function QuizTextRenderer({
           return <span key={`text-${index}`}>{segment.value}</span>;
         }
 
-        if (mode === "prompt") {
-          return (
-            <span key={segment.id} className="quiz-text__blank">
-              ____
-            </span>
-          );
-        }
-
-        return (
+        return mode === "prompt" ? (
+          <span key={segment.id} className="quiz-text__blank">
+            ____
+          </span>
+        ) : (
           <span key={segment.id} className={`quiz-text__answer is-${tone}`}>
             {segment.value}
           </span>

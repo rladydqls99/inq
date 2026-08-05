@@ -1,11 +1,10 @@
 // @vitest-environment jsdom
 
-import { cleanup, fireEvent, render, screen } from "./test-utils";
+import { cleanup, render, screen } from "./test-utils";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChallengeDetailPage } from "../src/pages/challenges/ChallengeDetailPage";
-import * as vehicleControl from "../src/widgets/vehicleControl";
 
 describe("ChallengeDetailPage", () => {
   afterEach(() => {
@@ -30,22 +29,6 @@ describe("ChallengeDetailPage", () => {
       screen.getByRole("link", { name: "학습 시작" }).getAttribute("href"),
     ).toBe("/challenges/challenge-1/run");
     expect(screen.getByText("세종대왕").className).toContain("is-study");
-  });
-
-  it("primes vehicle controls before starting challenge study", async () => {
-    const prime = vi
-      .spyOn(vehicleControl, "primeVehicleControlFromUserGesture")
-      .mockImplementation(() => {});
-    mockFetchByPath({
-      "/api/challenges/challenge-1/cards": [challengeCard()],
-      "/api/challenges": [challenge()],
-    });
-
-    renderChallengeDetail();
-
-    fireEvent.click(await screen.findByRole("link", { name: "학습 시작" }));
-
-    expect(prime).toHaveBeenCalledTimes(1);
   });
 });
 

@@ -2,7 +2,7 @@ import { MicrophoneSource, SonioxClient, type Recording } from "@soniox/client";
 import { useEffect, useRef, useState } from "react";
 
 import { apiRequest } from "@/shared/api/client";
-import { matchesVoiceAnswer } from "./voiceAnswerMatch";
+import { matchingVoiceAnswerIds } from "./voiceAnswerMatch";
 
 type VoiceAnswerState =
   | { status: "listening"; transcript: string }
@@ -13,16 +13,16 @@ export function useVoiceAnswer({
   enabled,
   answers,
   active,
-  onCorrect,
+  onMatch,
 }: {
   enabled: boolean;
-  answers: string[];
+  answers: { id: string; value: string }[];
   active: boolean;
-  onCorrect: () => void;
+  onMatch: (answerIds: string[]) => void;
 }) {
   const [state, setState] = useState<VoiceAnswerState | null>(null);
-  const onCorrectRef = useRef(onCorrect);
-  onCorrectRef.current = onCorrect;
+  const onMatchRef = useRef(onMatch);
+  onMatchRef.current = onMatch;
 
   useEffect(() => {
     if (!enabled || !active || answers.length === 0) {
@@ -45,8 +45,10 @@ export function useVoiceAnswer({
       language_hints: ["ko"],
       language_hints_strict: true,
       enable_endpoint_detection: true,
+      endpoint_latency_adjustment_level: 2,
+      endpoint_sensitivity: 0.3,
       max_endpoint_delay_ms: 1000,
-      context: { terms: answers },
+      context: { terms: answers.map((answer) => answer.value) },
       source: new MicrophoneSource({
         constraints: {
           autoGainControl: true,
@@ -69,11 +71,10 @@ export function useVoiceAnswer({
       finalTranscript = "";
       if (!transcript || closed) return;
 
-      if (matchesVoiceAnswer(transcript, answers)) {
-        closed = true;
+      const answerIds = matchingVoiceAnswerIds(transcript, answers);
+      if (answerIds.length > 0) {
         setState({ status: "listening", transcript });
-        recording?.cancel();
-        onCorrectRef.current();
+        onMatchRef.current(answerIds);
         return;
       }
 

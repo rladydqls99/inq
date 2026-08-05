@@ -4,9 +4,9 @@ import { cleanup, render, screen } from "./test-utils";
 import { afterEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizPreview } from "../src/shared/ui/QuizPreview";
+import { DeckQuizPreview } from "../src/features/decks/DeckQuizPreview";
 
-describe("QuizPreview", () => {
+describe("DeckQuizPreview", () => {
   afterEach(() => {
     cleanup();
   });
@@ -18,7 +18,7 @@ describe("QuizPreview", () => {
       { type: "text", value: " 이다." },
     ];
 
-    render(<QuizPreview segments={segments} />);
+    render(<DeckQuizPreview segments={segments} />);
 
     expect(
       screen.getByText(

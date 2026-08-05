@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { QuizSegment } from "@inq/shared";
-import { QuizPreview } from "@/shared/ui/QuizPreview";
+import { DeckQuizPreview } from "./DeckQuizPreview";
 
 type CardSegmentEditFormProps = {
   segments: QuizSegment[];
@@ -40,7 +40,7 @@ export function CardSegmentEditForm({
 
   return (
     <form className="segment-edit-form" onSubmit={submit}>
-      <QuizPreview segments={draftSegments} />
+      <DeckQuizPreview segments={draftSegments} />
       <div className="segment-edit-form__fields">
         {draftSegments.map((segment, index) => (
           <label key={`${segment.type}-${index}`}>

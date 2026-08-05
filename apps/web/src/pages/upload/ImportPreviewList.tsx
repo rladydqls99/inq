@@ -1,5 +1,5 @@
 import type { ImportPreviewCard } from "@inq/shared";
-import { QuizPreview } from "@/shared/ui/QuizPreview";
+import { DeckQuizPreview } from "@/features/decks/DeckQuizPreview";
 
 type ImportPreviewListProps = {
   cards: ImportPreviewCard[];
@@ -19,7 +19,7 @@ export function ImportPreviewList({ cards }: ImportPreviewListProps) {
       {cards.map((card) => (
         <article key={card.blockIndex} className="import-preview-card">
           <span>{card.blockIndex + 1}번째 카드</span>
-          <QuizPreview segments={card.segments} />
+          <DeckQuizPreview segments={card.segments} />
         </article>
       ))}
     </div>

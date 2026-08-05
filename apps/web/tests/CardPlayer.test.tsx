@@ -1,11 +1,12 @@
 // @vitest-environment jsdom
 
-import { act, cleanup, fireEvent, render, screen } from "./test-utils";
+import { cleanup, fireEvent, render, screen } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
-import { CardPlayer } from "../src/shared/ui/CardPlayer";
+import { ChallengeCardPlayer } from "../src/features/challenges/ChallengeCardPlayer";
+import { DeckCardPlayer } from "../src/features/decks/DeckCardPlayer";
 
 const segments: QuizSegment[] = [
   { type: "text", value: "훈민정음의 창제자는 " },
@@ -13,228 +14,99 @@ const segments: QuizSegment[] = [
   { type: "text", value: "이다." },
 ];
 
-describe("CardPlayer", () => {
-  afterEach(() => {
-    vi.useRealTimers();
-    cleanup();
-  });
+describe("separate card players", () => {
+  afterEach(cleanup);
 
-  it("fires previous and next callbacks", async () => {
-    const user = userEvent.setup();
-    const onPrevious = vi.fn();
-    const onNext = vi.fn();
-
-    render(
-      <CardPlayer
-        segments={segments}
-        mode="challenge"
-        currentIndex={0}
-        totalCards={2}
-        onPrevious={onPrevious}
-        onNext={onNext}
-      />,
-    );
-
-    await user.click(screen.getByRole("button", { name: "이전 카드" }));
-    await user.click(screen.getByRole("button", { name: "다음 카드" }));
-
-    expect(onPrevious).toHaveBeenCalledTimes(1);
-    expect(onNext).toHaveBeenCalledTimes(1);
-  });
-
-  it("shows result controls by default and reveals the answer when scored", async () => {
+  it("keeps challenge scoring and deck answer reveal separate", async () => {
     const user = userEvent.setup();
     const onResult = vi.fn();
-
-    render(
-      <CardPlayer
+    const onAnswerReveal = vi.fn();
+    const { rerender } = render(
+      <ChallengeCardPlayer
         segments={segments}
-        mode="challenge"
         currentIndex={0}
         totalCards={2}
+        selectedResult={null}
+        canPrevious={false}
+        canNext
+        onPrevious={() => {}}
+        onNext={() => {}}
         onResult={onResult}
       />,
     );
 
-    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
-    expect(screen.getByRole("button", { name: "틀렸어요" })).toBeTruthy();
-    expect(screen.getByRole("button", { name: "맞았어요" })).toBeTruthy();
-
     await user.click(screen.getByRole("button", { name: "맞았어요" }));
-
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
     expect(onResult).toHaveBeenCalledWith("correct");
-  });
-
-  it("syncs the revealed answer when selected result changes from props", () => {
-    const { rerender } = render(
-      <CardPlayer
-        segments={segments}
-        mode="challenge"
-        currentIndex={0}
-        totalCards={2}
-        selectedResult={null}
-      />,
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
 
     rerender(
-      <CardPlayer
+      <DeckCardPlayer
         segments={segments}
-        mode="challenge"
         currentIndex={0}
         totalCards={2}
-        selectedResult="correct"
-      />,
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-  });
-
-  it("reveals from the study card area and changes the action to next", async () => {
-    const user = userEvent.setup();
-    const onAnswerReveal = vi.fn();
-
-    render(
-      <CardPlayer
-        segments={segments}
-        mode="study"
-        currentIndex={1}
-        totalCards={3}
+        answerRevealed={false}
+        canPrevious={false}
+        canNext
+        onPrevious={() => {}}
+        onNext={() => {}}
         onAnswerReveal={onAnswerReveal}
       />,
     );
 
-    await user.click(
-      screen.getByRole("button", { name: "카드 영역을 눌러 정답 보기" }),
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-    expect(
-      screen.getByRole("button", { name: "다음 카드로 이동" }),
-    ).toBeTruthy();
-    expect(onAnswerReveal).toHaveBeenCalledTimes(1);
+    await user.click(screen.getByRole("button", { name: "정답 보기" }));
+    expect(onAnswerReveal).toHaveBeenCalledOnce();
+    expect(screen.queryByRole("button", { name: "맞았어요" })).toBeNull();
   });
 
-  it("can show a study answer immediately without a reveal action", () => {
-    render(
-      <CardPlayer
-        segments={segments}
-        mode="study"
-        currentIndex={0}
-        totalCards={2}
-        initiallyRevealed
-      />,
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-    expect(screen.queryByRole("button", { name: "정답 보기" })).toBeNull();
-    expect(
-      screen.getByRole("button", { name: "다음 카드로 이동" }),
-    ).toBeTruthy();
-  });
-
-  it("uses a controlled study reveal state", () => {
-    const { rerender } = render(
-      <CardPlayer
-        segments={segments}
-        mode="study"
-        currentIndex={0}
-        totalCards={2}
-        answerRevealed={false}
-      />,
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 ____이다.")).toBeTruthy();
-
-    rerender(
-      <CardPlayer
-        segments={segments}
-        mode="study"
-        currentIndex={0}
-        totalCards={2}
-        answerRevealed
-      />,
-    );
-
-    expect(getByTextContent("훈민정음의 창제자는 세종대왕이다.")).toBeTruthy();
-  });
-
-  it("counts down and exposes a next-problem action after scoring", () => {
-    vi.useFakeTimers();
+  it("supports swipe navigation in the challenge player", () => {
     const onNext = vi.fn();
-
     render(
-      <CardPlayer
+      <ChallengeCardPlayer
         segments={segments}
-        mode="challenge"
         currentIndex={0}
         totalCards={2}
-        selectedResult="correct"
-        autoAdvanceSeconds={5}
+        selectedResult={null}
+        canPrevious={false}
+        canNext
+        onPrevious={() => {}}
         onNext={onNext}
+        onResult={() => {}}
       />,
     );
 
-    expect(screen.getByText("5초")).toBeTruthy();
-
-    act(() => {
-      vi.advanceTimersByTime(1000);
-    });
-
-    expect(screen.getByText("4초")).toBeTruthy();
-    fireEvent.click(screen.getByRole("button", { name: /다음 문제/ }));
-    expect(onNext).toHaveBeenCalledTimes(1);
-  });
-
-  it("shows progress and supports horizontal swipe navigation", () => {
-    const onPrevious = vi.fn();
-    const onNext = vi.fn();
-
-    render(
-      <CardPlayer
-        segments={segments}
-        mode="challenge"
-        currentIndex={1}
-        totalCards={4}
-        onPrevious={onPrevious}
-        onNext={onNext}
-      />,
-    );
-
-    const player = screen.getByRole("region", { name: "퀴즈 카드 2/4" });
-    expect(screen.getByText("2 / 4")).toBeTruthy();
-    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe(
-      "2",
-    );
-
+    const player = screen.getByRole("region", { name: "퀴즈 카드 1/2" });
     fireEvent.touchStart(player, {
       changedTouches: [{ clientX: 240, clientY: 200 }],
     });
     fireEvent.touchEnd(player, {
       changedTouches: [{ clientX: 140, clientY: 204 }],
     });
-    fireEvent.touchStart(player, {
-      changedTouches: [{ clientX: 120, clientY: 200 }],
-    });
-    fireEvent.touchEnd(player, {
-      changedTouches: [{ clientX: 210, clientY: 203 }],
-    });
+    expect(onNext).toHaveBeenCalledOnce();
+  });
 
-    expect(onNext).toHaveBeenCalledTimes(1);
-    expect(onPrevious).toHaveBeenCalledTimes(1);
+  it("reveals only spoken answers and marks remaining blanks with an X", () => {
+    render(
+      <ChallengeCardPlayer
+        segments={[
+          { type: "answer", id: "hunmin", value: "훈민정음" },
+          { type: "text", value: "을 만든 조선의 왕은 " },
+          { type: "answer", id: "sejong", value: "세종" },
+          { type: "text", value: "이다." },
+        ]}
+        currentIndex={0}
+        totalCards={1}
+        selectedResult={null}
+        canPrevious={false}
+        canNext={false}
+        onPrevious={() => {}}
+        onNext={() => {}}
+        onResult={() => {}}
+        revealedAnswerIds={["sejong"]}
+        showWrongAnswers
+      />,
+    );
+
+    expect(screen.getByText("세종")).toBeTruthy();
+    expect(screen.getByLabelText("오답")).toBeTruthy();
+    expect(screen.queryByText("훈민정음")).toBeNull();
   });
 });
-
-function getByTextContent(text: string) {
-  return screen.getByText((_, element) => {
-    if (element?.textContent !== text) {
-      return false;
-    }
-
-    return Array.from(element.children).every(
-      (child) => child.textContent !== text,
-    );
-  });
-}

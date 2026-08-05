@@ -8,8 +8,7 @@ import {
   useDeleteCard,
   useStartDeckRun,
 } from "@/entities/decks/api";
-import { CardListHeader } from "@/shared/ui/CardListHeader";
-import { QuizTextRenderer } from "@/shared/ui/QuizTextRenderer";
+import { DeckQuizText } from "@/features/decks/DeckQuizText";
 import {
   primeVehicleControlFromUserGesture,
   releasePrimedVehicleControl,
@@ -84,25 +83,29 @@ export function DeckDetailPage() {
 
   return (
     <section className="page card-list-page">
-      <CardListHeader
-        context="덱 카드"
-        title={deck?.title ?? "덱 카드"}
-        meta={loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}
-        action={
-          deckId ? (
-            <button
-              className="card-list-header__start"
-              type="button"
-              disabled={
-                loading || cards.length === 0 || startRunMutation.isPending
-              }
-              onClick={() => void startDeckRun()}
-            >
-              {startRunMutation.isPending ? "준비 중" : "학습 시작"}
-            </button>
-          ) : null
-        }
-      />
+      <header className="card-list-header">
+        <p className="card-list-header__context">덱 카드</p>
+        <div className="card-list-header__main">
+          <div className="card-list-header__copy">
+            <h1>{deck?.title ?? "덱 카드"}</h1>
+            <p>{loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}</p>
+          </div>
+          {deckId ? (
+            <div className="card-list-header__action">
+              <button
+                className="card-list-header__start"
+                type="button"
+                disabled={
+                  loading || cards.length === 0 || startRunMutation.isPending
+                }
+                onClick={() => void startDeckRun()}
+              >
+                {startRunMutation.isPending ? "준비 중" : "학습 시작"}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      </header>
       {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
       {loadError ? (
         <div className="list-empty">카드 목록을 불러오지 못했습니다.</div>
@@ -119,7 +122,7 @@ export function DeckDetailPage() {
       <div className="card-editor-list">
         {cards.map((card) => (
           <article key={card.id} className="card-editor">
-            <QuizTextRenderer
+            <DeckQuizText
               className="card-editor__revealed"
               mode="revealed"
               segments={card.segments}
