@@ -198,6 +198,45 @@ describe("DeckDetailPage", () => {
     expect(queryByTextContent("훈민정음을 만든 왕은 세종대왕이다.")).toBeNull();
   });
 
+  it("shows bulk delete only after cards are selected", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [
+        card({ id: "card-1" }),
+        card({
+          id: "card-2",
+          segments: [
+            { type: "text", value: "대한민국의 수도는 " },
+            { type: "answer", id: "answer-1", value: "서울" },
+            { type: "text", value: "이다." },
+          ],
+        }),
+      ],
+    });
+
+    renderDeckDetail();
+
+    const checkboxes = await screen.findAllByRole("checkbox", {
+      name: "카드 선택",
+    });
+    expect(screen.queryByRole("button", { name: /선택 .*장 삭제/ })).toBeNull();
+
+    await user.click(checkboxes[0] as HTMLElement);
+    await user.click(checkboxes[1] as HTMLElement);
+    await user.click(screen.getByRole("button", { name: "선택 2장 삭제" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/cards/card-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/cards/card-2",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(screen.queryByText("세종대왕")).toBeNull();
+    expect(screen.queryByText("서울")).toBeNull();
+  });
+
   it("shows an error and keeps the card when deleting a card fails", async () => {
     const user = userEvent.setup();
     mockFetchByPath({

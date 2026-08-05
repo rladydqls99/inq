@@ -48,6 +48,7 @@ describe("separate card players", () => {
         canNext
         onPrevious={() => {}}
         onNext={() => {}}
+        onMoveTo={() => {}}
         onAnswerReveal={onAnswerReveal}
       />,
     );
@@ -81,6 +82,33 @@ describe("separate card players", () => {
       changedTouches: [{ clientX: 140, clientY: 204 }],
     });
     expect(onNext).toHaveBeenCalledOnce();
+  });
+
+  it("moves to the card selected by dragging the progress bar", () => {
+    const onMoveTo = vi.fn();
+    render(
+      <DeckCardPlayer
+        segments={segments}
+        currentIndex={0}
+        totalCards={10}
+        answerRevealed={false}
+        canPrevious={false}
+        canNext
+        onPrevious={() => {}}
+        onNext={() => {}}
+        onMoveTo={onMoveTo}
+        onAnswerReveal={() => {}}
+      />,
+    );
+
+    const progress = screen.getByRole("slider", { name: "카드 학습 진행률" });
+    Object.defineProperty(progress, "getBoundingClientRect", {
+      value: () => ({ left: 0, width: 100 }),
+    });
+    fireEvent.pointerDown(progress, { pointerId: 1, clientX: 75 });
+    fireEvent.pointerUp(progress, { pointerId: 1, clientX: 75 });
+
+    expect(onMoveTo).toHaveBeenCalledWith(7);
   });
 
   it("reveals only spoken answers and marks remaining blanks with an X", () => {

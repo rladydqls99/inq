@@ -227,6 +227,7 @@ export function DeckRunnerPage() {
           canNext={!moveMutation.isPending && cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}
           onNext={() => void moveTo(cursor + 1)}
+          onMoveTo={(index) => void moveTo(index)}
           onAnswerReveal={() => setRevealedCardId(currentCard.cardId)}
         />
         {moveError ? (

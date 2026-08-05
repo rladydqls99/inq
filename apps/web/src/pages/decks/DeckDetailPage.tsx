@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { PencilLine, Trash2 } from "lucide-react";
+import { Check, PencilLine, Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -18,6 +18,8 @@ export function DeckDetailPage() {
   const { deckId } = useParams();
   const navigate = useNavigate();
   const [deleteError, setDeleteError] = useState(false);
+  const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
   const [startError, setStartError] = useState(false);
   const {
     data: cards = [],
@@ -43,14 +45,49 @@ export function DeckDetailPage() {
     };
   }, []);
 
+  useEffect(() => {
+    setSelectedCardIds((selected) => {
+      const next = selected.filter((id) =>
+        cards.some((card) => card.id === id),
+      );
+      return next.length === selected.length ? selected : next;
+    });
+  }, [cards]);
+
   async function deleteCard(cardId: string) {
     setDeleteError(false);
 
     try {
       await deleteCardMutation.mutateAsync(cardId);
+      setSelectedCardIds((selected) => selected.filter((id) => id !== cardId));
     } catch {
       setDeleteError(true);
     }
+  }
+
+  function toggleCardSelection(cardId: string) {
+    setSelectedCardIds((selected) =>
+      selected.includes(cardId)
+        ? selected.filter((id) => id !== cardId)
+        : [...selected, cardId],
+    );
+  }
+
+  async function deleteSelectedCards() {
+    if (selectedCardIds.length === 0 || bulkDeleting) return;
+
+    setBulkDeleting(true);
+    setDeleteError(false);
+    const results = await Promise.allSettled(
+      selectedCardIds.map((id) => deleteCardMutation.mutateAsync(id)),
+    );
+    const failedIds = selectedCardIds.filter(
+      (_, index) => results[index]?.status === "rejected",
+    );
+    setSelectedCardIds(failedIds);
+    setBulkDeleting(false);
+
+    if (failedIds.length > 0) setDeleteError(true);
   }
 
   async function startDeckRun() {
@@ -91,7 +128,20 @@ export function DeckDetailPage() {
             <p>{loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}</p>
           </div>
           {deckId ? (
-            <div className="card-list-header__action">
+            <div className="card-list-header__actions">
+              {selectedCardIds.length > 0 ? (
+                <button
+                  className="card-list-header__delete-selected"
+                  type="button"
+                  disabled={bulkDeleting}
+                  onClick={() => void deleteSelectedCards()}
+                >
+                  <Trash2 aria-hidden="true" size={18} strokeWidth={2.2} />
+                  {bulkDeleting
+                    ? "삭제 중"
+                    : `선택 ${selectedCardIds.length}장 삭제`}
+                </button>
+              ) : null}
               <button
                 className="card-list-header__start"
                 type="button"
@@ -122,6 +172,19 @@ export function DeckDetailPage() {
       <div className="card-editor-list">
         {cards.map((card) => (
           <article key={card.id} className="card-editor">
+            <label className="card-editor__select">
+              <input
+                type="checkbox"
+                checked={selectedCardIds.includes(card.id)}
+                onChange={() => toggleCardSelection(card.id)}
+                aria-label="카드 선택"
+              />
+              <span className="card-editor__checkbox" aria-hidden="true">
+                {selectedCardIds.includes(card.id) ? (
+                  <Check size={16} strokeWidth={3} />
+                ) : null}
+              </span>
+            </label>
             <DeckQuizText
               className="card-editor__revealed"
               mode="revealed"
@@ -129,13 +192,21 @@ export function DeckDetailPage() {
               tone="study"
             />
             <div className="card-editor__actions">
-              <Link className="row-action-link" to={`/cards/${card.id}/edit`}>
+              <Link
+                className="row-action-link"
+                to={`/cards/${card.id}/edit`}
+                aria-label="카드 수정"
+                title="카드 수정"
+              >
                 <PencilLine aria-hidden="true" size={17} strokeWidth={2.1} />
-                카드 수정
               </Link>
-              <button type="button" onClick={() => void deleteCard(card.id)}>
+              <button
+                type="button"
+                aria-label="카드 삭제"
+                title="카드 삭제"
+                onClick={() => void deleteCard(card.id)}
+              >
                 <Trash2 aria-hidden="true" size={17} strokeWidth={2.1} />
-                카드 삭제
               </button>
             </div>
           </article>

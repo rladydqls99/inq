@@ -1,8 +1,11 @@
 import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import {
+  useEffect,
   useRef,
+  useState,
   type KeyboardEvent,
   type MouseEvent,
+  type PointerEvent,
   type TouchEvent,
 } from "react";
 
@@ -18,6 +21,7 @@ type DeckCardPlayerProps = {
   canNext: boolean;
   onPrevious: () => void;
   onNext: () => void;
+  onMoveTo: (index: number) => void;
   onAnswerReveal: () => void;
 };
 
@@ -30,11 +34,74 @@ export function DeckCardPlayer({
   canNext,
   onPrevious,
   onNext,
+  onMoveTo,
   onAnswerReveal,
 }: DeckCardPlayerProps) {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
+  const progressPreview = useRef<number | null>(null);
+  const [previewIndex, setPreviewIndex] = useState<number | null>(null);
   const displayIndex = Math.min(Math.max(currentIndex + 1, 1), totalCards);
-  const progress = totalCards === 0 ? 0 : (displayIndex / totalCards) * 100;
+  const progressIndex = previewIndex ?? displayIndex;
+  const progress = totalCards === 0 ? 0 : (progressIndex / totalCards) * 100;
+
+  useEffect(() => setPreviewIndex(null), [currentIndex]);
+
+  function progressIndexAt(clientX: number, target: HTMLElement) {
+    const { left, width } = target.getBoundingClientRect();
+    return Math.min(
+      Math.max(
+        Math.round(((clientX - left) / width) * (totalCards - 1)) + 1,
+        1,
+      ),
+      totalCards,
+    );
+  }
+
+  function handleProgressPointerDown(event: PointerEvent<HTMLDivElement>) {
+    if (totalCards < 2) return;
+    if ("setPointerCapture" in event.currentTarget) {
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }
+    const index = progressIndexAt(event.clientX, event.currentTarget);
+    progressPreview.current = index;
+    setPreviewIndex(index);
+  }
+
+  function handleProgressPointerMove(event: PointerEvent<HTMLDivElement>) {
+    if (progressPreview.current === null) return;
+    const index = progressIndexAt(event.clientX, event.currentTarget);
+    progressPreview.current = index;
+    setPreviewIndex(index);
+  }
+
+  function commitProgressMove() {
+    const index = progressPreview.current;
+    progressPreview.current = null;
+    setPreviewIndex(null);
+    if (index !== null && index !== displayIndex) onMoveTo(index - 1);
+  }
+
+  function handleProgressKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    const offsets: Record<string, number> = {
+      ArrowLeft: -1,
+      ArrowDown: -1,
+      ArrowRight: 1,
+      ArrowUp: 1,
+      PageDown: -1,
+      PageUp: 1,
+    };
+    const index =
+      event.key === "Home"
+        ? 1
+        : event.key === "End"
+          ? totalCards
+          : displayIndex + (offsets[event.key] ?? 0);
+    if (!(event.key in offsets) && event.key !== "Home" && event.key !== "End")
+      return;
+    event.preventDefault();
+    const boundedIndex = Math.min(Math.max(index, 1), totalCards);
+    if (boundedIndex !== displayIndex) onMoveTo(boundedIndex - 1);
+  }
 
   function revealAnswer() {
     if (!answerRevealed) onAnswerReveal();
@@ -99,11 +166,18 @@ export function DeckCardPlayer({
         </div>
         <div
           className="card-player__progress-track"
-          role="progressbar"
+          role="slider"
           aria-label="카드 학습 진행률"
           aria-valuemin={1}
           aria-valuemax={totalCards}
-          aria-valuenow={displayIndex}
+          aria-valuenow={progressIndex}
+          aria-valuetext={`${progressIndex} / ${totalCards}`}
+          tabIndex={totalCards > 1 ? 0 : undefined}
+          onKeyDown={handleProgressKeyDown}
+          onPointerDown={handleProgressPointerDown}
+          onPointerMove={handleProgressPointerMove}
+          onPointerUp={commitProgressMove}
+          onPointerCancel={commitProgressMove}
         >
           <span style={{ width: `${progress}%` }} />
         </div>
