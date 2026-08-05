@@ -58,6 +58,29 @@ describe("separate card players", () => {
     expect(screen.queryByRole("button", { name: "맞았어요" })).toBeNull();
   });
 
+  it("reveals the answer without recording a result", async () => {
+    const user = userEvent.setup();
+    const onResult = vi.fn();
+    render(
+      <ChallengeCardPlayer
+        segments={segments}
+        currentIndex={0}
+        totalCards={1}
+        selectedResult={null}
+        canPrevious={false}
+        canNext={false}
+        onPrevious={() => {}}
+        onNext={() => {}}
+        onResult={onResult}
+      />,
+    );
+
+    await user.click(screen.getByRole("button", { name: "정답 보기" }));
+
+    expect(screen.getByText("세종대왕")).toBeTruthy();
+    expect(onResult).not.toHaveBeenCalled();
+  });
+
   it("supports swipe navigation in the challenge player", () => {
     const onNext = vi.fn();
     render(
@@ -111,7 +134,7 @@ describe("separate card players", () => {
     expect(onMoveTo).toHaveBeenCalledWith(7);
   });
 
-  it("reveals only spoken answers and marks remaining blanks with an X", () => {
+  it("reveals only spoken answers and marks remaining blanks with a red underline", () => {
     render(
       <ChallengeCardPlayer
         segments={[
@@ -134,7 +157,7 @@ describe("separate card players", () => {
     );
 
     expect(screen.getByText("세종")).toBeTruthy();
-    expect(screen.getByLabelText("오답")).toBeTruthy();
+    expect(screen.getByLabelText("오답").className).toContain("is-wrong");
     expect(screen.queryByText("훈민정음")).toBeNull();
   });
 });

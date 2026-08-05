@@ -40,6 +40,8 @@ export function ChallengeRunnerPage() {
   const answeredCardRef = useRef<ChallengeRunCard | null>(null);
   const cursorRef = useRef(0);
   const movingRef = useRef(false);
+  const submittingResultRef = useRef(false);
+  const matchedAnswerIdsRef = useRef(new Set<string>());
   const selectedResult =
     (answeredCard ?? runState?.cards[cursor])?.selectedResult ?? null;
   const currentCard = answeredCard ?? runState?.cards[cursor];
@@ -105,6 +107,7 @@ export function ChallengeRunnerPage() {
         runStateRef.current = nextRunState;
         cursorRef.current = nextRunState.cursor;
         answeredCardRef.current = null;
+        submittingResultRef.current = false;
         setAnsweredCard(null);
         setNextCursorAfterAnswer(null);
         setResultError(false);
@@ -115,6 +118,39 @@ export function ChallengeRunnerPage() {
       }
     },
     [challengeId, moveMutation],
+  );
+
+  const submitResult = useCallback(
+    async (result: "correct" | "wrong") => {
+      if (!challengeId || !currentCard || submittingResultRef.current) {
+        return;
+      }
+
+      submittingResultRef.current = true;
+      setResultError(false);
+      setMoveError(false);
+
+      try {
+        const response = await resultMutation.mutateAsync({
+          sessionCardId: currentCard.sessionCardId,
+          finalResult: result,
+        });
+        const answered = { ...currentCard, selectedResult: result };
+        answeredCardRef.current = answered;
+        setAnsweredCard(answered);
+        setNextCursorAfterAnswer(
+          nextCursorForAnsweredCard(
+            response.runState,
+            currentCard.sessionCardId,
+            cursor,
+          ),
+        );
+      } catch {
+        submittingResultRef.current = false;
+        setResultError(true);
+      }
+    },
+    [challengeId, currentCard, cursor, resultMutation],
   );
 
   const voiceAnswers = useMemo(
@@ -128,6 +164,7 @@ export function ChallengeRunnerPage() {
   );
 
   useEffect(() => {
+    matchedAnswerIdsRef.current = new Set();
     setRevealedAnswerIds([]);
   }, [currentCard?.sessionCardId]);
 
@@ -135,10 +172,18 @@ export function ChallengeRunnerPage() {
     enabled: voiceAnswerEnabled,
     answers: voiceAnswers,
     active: Boolean(pageVisible && currentCard && !selectedResult),
-    onMatch: (answerIds) =>
-      setRevealedAnswerIds((current) => [
-        ...new Set([...current, ...answerIds]),
-      ]),
+    onMatch: (answerIds) => {
+      answerIds.forEach((id) => matchedAnswerIdsRef.current.add(id));
+      setRevealedAnswerIds([...matchedAnswerIdsRef.current]);
+      if (
+        voiceAnswers.length > 0 &&
+        voiceAnswers.every((answer) =>
+          matchedAnswerIdsRef.current.has(answer.id),
+        )
+      ) {
+        void submitResult("correct");
+      }
+    },
   });
 
   useEffect(() => {
@@ -175,34 +220,6 @@ export function ChallengeRunnerPage() {
         <div className="list-empty">완료되었습니다.</div>
       </section>
     );
-  }
-
-  async function submitResult(result: "correct" | "wrong") {
-    if (!challengeId || !currentCard) {
-      return;
-    }
-
-    setResultError(false);
-    setMoveError(false);
-
-    try {
-      const response = await resultMutation.mutateAsync({
-        sessionCardId: currentCard.sessionCardId,
-        finalResult: result,
-      });
-      const answered = { ...currentCard, selectedResult: result };
-      answeredCardRef.current = answered;
-      setAnsweredCard(answered);
-      setNextCursorAfterAnswer(
-        nextCursorForAnsweredCard(
-          response.runState,
-          currentCard.sessionCardId,
-          cursor,
-        ),
-      );
-    } catch {
-      setResultError(true);
-    }
   }
 
   return (

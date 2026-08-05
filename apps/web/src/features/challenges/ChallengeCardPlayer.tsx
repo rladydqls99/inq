@@ -147,6 +147,15 @@ export function ChallengeCardPlayer({
           맞았어요
         </button>
       </div>
+      {!selectedResult ? (
+        <button
+          className="card-player__reveal-button is-answer"
+          type="button"
+          onClick={() => setAnswerRevealed(true)}
+        >
+          정답 보기
+        </button>
+      ) : null}
       {selectedResult ? (
         <button
           className="card-player__reveal-button is-next"

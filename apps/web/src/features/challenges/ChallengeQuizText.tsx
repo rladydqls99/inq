@@ -1,5 +1,4 @@
 import type { QuizSegment } from "@inq/shared";
-import { X } from "lucide-react";
 
 type ChallengeQuizTextProps = {
   segments: QuizSegment[];
@@ -38,12 +37,12 @@ export function ChallengeQuizText({
           );
         }
 
-        return showWrongAnswers ? (
-          <span key={segment.id} className="quiz-text__wrong" aria-label="오답">
-            <X aria-hidden="true" size={18} strokeWidth={3} />
-          </span>
-        ) : (
-          <span key={segment.id} className="quiz-text__blank">
+        return (
+          <span
+            key={segment.id}
+            className={`quiz-text__blank${showWrongAnswers ? " is-wrong" : ""}`}
+            aria-label={showWrongAnswers ? "오답" : undefined}
+          >
             ____
           </span>
         );

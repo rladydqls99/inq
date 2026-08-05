@@ -6,6 +6,18 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChallengeRunnerPage } from "../src/pages/challenges/ChallengeRunnerPage";
+import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
+
+const voiceAnswer = vi.hoisted(() => ({
+  onMatch: null as ((answerIds: string[]) => void) | null,
+}));
+
+vi.mock("../src/widgets/useVoiceAnswer", () => ({
+  useVoiceAnswer: ({ onMatch }: { onMatch: (answerIds: string[]) => void }) => {
+    voiceAnswer.onMatch = onMatch;
+    return null;
+  },
+}));
 
 describe("ChallengeRunnerPage", () => {
   afterEach(() => {
@@ -274,6 +286,38 @@ describe("ChallengeRunnerPage", () => {
         matchesTextContent(element, "조선의 수도는 ____이다."),
       ),
     ).toBeTruthy();
+  });
+
+  it("records a correct result when every answer is spoken", async () => {
+    window.localStorage.setItem(VOICE_ANSWER_STORAGE_KEY, "true");
+    const fetchMock = mockFetch();
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+    );
+
+    await screen.findByText((_, element) =>
+      matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+    );
+    await act(async () => voiceAnswer.onMatch?.(["answer-1"]));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/results",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({
+          sessionCardId: "session-card-1",
+          finalResult: "correct",
+        }),
+      }),
+    );
   });
 });
 
