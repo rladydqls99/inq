@@ -2270,6 +2270,21 @@ textarea {
   outline-offset: 2px;
 }
 
+.vehicle-control-status__actions {
+  display: flex;
+  gap: 8px;
+}
+
+.vehicle-control-status button.vehicle-control-status__delete {
+  background: color-mix(in srgb, var(--inq-error) 12%, var(--inq-canvas));
+  color: var(--inq-error);
+}
+
+.vehicle-control-status button:disabled {
+  color: var(--inq-ink-soft);
+  cursor: default;
+}
+
 .runner-next {
   display: flex;
   align-items: center;

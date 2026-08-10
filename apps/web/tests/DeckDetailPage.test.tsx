@@ -237,6 +237,29 @@ describe("DeckDetailPage", () => {
     expect(screen.queryByText("서울")).toBeNull();
   });
 
+  it("deletes every card from the header without confirmation", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [
+        card({ id: "card-1" }),
+        card({ id: "card-2" }),
+      ],
+    });
+
+    renderDeckDetail();
+
+    await user.click(await screen.findByRole("button", { name: "전체 삭제" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/cards/card-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/cards/card-2",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+  });
+
   it("shows an error and keeps the card when deleting a card fails", async () => {
     const user = userEvent.setup();
     mockFetchByPath({

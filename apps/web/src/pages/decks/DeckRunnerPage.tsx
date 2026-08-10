@@ -1,8 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Navigate, useParams } from "react-router-dom";
+import { Navigate, useNavigate, useParams } from "react-router-dom";
 
 import type { DeckRunResponse } from "@inq/shared";
-import { useDeckRun, useMoveDeckRun } from "@/entities/decks/api";
+import {
+  useDeckRun,
+  useDeleteDeck,
+  useMoveDeckRun,
+} from "@/entities/decks/api";
 import { DeckCardPlayer } from "@/features/decks/DeckCardPlayer";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import {
@@ -18,6 +22,9 @@ import {
 
 export function DeckRunnerPage() {
   const { deckId } = useParams();
+  const navigate = useNavigate();
+  const deleteMutation = useDeleteDeck();
+  const [deleteError, setDeleteError] = useState(false);
   const [moveError, setMoveError] = useState(false);
   const [revealedCardId, setRevealedCardId] = useState<string | null>(null);
   const { data: runState, isError: loadError } = useDeckRun(deckId);
@@ -67,6 +74,19 @@ export function DeckRunnerPage() {
       window.removeEventListener(VEHICLE_CONTROL_CHANGE_EVENT, syncSetting);
     };
   }, []);
+
+  async function deleteDeck() {
+    if (!deckId || deleteMutation.isPending) return;
+
+    setDeleteError(false);
+
+    try {
+      await deleteMutation.mutateAsync(deckId);
+      navigate("/decks");
+    } catch {
+      setDeleteError(true);
+    }
+  }
 
   const moveTo = useCallback(
     async (nextCursor: number) => {
@@ -216,6 +236,8 @@ export function DeckRunnerPage() {
         <VehicleControlNotice
           status={vehicleControlEnabled ? vehicleControlStatus : "disabled"}
           onRetry={() => void mediaControllerRef.current?.prepare()}
+          onDelete={() => void deleteDeck()}
+          deleting={deleteMutation.isPending}
         />
         <DeckCardPlayer
           key={currentCard.cardId}
@@ -235,6 +257,11 @@ export function DeckRunnerPage() {
             카드를 이동하지 못했습니다.
           </div>
         ) : null}
+        {deleteError ? (
+          <div className="list-empty" role="alert">
+            덱을 삭제하지 못했습니다.
+          </div>
+        ) : null}
       </div>
     </section>
   );
@@ -243,9 +270,13 @@ export function DeckRunnerPage() {
 function VehicleControlNotice({
   status,
   onRetry,
+  onDelete,
+  deleting,
 }: {
   status: VehicleControlStatus;
   onRetry: () => void;
+  onDelete: () => void;
+  deleting: boolean;
 }) {
   const copy: Record<VehicleControlStatus, string> = {
     preparing: "차량 제어 준비 중",
@@ -262,11 +293,21 @@ function VehicleControlNotice({
       aria-live="polite"
     >
       <span>{copy[status]}</span>
-      {status === "failed" ? (
-        <button type="button" onClick={onRetry}>
-          다시 시도
+      <div className="vehicle-control-status__actions">
+        {status === "failed" ? (
+          <button type="button" onClick={onRetry}>
+            다시 시도
+          </button>
+        ) : null}
+        <button
+          className="vehicle-control-status__delete"
+          type="button"
+          disabled={deleting}
+          onClick={onDelete}
+        >
+          {deleting ? "삭제 중" : "삭제"}
         </button>
-      ) : null}
+      </div>
     </div>
   );
 }

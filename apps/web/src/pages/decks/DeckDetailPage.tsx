@@ -90,6 +90,23 @@ export function DeckDetailPage() {
     if (failedIds.length > 0) setDeleteError(true);
   }
 
+  async function deleteAllCards() {
+    if (cards.length === 0 || bulkDeleting) return;
+
+    setBulkDeleting(true);
+    setDeleteError(false);
+    const results = await Promise.allSettled(
+      cards.map((card) => deleteCardMutation.mutateAsync(card.id)),
+    );
+    const failedIds = cards
+      .filter((_, index) => results[index]?.status === "rejected")
+      .map((card) => card.id);
+    setSelectedCardIds(failedIds);
+    setBulkDeleting(false);
+
+    if (failedIds.length > 0) setDeleteError(true);
+  }
+
   async function startDeckRun() {
     if (!deckId || startRunMutation.isPending || cards.length === 0) {
       return;
@@ -129,6 +146,15 @@ export function DeckDetailPage() {
           </div>
           {deckId ? (
             <div className="card-list-header__actions">
+              <button
+                className="card-list-header__delete-selected"
+                type="button"
+                disabled={loading || cards.length === 0 || bulkDeleting}
+                onClick={() => void deleteAllCards()}
+              >
+                <Trash2 aria-hidden="true" size={18} strokeWidth={2.2} />
+                {bulkDeleting ? "삭제 중" : "전체 삭제"}
+              </button>
               {selectedCardIds.length > 0 ? (
                 <button
                   className="card-list-header__delete-selected"

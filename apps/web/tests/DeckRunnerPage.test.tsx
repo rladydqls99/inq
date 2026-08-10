@@ -105,6 +105,23 @@ describe("DeckRunnerPage", () => {
     ).toBeTruthy();
   });
 
+  it("deletes the deck immediately from the vehicle control area", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
+    });
+
+    renderDeckRunner();
+
+    await user.click(await screen.findByRole("button", { name: "삭제" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1",
+      expect.objectContaining({ method: "DELETE" }),
+    );
+    expect(await screen.findByText("덱 목록")).toBeTruthy();
+  });
+
   it("shows an error and keeps the current card when moving fails", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
