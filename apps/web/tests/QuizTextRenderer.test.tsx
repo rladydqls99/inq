@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 
 import type { QuizSegment } from "@inq/shared";
 import { ChallengeQuizText } from "../src/features/challenges/ChallengeQuizText";
+import { DeckQuizText } from "../src/features/decks/DeckQuizText";
 
 const segments: QuizSegment[] = [
   { type: "text", value: "훈민정음을 만든 " },
@@ -50,6 +51,21 @@ describe("ChallengeQuizText", () => {
       <ChallengeQuizText mode="revealed" segments={segments} tone="study" />,
     );
     expect(screen.getByText("조선").className).toContain("is-study");
+  });
+
+  it("removes outer line breaks from deck text", () => {
+    render(
+      <DeckQuizText
+        mode="revealed"
+        segments={[
+          { type: "text", value: "\n대한민국의 수도는 " },
+          { type: "answer", id: "answer-1", value: "서울" },
+          { type: "text", value: "이다.\n" },
+        ]}
+      />,
+    );
+
+    expect(getByTextContent("대한민국의 수도는 서울이다.")).toBeTruthy();
   });
 });
 

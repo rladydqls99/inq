@@ -223,7 +223,9 @@ describe("DeckDetailPage", () => {
 
     await user.click(checkboxes[0] as HTMLElement);
     await user.click(checkboxes[1] as HTMLElement);
-    await user.click(screen.getByRole("button", { name: "선택 2장 삭제" }));
+    await user.click(
+      screen.getByRole("button", { name: "선택한 카드 2장 삭제" }),
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/cards/card-1",

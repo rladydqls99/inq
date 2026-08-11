@@ -155,19 +155,6 @@ export function DeckDetailPage() {
                 <Trash2 aria-hidden="true" size={18} strokeWidth={2.2} />
                 {bulkDeleting ? "삭제 중" : "전체 삭제"}
               </button>
-              {selectedCardIds.length > 0 ? (
-                <button
-                  className="card-list-header__delete-selected"
-                  type="button"
-                  disabled={bulkDeleting}
-                  onClick={() => void deleteSelectedCards()}
-                >
-                  <Trash2 aria-hidden="true" size={18} strokeWidth={2.2} />
-                  {bulkDeleting
-                    ? "삭제 중"
-                    : `선택 ${selectedCardIds.length}장 삭제`}
-                </button>
-              ) : null}
               <button
                 className="card-list-header__start"
                 type="button"
@@ -197,7 +184,10 @@ export function DeckDetailPage() {
       ) : null}
       <div className="card-editor-list">
         {cards.map((card) => (
-          <article key={card.id} className="card-editor">
+          <article
+            key={card.id}
+            className="card-editor card-editor--selectable"
+          >
             <label className="card-editor__select">
               <input
                 type="checkbox"
@@ -238,6 +228,21 @@ export function DeckDetailPage() {
           </article>
         ))}
       </div>
+      {selectedCardIds.length > 0 ? (
+        <button
+          className="floating-delete-button"
+          type="button"
+          disabled={bulkDeleting}
+          aria-label={
+            bulkDeleting
+              ? "선택한 카드 삭제 중"
+              : `선택한 카드 ${selectedCardIds.length}장 삭제`
+          }
+          onClick={() => void deleteSelectedCards()}
+        >
+          <Trash2 aria-hidden="true" size={22} strokeWidth={2.4} />
+        </button>
+      ) : null}
     </section>
   );
 }

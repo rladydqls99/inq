@@ -8,11 +8,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SettingsPage } from "../src/pages/settings/SettingsPage";
 import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
+import { THEME_STORAGE_KEY } from "../src/shared/theme";
 
 describe("SettingsPage", () => {
   afterEach(() => {
     cleanup();
     window.localStorage.clear();
+    delete document.documentElement.dataset.theme;
     vi.restoreAllMocks();
   });
 
@@ -65,6 +67,25 @@ describe("SettingsPage", () => {
 
     expect(voiceAnswer.checked).toBe(true);
     expect(window.localStorage.getItem(VOICE_ANSWER_STORAGE_KEY)).toBe("true");
+  });
+
+  it("uses dark mode by default and persists the selected theme", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    expect(
+      (screen.getByRole("radio", { name: "다크" }) as HTMLInputElement).checked,
+    ).toBe(true);
+
+    await user.click(screen.getByRole("radio", { name: "라이트" }));
+
+    expect(document.documentElement.dataset.theme).toBe("light");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("light");
+
+    await user.click(screen.getByRole("radio", { name: "다크" }));
+
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(window.localStorage.getItem(THEME_STORAGE_KEY)).toBe("dark");
   });
 
   it("exports backup data", async () => {

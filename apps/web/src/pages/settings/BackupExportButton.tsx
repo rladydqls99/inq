@@ -31,12 +31,24 @@ export function BackupExportButton() {
   }
 
   return (
-    <div className="settings-action">
-      <button type="button" onClick={() => void exportBackup()}>
+    <div className="flex items-center gap-2.5">
+      <button
+        className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink"
+        type="button"
+        onClick={() => void exportBackup()}
+      >
         백업 내보내기
       </button>
-      {exported ? <span>백업 파일이 준비되었습니다.</span> : null}
-      {error ? <span>백업을 내보내지 못했습니다.</span> : null}
+      {exported ? (
+        <span className="text-[13px] font-extrabold text-inq-success">
+          백업 파일이 준비되었습니다.
+        </span>
+      ) : null}
+      {error ? (
+        <span className="text-[13px] font-extrabold text-inq-error">
+          백업을 내보내지 못했습니다.
+        </span>
+      ) : null}
     </div>
   );
 }

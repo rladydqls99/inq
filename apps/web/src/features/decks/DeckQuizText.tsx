@@ -17,7 +17,14 @@ export function DeckQuizText({
     <p className={["quiz-text", className].filter(Boolean).join(" ")}>
       {segments.map((segment, index) => {
         if (segment.type === "text") {
-          return <span key={`text-${index}`}>{segment.value}</span>;
+          const value =
+            index === 0
+              ? segment.value.trimStart()
+              : index === segments.length - 1
+                ? segment.value.trimEnd()
+                : segment.value;
+
+          return <span key={`text-${index}`}>{value}</span>;
         }
 
         return mode === "prompt" ? (

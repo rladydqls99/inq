@@ -3,6 +3,7 @@ import { expect, test } from "@playwright/test";
 test("challenge runner reveals inline answers when self-scoring", async ({
   page,
 }) => {
+  await page.setViewportSize({ width: 320, height: 568 });
   const runState = {
     sessionId: "session-1",
     challengeId: "challenge-1",
@@ -69,6 +70,10 @@ test("challenge runner reveals inline answers when self-scoring", async ({
 
   await expect(page.getByText("훈민정음을 만든 ____이다.")).toBeVisible();
   await expect(page.getByText("1 / 1")).toBeVisible();
+  await expect(page.getByRole("button", { name: "이전 카드" })).toHaveCSS(
+    "width",
+    "44px",
+  );
   await expect(page.getByRole("button", { name: "다음 카드" })).toHaveCSS(
     "border-top-width",
     "0px",

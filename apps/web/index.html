@@ -6,16 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
     />
-    <meta
-      name="theme-color"
-      content="#fcfcfc"
-      media="(prefers-color-scheme: light)"
-    />
-    <meta
-      name="theme-color"
-      content="#101511"
-      media="(prefers-color-scheme: dark)"
-    />
+    <meta name="theme-color" content="#101511" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="icon" href="/icons/favicon-32.png" sizes="32x32" />
     <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
@@ -25,6 +16,26 @@
   </head>
   <body>
     <div id="root"></div>
+    <script>
+      (() => {
+        let preference = null;
+        try {
+          preference = localStorage.getItem("inq:theme-preference");
+        } catch {
+          // The CSS default remains dark when storage is unavailable.
+        }
+        const theme =
+          preference === "light" ||
+          (preference === "system" &&
+            !window.matchMedia("(prefers-color-scheme: dark)").matches)
+            ? "light"
+            : "dark";
+        document.documentElement.dataset.theme = theme;
+        document
+          .querySelector('meta[name="theme-color"]')
+          ?.setAttribute("content", theme === "dark" ? "#101511" : "#fcfcfc");
+      })();
+    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
