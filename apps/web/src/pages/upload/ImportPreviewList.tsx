@@ -12,13 +12,18 @@ export function ImportPreviewList({ cards }: ImportPreviewListProps) {
 
   return (
     <div
-      className="import-preview-list"
+      className="grid max-h-[28rem] gap-2 overflow-auto rounded-lg border border-inq-line p-3 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
       aria-label="퀴즈 카드 미리보기"
       tabIndex={0}
     >
       {cards.map((card) => (
-        <article key={card.blockIndex} className="import-preview-card">
-          <span>{card.blockIndex + 1}번째 카드</span>
+        <article
+          key={card.blockIndex}
+          className="grid gap-2 border-b border-inq-line pb-3 last:border-b-0 last:pb-0"
+        >
+          <span className="text-xs font-bold text-inq-ink-soft">
+            {card.blockIndex + 1}번째 카드
+          </span>
           <DeckQuizPreview segments={card.segments} />
         </article>
       ))}

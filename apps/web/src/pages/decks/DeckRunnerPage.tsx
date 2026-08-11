@@ -214,12 +214,18 @@ export function DeckRunnerPage() {
   const currentCard = runState?.cards[cursor];
   if (loadError) {
     return (
-      <div className="list-empty">덱 실행 정보를 불러오지 못했습니다.</div>
+      <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        덱 실행 정보를 불러오지 못했습니다.
+      </div>
     );
   }
 
   if (!deckId || !runState) {
-    return <div className="list-empty">불러오는 중입니다.</div>;
+    return (
+      <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        불러오는 중입니다.
+      </div>
+    );
   }
 
   const completed =
@@ -230,15 +236,23 @@ export function DeckRunnerPage() {
   }
 
   return (
-    <section className="page">
+    <section className="grid gap-4">
       <PageHeader title="덱 학습" />
-      <div className="runner-surface">
+      <div className="grid min-h-[calc(100dvh-11rem)] gap-4">
         <VehicleControlNotice
           status={vehicleControlEnabled ? vehicleControlStatus : "disabled"}
           onRetry={() => void mediaControllerRef.current?.prepare()}
-          onDelete={() => void deleteDeck()}
-          deleting={deleteMutation.isPending}
         />
+        <div className="flex justify-end">
+          <button
+            className="cursor-pointer rounded-lg border-0 bg-transparent px-3 text-sm font-bold text-inq-error disabled:cursor-not-allowed disabled:text-inq-ink-soft"
+            type="button"
+            disabled={deleteMutation.isPending}
+            onClick={() => void deleteDeck()}
+          >
+            {deleteMutation.isPending ? "삭제 중" : "삭제"}
+          </button>
+        </div>
         <DeckCardPlayer
           key={currentCard.cardId}
           segments={currentCard.segments}
@@ -253,12 +267,12 @@ export function DeckRunnerPage() {
           onAnswerReveal={() => setRevealedCardId(currentCard.cardId)}
         />
         {moveError ? (
-          <div className="list-empty" role="alert">
+          <div className="text-sm font-bold text-inq-error" role="alert">
             카드를 이동하지 못했습니다.
           </div>
         ) : null}
         {deleteError ? (
-          <div className="list-empty" role="alert">
+          <div className="text-sm font-bold text-inq-error" role="alert">
             덱을 삭제하지 못했습니다.
           </div>
         ) : null}
@@ -270,13 +284,9 @@ export function DeckRunnerPage() {
 function VehicleControlNotice({
   status,
   onRetry,
-  onDelete,
-  deleting,
 }: {
   status: VehicleControlStatus;
   onRetry: () => void;
-  onDelete: () => void;
-  deleting: boolean;
 }) {
   const copy: Record<VehicleControlStatus, string> = {
     preparing: "차량 제어 준비 중",
@@ -288,26 +298,22 @@ function VehicleControlNotice({
 
   return (
     <div
-      className={`vehicle-control-status is-${status}`}
+      className={`flex justify-between items-center gap-2 rounded-lg bg-inq-surface px-3 py-2 text-sm font-bold ${status === "failed" ? "text-inq-error" : status === "ready" ? "text-inq-success" : "text-inq-ink-soft"}`}
       role="status"
       aria-live="polite"
     >
       <span>{copy[status]}</span>
-      <div className="vehicle-control-status__actions">
-        {status === "failed" ? (
-          <button type="button" onClick={onRetry}>
+      {status !== "failed" ? (
+        <div className="flex justify-self-end">
+          <button
+            className="cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 text-sm font-bold text-inq-ink"
+            type="button"
+            onClick={onRetry}
+          >
             다시 시도
           </button>
-        ) : null}
-        <button
-          className="vehicle-control-status__delete"
-          type="button"
-          disabled={deleting}
-          onClick={onDelete}
-        >
-          {deleting ? "삭제 중" : "삭제"}
-        </button>
-      </div>
+        </div>
+      ) : null}
     </div>
   );
 }

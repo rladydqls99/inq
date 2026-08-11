@@ -39,7 +39,7 @@ export function PinGate({ children }: PinGateProps) {
   }
 
   if (!status) {
-    return <div className="pin-gate pin-gate--loading" />;
+    return <div className="min-h-dvh bg-inq-canvas" />;
   }
 
   if (!status.unlocked) {

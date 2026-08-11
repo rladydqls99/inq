@@ -44,18 +44,18 @@ export function ProgressSummary({
   });
 
   return (
-    <span className="progress-summary">
-      <span className="progress-summary__overall">
-        <span className="progress-summary__copy">
+    <span className="grid gap-2 text-[13px] font-bold text-inq-success">
+      <span className="grid gap-1">
+        <span className="flex items-baseline justify-between gap-2 text-inq-ink-soft">
           <span>전체 진도</span>
-          <span className="progress-summary__value">
+          <span className="text-inq-ink">
             <strong>{progress.completedCards}</strong>
             <span aria-hidden="true"> / </span>
             {progress.totalCards}장
           </span>
         </span>
         <span
-          className="progress-summary__track"
+          className="h-1 overflow-hidden rounded-full bg-inq-line [&>span]:block [&>span]:h-full [&>span]:origin-left [&>span]:bg-inq-highlight-strong"
           role="progressbar"
           aria-label={label}
           aria-valuemin={0}
@@ -67,22 +67,19 @@ export function ProgressSummary({
         </span>
       </span>
       {termProgress.length > 0 ? (
-        <span className="term-progress-summary">
-          <span className="term-progress-summary__label">텀별 완료</span>
-          <span className="term-progress-summary__items">
+        <span className="grid gap-1.5 text-inq-ink-soft">
+          <span className="text-xs font-bold">텀별 완료</span>
+          <span className="grid gap-1.5">
             {termProgress.map((term, termIndex) => (
-              <span
-                className="term-progress-summary__item"
-                key={`${term.days}-${termIndex}`}
-              >
-                <span className="term-progress-summary__copy">
+              <span className="grid gap-1" key={`${term.days}-${termIndex}`}>
+                <span className="flex items-baseline justify-between gap-2 text-xs font-bold text-inq-ink-soft">
                   <span>{term.days}일</span>
-                  <span className="term-progress-summary__value">
+                  <span className="text-inq-ink">
                     <strong>{term.completedCards}</strong>/{progress.totalCards}
                   </span>
                 </span>
                 <span
-                  className="term-progress-summary__track"
+                  className="h-1 overflow-hidden rounded-full bg-inq-line [&>span]:block [&>span]:h-full [&>span]:origin-left [&>span]:bg-inq-highlight-strong"
                   role="progressbar"
                   aria-label={`${term.days}일 텀 완료`}
                   aria-valuemin={0}

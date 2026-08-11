@@ -8,6 +8,8 @@ export function BackupExportButton() {
   const backupExport = useBackupExport();
 
   async function exportBackup() {
+    if (backupExport.isPending) return;
+
     try {
       const backup = await backupExport.mutateAsync();
       const serialized = JSON.stringify(backup, null, 2);
@@ -33,19 +35,26 @@ export function BackupExportButton() {
   return (
     <div className="flex items-center gap-2.5">
       <button
-        className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink"
+        className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink disabled:cursor-not-allowed disabled:bg-inq-surface disabled:text-inq-ink-soft"
+        disabled={backupExport.isPending}
         type="button"
         onClick={() => void exportBackup()}
       >
-        백업 내보내기
+        {backupExport.isPending ? "내보내는 중" : "백업 내보내기"}
       </button>
       {exported ? (
-        <span className="text-[13px] font-extrabold text-inq-success">
+        <span
+          className="text-[13px] font-extrabold text-inq-success"
+          role="status"
+        >
           백업 파일이 준비되었습니다.
         </span>
       ) : null}
       {error ? (
-        <span className="text-[13px] font-extrabold text-inq-error">
+        <span
+          className="text-[13px] font-extrabold text-inq-error"
+          role="alert"
+        >
           백업을 내보내지 못했습니다.
         </span>
       ) : null}

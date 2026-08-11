@@ -43,25 +43,39 @@ export function CardEditPage() {
   }
 
   return (
-    <section className="page">
+    <section className="grid gap-4">
       <PageHeader title="카드 수정" />
-      {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
+      {loading ? (
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          불러오는 중입니다.
+        </div>
+      ) : null}
       {loadError ? (
-        <div className="list-empty">카드를 불러오지 못했습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          카드를 불러오지 못했습니다.
+        </div>
       ) : null}
       {!loading && !loadError && !card ? (
-        <div className="list-empty">카드를 찾을 수 없습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          카드를 찾을 수 없습니다.
+        </div>
       ) : null}
       {card ? (
-        <div className="card-edit-page">
+        <div className="grid gap-3">
           <CardSegmentEditForm
             key={card.version}
             segments={card.segments}
             onDirty={markDirty}
             onSave={saveCard}
           />
-          {saved ? <div className="save-message">저장되었습니다.</div> : null}
-          {saveError ? <p className="card-editor__error">{saveError}</p> : null}
+          {saved ? (
+            <div className="text-sm font-bold text-inq-success">
+              저장되었습니다.
+            </div>
+          ) : null}
+          {saveError ? (
+            <p className="m-0 text-sm font-bold text-inq-error">{saveError}</p>
+          ) : null}
         </div>
       ) : null}
     </section>

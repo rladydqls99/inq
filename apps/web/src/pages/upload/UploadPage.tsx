@@ -71,13 +71,13 @@ export function UploadPage() {
   }
 
   return (
-    <section className="upload-page">
+    <section className="grid h-full min-h-0 gap-4">
       <PageHeader title="업로드" />
       <DeckSelectOrCreate
         selectedDeckId={selectedDeckId}
         onSelectDeck={selectDeck}
       />
-      <div className="upload-grid">
+      <div className="grid min-h-0 flex-1 grid-cols-2 gap-4 max-[1023px]:grid-cols-1">
         <MarkdownUploadPane
           markdown={markdown}
           errors={preview?.errors ?? []}
@@ -86,21 +86,25 @@ export function UploadPage() {
           onValidate={validateMarkdown}
         />
         <section
-          className="upload-pane upload-pane--preview"
+          className="grid min-h-0 gap-4 rounded-xl border border-inq-line bg-inq-canvas p-5"
           data-testid="upload-preview-pane"
         >
-          <header className="upload-pane__header">
-            <h2>검증 결과와 미리보기</h2>
-            <p>검증된 카드를 확인한 뒤 선택한 덱에 추가하세요.</p>
+          <header className="grid gap-1">
+            <h2 className="m-0 text-xl font-bold tracking-[-0.015em]">
+              검증 결과와 미리보기
+            </h2>
+            <p className="m-0 text-sm text-inq-ink-soft">
+              검증된 카드를 확인한 뒤 선택한 덱에 추가하세요.
+            </p>
           </header>
-          <div className="upload-preview-content">
+          <div className="grid min-h-0 flex-1 content-start gap-3 overflow-auto">
             {createError ? (
-              <div className="import-summary is-error">
+              <div className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error">
                 카드를 생성하지 못했습니다.
               </div>
             ) : null}
             {validationError ? (
-              <div className="import-summary is-error">
+              <div className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error">
                 마크다운을 검증하지 못했습니다.
               </div>
             ) : null}
@@ -108,7 +112,7 @@ export function UploadPage() {
             <ImportErrorList errors={preview?.errors ?? []} />
             <ImportPreviewList cards={preview?.previewCards ?? []} />
           </div>
-          <div className="upload-confirm-slot">
+          <div className="border-t border-inq-line pt-4">
             <ImportConfirmBar
               canCreate={canCreate}
               createdMessage={createdMessage}

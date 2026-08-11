@@ -14,7 +14,11 @@ export function DeckQuizText({
   className,
 }: DeckQuizTextProps) {
   return (
-    <p className={["quiz-text", className].filter(Boolean).join(" ")}>
+    <p
+      className={["m-0 text-[22px] font-semibold text-inq-ink", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {segments.map((segment, index) => {
         if (segment.type === "text") {
           const value =
@@ -28,11 +32,17 @@ export function DeckQuizText({
         }
 
         return mode === "prompt" ? (
-          <span key={segment.id} className="quiz-text__blank">
+          <span
+            key={segment.id}
+            className="inline-block min-w-[2.5em] border-b-2 border-inq-ink-soft px-[3px] leading-none text-transparent"
+          >
             ____
           </span>
         ) : (
-          <span key={segment.id} className={`quiz-text__answer is-${tone}`}>
+          <span
+            key={segment.id}
+            className={`is-${tone} rounded bg-inq-highlight px-[3px] font-extrabold text-inq-on-highlight box-decoration-clone`}
+          >
             {segment.value}
           </span>
         );

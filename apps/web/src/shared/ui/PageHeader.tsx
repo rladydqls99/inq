@@ -5,9 +5,9 @@ type PageHeaderProps = {
 
 export function PageHeader({ title, action }: PageHeaderProps) {
   return (
-    <header className="page-header">
-      <h1>{title}</h1>
-      {action ? <div className="page-header__action">{action}</div> : null}
+    <header className="flex min-h-12 items-center justify-between gap-3">
+      <h1 className="m-0 text-2xl font-bold tracking-normal">{title}</h1>
+      {action ? <div>{action}</div> : null}
     </header>
   );
 }

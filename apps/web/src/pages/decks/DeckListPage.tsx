@@ -65,104 +65,140 @@ export function DeckListPage() {
     !loading && !loadError && decks.length > 0 && editingDeckId === null;
 
   return (
-    <section className="page deck-list-page">
-      <div className="deck-list-page__header">
+    <section className="grid gap-4">
+      <div className="grid gap-2">
         <PageHeader title="덱" />
-        <p>문제를 모아둔 덱을 한눈에 확인하세요.</p>
+        <p className="m-0 text-sm font-medium text-inq-ink-soft">
+          문제를 모아둔 덱을 한눈에 확인하세요.
+        </p>
       </div>
-      <div className="deck-list-page__notices" aria-live="polite">
+      <div className="grid gap-2" aria-live="polite">
         {renameError ? (
-          <div className="deck-notice is-error" role="alert">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
+            role="alert"
+          >
             덱 이름을 저장하지 못했습니다.
           </div>
         ) : null}
         {deleteError ? (
-          <div className="deck-notice is-error" role="alert">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
+            role="alert"
+          >
             덱을 삭제하지 못했습니다.
           </div>
         ) : null}
       </div>
       {loading ? <DeckListSkeleton /> : null}
       {!loading && loadError ? (
-        <div className="deck-list-state" role="alert">
-          <div className="deck-list-state__copy">
-            <h2>덱 목록을 불러오지 못했습니다.</h2>
-            <p>잠시 후 다시 시도해 주세요.</p>
+        <div className="grid gap-3 rounded-xl bg-inq-surface p-4" role="alert">
+          <div className="grid gap-1">
+            <h2 className="m-0 text-xl font-bold tracking-[-0.015em]">
+              덱 목록을 불러오지 못했습니다.
+            </h2>
+            <p className="m-0 text-sm text-inq-ink-soft">
+              잠시 후 다시 시도해 주세요.
+            </p>
           </div>
-          <button type="button" onClick={() => void refetch()}>
+          <button
+            className="min-h-12 cursor-pointer rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
+            type="button"
+            onClick={() => void refetch()}
+          >
             다시 시도
           </button>
         </div>
       ) : null}
       {!loading && !loadError && decks.length === 0 ? (
-        <div className="deck-list-state">
-          <span className="deck-list-state__icon" aria-hidden="true">
+        <div className="grid gap-3 rounded-xl bg-inq-surface p-4">
+          <span
+            className="inline-grid size-11 place-items-center rounded-lg bg-inq-highlight text-inq-on-highlight"
+            aria-hidden="true"
+          >
             <BookOpen size={22} strokeWidth={2.2} />
           </span>
-          <div className="deck-list-state__copy">
-            <h2>등록된 덱이 없습니다.</h2>
-            <p>
+          <div className="grid gap-1">
+            <h2 className="m-0 text-xl font-bold tracking-[-0.015em]">
+              등록된 덱이 없습니다.
+            </h2>
+            <p className="m-0 text-sm text-inq-ink-soft">
               문제를 덱으로 묶어 자유롭게 학습하거나 챌린지로 복습해 보세요.
             </p>
           </div>
-          <button type="button" onClick={() => setCreateModalOpen(true)}>
+          <button
+            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
+            type="button"
+            onClick={() => setCreateModalOpen(true)}
+          >
             <Plus size={18} aria-hidden="true" />덱 등록하기
           </button>
         </div>
       ) : null}
-      <div className="action-list">
+      <div className="grid gap-2">
         {decks.map((deck) => (
           <div
             key={deck.id}
-            className="deck-row"
+            className="grid"
             data-testid={`deck-row-${deck.id}`}
           >
             <ActionListItem
               to={`/decks/${deck.id}/manage`}
               title={deck.title}
               meta={`카드 ${deck.cardCount}장`}
-            />
-            <ActionMenu
-              label={`${deck.title} 메뉴`}
-              open={openMenuDeckId === deck.id}
-              onToggle={() =>
-                setOpenMenuDeckId((current) =>
-                  current === deck.id ? null : deck.id,
-                )
+              action={
+                <ActionMenu
+                  label={`${deck.title} 메뉴`}
+                  open={openMenuDeckId === deck.id}
+                  onToggle={() =>
+                    setOpenMenuDeckId((current) =>
+                      current === deck.id ? null : deck.id,
+                    )
+                  }
+                >
+                  <button type="button" onClick={() => startRenaming(deck)}>
+                    이름 변경
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setChallengeDeckId(deck.id);
+                      setOpenMenuDeckId(null);
+                    }}
+                  >
+                    챌린지 등록
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void deleteDeck(deck.id)}
+                  >
+                    삭제
+                  </button>
+                </ActionMenu>
               }
-            >
-              <button type="button" onClick={() => startRenaming(deck)}>
-                이름 변경
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setChallengeDeckId(deck.id);
-                  setOpenMenuDeckId(null);
-                }}
-              >
-                챌린지 등록
-              </button>
-              <button type="button" onClick={() => void deleteDeck(deck.id)}>
-                삭제
-              </button>
-            </ActionMenu>
+            />
             {editingDeckId === deck.id ? (
-              <div className="inline-edit">
-                <label>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-2">
+                <label className="grid gap-1 text-sm font-bold">
                   덱 이름
                   <input
+                    className="min-h-11 rounded-lg border border-inq-line bg-inq-canvas px-3 text-base outline-none focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
                     value={editingTitle}
                     onChange={(event) => setEditingTitle(event.target.value)}
                   />
                 </label>
                 <button
+                  className="min-h-11 cursor-pointer rounded-lg border-0 bg-inq-ink px-3 text-sm font-bold text-inq-canvas"
                   type="button"
                   onClick={() => void saveDeckTitle(deck.id)}
                 >
                   저장
                 </button>
-                <button type="button" onClick={() => setEditingDeckId(null)}>
+                <button
+                  className="min-h-11 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 text-sm font-bold text-inq-ink"
+                  type="button"
+                  onClick={() => setEditingDeckId(null)}
+                >
                   취소
                 </button>
               </div>
@@ -173,7 +209,7 @@ export function DeckListPage() {
       {showFloatingAdd ? (
         <button
           type="button"
-          className="floating-add-button deck-add-button"
+          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 grid size-14 cursor-pointer place-items-center rounded-full border-0 bg-inq-ink text-inq-canvas shadow-[0_2px_8px_rgb(13_22_15_/_12%)] focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           aria-label="덱 만들기"
           onClick={() => setCreateModalOpen(true)}
         >
@@ -199,12 +235,16 @@ export function DeckListPage() {
 
 function DeckListSkeleton() {
   return (
-    <div className="deck-list-skeleton" role="status">
+    <div className="grid gap-2" role="status">
       <span className="sr-only">덱을 불러오는 중입니다.</span>
       {[0, 1].map((item) => (
-        <div className="deck-list-skeleton__item" key={item} aria-hidden="true">
-          <span className="deck-list-skeleton__title" />
-          <span className="deck-list-skeleton__meta" />
+        <div
+          className="grid min-h-16 gap-2 rounded-lg bg-inq-surface p-3 animate-pulse motion-reduce:animate-none"
+          key={item}
+          aria-hidden="true"
+        >
+          <span className="h-5 w-3/5 rounded bg-inq-line" />
+          <span className="h-4 w-2/5 rounded bg-inq-line" />
         </div>
       ))}
     </div>

@@ -91,118 +91,156 @@ export function ChallengeListPage() {
     editingChallengeId === null;
 
   return (
-    <section className="page challenge-list-page">
-      <div className="challenge-list-page__header">
+    <section className="grid gap-4">
+      <div className="grid gap-2">
         <PageHeader title="챌린지" />
-        <p>내가 만든 복습 루틴을 한눈에 확인하세요.</p>
+        <p className="m-0 text-sm font-medium text-inq-ink-soft">
+          내가 만든 복습 루틴을 한눈에 확인하세요.
+        </p>
       </div>
-      <div className="challenge-list-page__notices" aria-live="polite">
+      <div className="grid gap-2" aria-live="polite">
         {updateMessage ? (
-          <div className="challenge-notice" role="status">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-ink"
+            role="status"
+          >
             {updateMessage}
           </div>
         ) : null}
         {updateError ? (
-          <div className="challenge-notice is-error" role="alert">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
+            role="alert"
+          >
             챌린지를 업데이트하지 못했습니다.
           </div>
         ) : null}
         {renameError ? (
-          <div className="challenge-notice is-error" role="alert">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
+            role="alert"
+          >
             챌린지 이름을 저장하지 못했습니다.
           </div>
         ) : null}
         {deleteError ? (
-          <div className="challenge-notice is-error" role="alert">
+          <div
+            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
+            role="alert"
+          >
             챌린지를 삭제하지 못했습니다.
           </div>
         ) : null}
       </div>
       {loading ? <ChallengeListSkeleton /> : null}
       {!loading && loadError ? (
-        <div className="challenge-list-state" role="alert">
-          <div className="challenge-list-state__copy">
-            <h2>챌린지 목록을 불러오지 못했습니다.</h2>
-            <p>잠시 후 다시 시도해 주세요.</p>
+        <div className="grid gap-3 rounded-xl bg-inq-surface p-4" role="alert">
+          <div className="grid gap-1">
+            <h2 className="m-0 text-xl font-bold tracking-[-0.015em]">
+              챌린지 목록을 불러오지 못했습니다.
+            </h2>
+            <p className="m-0 text-sm text-inq-ink-soft">
+              잠시 후 다시 시도해 주세요.
+            </p>
           </div>
-          <button type="button" onClick={() => void refetch()}>
+          <button
+            className="min-h-12 cursor-pointer rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
+            type="button"
+            onClick={() => void refetch()}
+          >
             다시 시도
           </button>
         </div>
       ) : null}
       {!loading && !loadError && challenges.length === 0 ? (
-        <div className="challenge-list-state">
-          <span className="challenge-list-state__icon" aria-hidden="true">
+        <div className="grid gap-3 rounded-xl bg-inq-surface p-4">
+          <span
+            className="inline-grid size-11 place-items-center rounded-lg bg-inq-highlight text-inq-on-highlight"
+            aria-hidden="true"
+          >
             <Flag size={22} strokeWidth={2.2} />
           </span>
-          <div className="challenge-list-state__copy">
-            <h2>등록된 챌린지가 없습니다.</h2>
-            <p>
+          <div className="grid gap-1">
+            <h2 className="m-0 text-xl font-bold tracking-[-0.015em]">
+              등록된 챌린지가 없습니다.
+            </h2>
+            <p className="m-0 text-sm text-inq-ink-soft">
               덱을 골라 복습 주기를 만들면, 오늘 풀 문제를 홈에서 바로 시작할 수
               있어요.
             </p>
           </div>
-          <button type="button" onClick={() => setCreateModalOpen(true)}>
+          <button
+            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
+            type="button"
+            onClick={() => setCreateModalOpen(true)}
+          >
             <Plus size={18} aria-hidden="true" />
             챌린지 등록하기
           </button>
         </div>
       ) : null}
-      <div className="action-list">
+      <div className="grid gap-2">
         {challenges.map((challenge) => (
           <div
             key={challenge.id}
-            className="challenge-row"
+            className="grid"
             data-testid={`challenge-row-${challenge.id}`}
           >
-            <ChallengeListItem challenge={challenge} />
-            <ActionMenu
-              label={`${challenge.name} 메뉴`}
-              open={openMenuChallengeId === challenge.id}
-              onToggle={() =>
-                setOpenMenuChallengeId((current) =>
-                  current === challenge.id ? null : challenge.id,
-                )
+            <ChallengeListItem
+              challenge={challenge}
+              action={
+                <ActionMenu
+                  label={`${challenge.name} 메뉴`}
+                  open={openMenuChallengeId === challenge.id}
+                  onToggle={() =>
+                    setOpenMenuChallengeId((current) =>
+                      current === challenge.id ? null : challenge.id,
+                    )
+                  }
+                >
+                  <button type="button" onClick={() => startEditing(challenge)}>
+                    이름 변경
+                  </button>
+                  <button
+                    type="button"
+                    disabled={!challenge.sourceDeckId}
+                    title={
+                      challenge.sourceDeckId
+                        ? undefined
+                        : "원본 덱이 삭제되어 카드를 갱신할 수 없습니다."
+                    }
+                    onClick={() => void updateFromDeck(challenge.id)}
+                  >
+                    덱에서 카드 갱신
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void deleteChallenge(challenge.id)}
+                  >
+                    삭제
+                  </button>
+                </ActionMenu>
               }
-            >
-              <button type="button" onClick={() => startEditing(challenge)}>
-                이름 변경
-              </button>
-              <button
-                type="button"
-                disabled={!challenge.sourceDeckId}
-                title={
-                  challenge.sourceDeckId
-                    ? undefined
-                    : "원본 덱이 삭제되어 카드를 갱신할 수 없습니다."
-                }
-                onClick={() => void updateFromDeck(challenge.id)}
-              >
-                덱에서 카드 갱신
-              </button>
-              <button
-                type="button"
-                onClick={() => void deleteChallenge(challenge.id)}
-              >
-                삭제
-              </button>
-            </ActionMenu>
+            />
             {editingChallengeId === challenge.id ? (
-              <div className="inline-edit">
-                <label>
+              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-2">
+                <label className="grid gap-1 text-sm font-bold">
                   챌린지 이름
                   <input
+                    className="min-h-11 rounded-lg border border-inq-line bg-inq-canvas px-3 text-base outline-none focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
                     value={editingName}
                     onChange={(event) => setEditingName(event.target.value)}
                   />
                 </label>
                 <button
+                  className="min-h-11 cursor-pointer rounded-lg border-0 bg-inq-ink px-3 text-sm font-bold text-inq-canvas"
                   type="button"
                   onClick={() => void saveChallengeName(challenge.id)}
                 >
                   저장
                 </button>
                 <button
+                  className="min-h-11 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 text-sm font-bold text-inq-ink"
                   type="button"
                   onClick={() => setEditingChallengeId(null)}
                 >
@@ -216,7 +254,7 @@ export function ChallengeListPage() {
       {showFloatingAdd ? (
         <button
           type="button"
-          className="floating-add-button challenge-add-button"
+          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 grid size-14 cursor-pointer place-items-center rounded-full border-0 bg-inq-ink text-inq-canvas shadow-[0_2px_8px_rgb(13_22_15_/_12%)] focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           aria-label="챌린지 등록"
           onClick={() => setCreateModalOpen(true)}
         >
@@ -235,18 +273,18 @@ export function ChallengeListPage() {
 
 function ChallengeListSkeleton() {
   return (
-    <div className="challenge-list-skeleton" role="status">
+    <div className="grid gap-2" role="status">
       <span className="sr-only">챌린지를 불러오는 중입니다.</span>
       {[0, 1].map((item) => (
         <div
-          className="challenge-list-skeleton__item"
+          className="grid min-h-32 gap-3 rounded-lg bg-inq-surface p-3 animate-pulse motion-reduce:animate-none"
           key={item}
           aria-hidden="true"
         >
-          <span className="challenge-list-skeleton__title" />
-          <span className="challenge-list-skeleton__meta" />
-          <span className="challenge-list-skeleton__status" />
-          <span className="challenge-list-skeleton__progress" />
+          <span className="h-5 w-3/5 rounded bg-inq-line" />
+          <span className="h-4 w-2/5 rounded bg-inq-line" />
+          <span className="h-4 w-1/3 rounded bg-inq-line" />
+          <span className="h-1 w-full rounded bg-inq-line" />
         </div>
       ))}
     </div>

@@ -125,6 +125,37 @@ describe("SettingsPage", () => {
     expect(screen.queryByText("백업 파일이 준비되었습니다.")).toBeNull();
   });
 
+  it("prevents duplicate backup exports while one is in progress", async () => {
+    const user = userEvent.setup();
+    let resolveRequest!: (response: Response) => void;
+    const fetchMock = vi.fn(
+      () =>
+        new Promise<Response>((resolve) => {
+          resolveRequest = resolve;
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    renderSettings();
+
+    const button = screen.getByRole("button", { name: "백업 내보내기" });
+    await user.click(button);
+
+    expect((button as HTMLButtonElement).disabled).toBe(true);
+    expect(button.textContent).toBe("내보내는 중");
+
+    await user.click(button);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+
+    resolveRequest(
+      new Response(JSON.stringify({ exportedAt: "2026-06-25T00:00:00.000Z" }), {
+        headers: { "content-type": "application/json" },
+      }),
+    );
+
+    expect(await screen.findByText("백업 파일이 준비되었습니다.")).toBeTruthy();
+  });
+
   it("locks the app and emits the lock event", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({

@@ -205,27 +205,35 @@ export function ChallengeRunnerPage() {
 
   if (loadError) {
     return (
-      <div className="list-empty">챌린지 실행 정보를 불러오지 못했습니다.</div>
+      <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        챌린지 실행 정보를 불러오지 못했습니다.
+      </div>
     );
   }
 
   if (!challengeId || !runState) {
-    return <div className="list-empty">불러오는 중입니다.</div>;
+    return (
+      <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        불러오는 중입니다.
+      </div>
+    );
   }
 
   if (!currentCard || runState.status === "completed") {
     return (
-      <section className="page">
+      <section className="grid gap-4">
         <PageHeader title="챌린지 학습" />
-        <div className="list-empty">완료되었습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          완료되었습니다.
+        </div>
       </section>
     );
   }
 
   return (
-    <section className="page">
+    <section className="grid gap-4">
       <PageHeader title="챌린지 학습" />
-      <div className="runner-surface">
+      <div className="grid min-h-[calc(100dvh-11rem)] gap-4">
         <ChallengeCardPlayer
           key={currentCard.sessionCardId}
           segments={currentCard.segments}
@@ -242,10 +250,14 @@ export function ChallengeRunnerPage() {
           showWrongAnswers={voiceFeedback?.status === "wrong"}
         />
         {resultError ? (
-          <div className="list-empty">결과를 저장하지 못했습니다.</div>
+          <div className="text-sm font-bold text-inq-error">
+            결과를 저장하지 못했습니다.
+          </div>
         ) : null}
         {moveError ? (
-          <div className="list-empty">카드를 이동하지 못했습니다.</div>
+          <div className="text-sm font-bold text-inq-error">
+            카드를 이동하지 못했습니다.
+          </div>
         ) : null}
       </div>
     </section>

@@ -4,9 +4,11 @@ import { DeckQuizText } from "./DeckQuizText";
 
 export function DeckQuizPreview({ segments }: { segments: QuizSegment[] }) {
   return (
-    <div className="quiz-preview">
+    <div className="grid gap-2">
       <DeckQuizText mode="revealed" segments={segments} tone="study" />
-      <span className="quiz-preview__count">{getAnswers(segments).length}</span>
+      <span className="text-xs font-bold text-inq-ink-soft">
+        {getAnswers(segments).length}
+      </span>
     </div>
   );
 }

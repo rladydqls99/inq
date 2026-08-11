@@ -52,10 +52,11 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
   }
 
   return (
-    <form className="challenge-form" onSubmit={submit}>
-      <label>
+    <form className="grid gap-3" onSubmit={submit}>
+      <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
         챌린지 이름
         <input
+          className="min-h-12 rounded-lg border border-inq-line bg-inq-canvas px-3.5 py-3 text-base text-inq-ink outline-none focus-visible:border-inq-highlight-strong focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
           value={name}
           onChange={(event) => {
             setName(event.target.value);
@@ -63,9 +64,10 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
           }}
         />
       </label>
-      <label>
+      <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
         덱
         <select
+          className="min-h-12 rounded-lg border border-inq-line bg-inq-canvas px-3.5 py-3 text-base text-inq-ink outline-none focus-visible:border-inq-highlight-strong focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30 disabled:bg-inq-surface disabled:text-inq-ink-soft"
           value={deckId}
           disabled={Boolean(presetDeckId)}
           onChange={(event) => {
@@ -80,10 +82,11 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
           ))}
         </select>
       </label>
-      <div className="interval-grid" aria-label="챌린지 주기">
-        <label>
+      <div className="grid grid-cols-3 gap-2" aria-label="챌린지 주기">
+        <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
           첫 번째 주기(일)
           <input
+            className="min-h-12 rounded-lg border border-inq-line bg-inq-canvas px-3.5 py-3 text-base text-inq-ink outline-none focus-visible:border-inq-highlight-strong focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
             inputMode="numeric"
             value={intervalOne}
             onChange={(event) => {
@@ -92,9 +95,10 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
             }}
           />
         </label>
-        <label>
+        <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
           두 번째 주기(일)
           <input
+            className="min-h-12 rounded-lg border border-inq-line bg-inq-canvas px-3.5 py-3 text-base text-inq-ink outline-none focus-visible:border-inq-highlight-strong focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
             inputMode="numeric"
             value={intervalTwo}
             onChange={(event) => {
@@ -103,9 +107,10 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
             }}
           />
         </label>
-        <label>
+        <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
           세 번째 주기(일)
           <input
+            className="min-h-12 rounded-lg border border-inq-line bg-inq-canvas px-3.5 py-3 text-base text-inq-ink outline-none focus-visible:border-inq-highlight-strong focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
             inputMode="numeric"
             value={intervalThree}
             onChange={(event) => {
@@ -116,13 +121,22 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
         </label>
       </div>
       <button
+        className="min-h-12 cursor-pointer rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 active:scale-[0.98]"
         type="submit"
         disabled={!trimmedName || !deckId || !parsedIntervals}
       >
         등록하기
       </button>
-      {deckLoadError ? <span>덱 목록을 불러오지 못했습니다.</span> : null}
-      {error ? <span>챌린지를 생성하지 못했습니다.</span> : null}
+      {deckLoadError ? (
+        <span className="text-sm font-bold text-inq-error">
+          덱 목록을 불러오지 못했습니다.
+        </span>
+      ) : null}
+      {error ? (
+        <span className="text-sm font-bold text-inq-error">
+          챌린지를 생성하지 못했습니다.
+        </span>
+      ) : null}
     </form>
   );
 }

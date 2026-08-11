@@ -18,7 +18,11 @@ export function ChallengeQuizText({
   showWrongAnswers = false,
 }: ChallengeQuizTextProps) {
   return (
-    <p className={["quiz-text", className].filter(Boolean).join(" ")}>
+    <p
+      className={["m-0 text-[22px] font-semibold text-inq-ink", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       {segments.map((segment, index) => {
         if (segment.type === "text") {
           return <span key={`text-${index}`}>{segment.value}</span>;
@@ -28,9 +32,7 @@ export function ChallengeQuizText({
           return (
             <span
               key={segment.id}
-              className={`quiz-text__answer is-${
-                mode === "revealed" ? tone : "correct"
-              }`}
+              className={`is-${mode === "revealed" ? tone : "correct"} rounded bg-inq-highlight px-[3px] font-extrabold text-inq-on-highlight box-decoration-clone`}
             >
               {segment.value}
             </span>
@@ -40,7 +42,7 @@ export function ChallengeQuizText({
         return (
           <span
             key={segment.id}
-            className={`quiz-text__blank${showWrongAnswers ? " is-wrong" : ""}`}
+            className={`inline-block min-w-[2.5em] border-b-2 px-[3px] leading-none text-transparent ${showWrongAnswers ? "is-wrong border-inq-error" : "border-inq-ink-soft"}`}
             aria-label={showWrongAnswers ? "오답" : undefined}
           >
             ____

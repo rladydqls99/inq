@@ -43,6 +43,8 @@ export function SettingsPage() {
   }
 
   async function lock() {
+    if (lockMutation.isPending) return;
+
     try {
       await lockMutation.mutateAsync();
       setLockError(false);
@@ -53,7 +55,7 @@ export function SettingsPage() {
   }
 
   return (
-    <section className="page">
+    <section className="grid gap-4">
       <PageHeader title="설정" />
       <div className="mt-[18px] grid gap-[18px] [&_h2]:m-0 [&_h2]:text-[15px] [&_h2]:font-extrabold">
         <section className="grid gap-2.5">
@@ -98,14 +100,18 @@ export function SettingsPage() {
         </section>
         <section className="grid gap-2.5">
           <h2>차량 제어</h2>
-          <label className="settings-toggle">
-            <span className="settings-toggle__copy">
-              <strong>학습 차량 제어</strong>
-              <span id="vehicle-control-description">
+          <label className="flex min-h-12 cursor-pointer items-center justify-between gap-4 rounded-lg border border-inq-line bg-inq-canvas p-3 focus-within:outline-3 focus-within:outline-inq-highlight-strong focus-within:outline-offset-2">
+            <span className="grid min-w-0 gap-1">
+              <strong className="text-sm font-bold">학습 차량 제어</strong>
+              <span
+                className="text-[13px] leading-[1.45] text-inq-ink-soft"
+                id="vehicle-control-description"
+              >
                 덱 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
               </span>
             </span>
             <input
+              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full bg-inq-line transition-colors after:absolute after:top-1 after:left-1 after:size-5 after:rounded-full after:bg-inq-canvas after:transition-transform checked:bg-inq-highlight checked:after:translate-x-5 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 motion-reduce:transition-none"
               type="checkbox"
               role="switch"
               checked={vehicleControlEnabled}
@@ -116,15 +122,19 @@ export function SettingsPage() {
         </section>
         <section className="grid gap-2.5">
           <h2>음성 정답 판정</h2>
-          <label className="settings-toggle">
-            <span className="settings-toggle__copy">
-              <strong>음성으로 정답 확인</strong>
-              <span id="voice-answer-description">
+          <label className="flex min-h-12 cursor-pointer items-center justify-between gap-4 rounded-lg border border-inq-line bg-inq-canvas p-3 focus-within:outline-3 focus-within:outline-inq-highlight-strong focus-within:outline-offset-2">
+            <span className="grid min-w-0 gap-1">
+              <strong className="text-sm font-bold">음성으로 정답 확인</strong>
+              <span
+                className="text-[13px] leading-[1.45] text-inq-ink-soft"
+                id="voice-answer-description"
+              >
                 챌린지 학습 중 마이크 음성이 Soniox로 전송되어 정답을
                 판정합니다.
               </span>
             </span>
             <input
+              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full bg-inq-line transition-colors after:absolute after:top-1 after:left-1 after:size-5 after:rounded-full after:bg-inq-canvas after:transition-transform checked:bg-inq-highlight checked:after:translate-x-5 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 motion-reduce:transition-none"
               type="checkbox"
               role="switch"
               checked={voiceAnswerEnabled}
@@ -141,14 +151,18 @@ export function SettingsPage() {
           <h2>잠금</h2>
           <div className="flex items-center gap-2.5">
             <button
-              className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink"
+              className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink disabled:cursor-not-allowed disabled:bg-inq-surface disabled:text-inq-ink-soft"
+              disabled={lockMutation.isPending}
               type="button"
               onClick={() => void lock()}
             >
-              잠그기
+              {lockMutation.isPending ? "잠그는 중" : "잠그기"}
             </button>
             {lockError ? (
-              <span className="text-[13px] font-extrabold text-inq-error">
+              <span
+                className="text-[13px] font-extrabold text-inq-error"
+                role="alert"
+              >
                 잠금 처리에 실패했습니다.
               </span>
             ) : null}

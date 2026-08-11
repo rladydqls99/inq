@@ -67,20 +67,20 @@ export function ChallengeCardPlayer({
 
   return (
     <section
-      className="card-player"
+      className="flex min-w-0 flex-1 flex-col gap-6"
       aria-label={`퀴즈 카드 ${displayIndex}/${totalCards}`}
       onTouchStart={handleTouchStart}
       onTouchEnd={handleTouchEnd}
     >
-      <header className="card-player__progress">
-        <div className="card-player__progress-label">
+      <header className="grid gap-2">
+        <div className="flex items-center justify-between gap-4 text-sm font-bold leading-[1.4] text-inq-ink-soft [&_strong]:text-inq-ink [&_strong]:tabular-nums">
           <span>학습 진행</span>
           <strong>
             {displayIndex} / {totalCards}
           </strong>
         </div>
         <div
-          className="card-player__progress-track"
+          className="relative -my-5 h-11 cursor-pointer touch-none before:absolute before:top-5 before:right-0 before:left-0 before:h-1 before:rounded-full before:bg-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 [&>span]:absolute [&>span]:top-5 [&>span]:left-0 [&>span]:h-1 [&>span]:rounded-full [&>span]:bg-inq-highlight-strong [&>span]:transition-[width] [&>span]:duration-180 [&>span]:after:absolute [&>span]:after:top-1/2 [&>span]:after:right-[-6px] [&>span]:after:size-3 [&>span]:after:rounded-full [&>span]:after:bg-inq-highlight-strong [&>span]:after:content-[''] [&>span]:after:-translate-y-1/2 motion-reduce:[&>span]:transition-none"
           role="progressbar"
           aria-label="카드 학습 진행률"
           aria-valuemin={1}
@@ -90,9 +90,9 @@ export function ChallengeCardPlayer({
           <span style={{ width: `${progress}%` }} />
         </div>
       </header>
-      <div className="card-player__stage">
+      <div className="grid min-h-[260px] flex-1 grid-cols-[44px_minmax(0,1fr)_44px] items-center">
         <button
-          className="card-player__nav-button"
+          className="inline-flex size-11 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-inq-ink-soft disabled:cursor-default disabled:text-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-label="이전 카드"
           disabled={!canPrevious}
@@ -100,7 +100,7 @@ export function ChallengeCardPlayer({
         >
           <ChevronLeft aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
-        <div className="card-player__question">
+        <div className="grid w-full max-w-[34rem] place-items-center self-stretch rounded-lg px-0 py-4 text-center">
           <div aria-live="polite">
             <ChallengeQuizText
               mode={answerRevealed || selectedResult ? "revealed" : "prompt"}
@@ -112,7 +112,7 @@ export function ChallengeCardPlayer({
           </div>
         </div>
         <button
-          className="card-player__nav-button"
+          className="inline-flex size-11 cursor-pointer items-center justify-center border-0 bg-transparent p-0 text-inq-ink-soft disabled:cursor-default disabled:text-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-label="다음 카드"
           disabled={!canNext}
@@ -121,9 +121,9 @@ export function ChallengeCardPlayer({
           <ChevronRight aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
       </div>
-      <div className="card-player__result-controls" aria-label="학습 결과">
+      <div className="grid grid-cols-2 gap-2" aria-label="학습 결과">
         <button
-          className="card-player__result-button is-wrong"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-error aria-pressed:bg-inq-error aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-pressed={selectedResult === "wrong"}
           onClick={() => {
@@ -135,7 +135,7 @@ export function ChallengeCardPlayer({
           틀렸어요
         </button>
         <button
-          className="card-player__result-button is-correct"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-success)_12%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-success aria-pressed:bg-inq-success aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-pressed={selectedResult === "correct"}
           onClick={() => {
@@ -149,7 +149,7 @@ export function ChallengeCardPlayer({
       </div>
       {!selectedResult ? (
         <button
-          className="card-player__reveal-button is-answer"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-surface px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-ink focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           onClick={() => setAnswerRevealed(true)}
         >
@@ -158,13 +158,13 @@ export function ChallengeCardPlayer({
       ) : null}
       {selectedResult ? (
         <button
-          className="card-player__reveal-button is-next"
+          className="relative inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas disabled:cursor-default disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           disabled={!canNext}
           onClick={onNext}
         >
           <span>다음 문제</span>
-          <span className="card-player__next-meta">
+          <span className="absolute right-[18px] inline-flex items-center gap-1.5">
             {autoAdvanceSeconds ? (
               <AutoAdvanceTimer
                 key={selectedResult}
@@ -192,7 +192,7 @@ function AutoAdvanceTimer({ seconds }: { seconds: number }) {
 
   return (
     <span
-      className="auto-advance-timer"
+      className="text-xs font-bold"
       aria-label={`자동 이동까지 ${remainingSeconds}초`}
       aria-live="polite"
     >

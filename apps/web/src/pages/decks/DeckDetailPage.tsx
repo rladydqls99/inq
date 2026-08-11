@@ -136,18 +136,22 @@ export function DeckDetailPage() {
   }
 
   return (
-    <section className="page card-list-page">
-      <header className="card-list-header">
-        <p className="card-list-header__context">덱 카드</p>
-        <div className="card-list-header__main">
-          <div className="card-list-header__copy">
-            <h1>{deck?.title ?? "덱 카드"}</h1>
-            <p>{loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}</p>
+    <section className="grid gap-4">
+      <header className="grid gap-2">
+        <p className="m-0 text-sm font-bold text-inq-ink-soft">덱 카드</p>
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="grid min-w-0 gap-1">
+            <h1 className="m-0 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
+              {deck?.title ?? "덱 카드"}
+            </h1>
+            <p className="m-0 text-sm font-medium text-inq-ink-soft">
+              {loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}
+            </p>
           </div>
           {deckId ? (
-            <div className="card-list-header__actions">
+            <div className="flex flex-wrap gap-2">
               <button
-                className="card-list-header__delete-selected"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-inq-line bg-inq-canvas px-4 py-3 text-sm font-bold text-inq-error disabled:cursor-not-allowed disabled:text-inq-ink-soft"
                 type="button"
                 disabled={loading || cards.length === 0 || bulkDeleting}
                 onClick={() => void deleteAllCards()}
@@ -156,7 +160,7 @@ export function DeckDetailPage() {
                 {bulkDeleting ? "삭제 중" : "전체 삭제"}
               </button>
               <button
-                className="card-list-header__start"
+                className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
                 type="button"
                 disabled={
                   loading || cards.length === 0 || startRunMutation.isPending
@@ -169,47 +173,63 @@ export function DeckDetailPage() {
           ) : null}
         </div>
       </header>
-      {loading ? <div className="list-empty">불러오는 중입니다.</div> : null}
+      {loading ? (
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          불러오는 중입니다.
+        </div>
+      ) : null}
       {loadError ? (
-        <div className="list-empty">카드 목록을 불러오지 못했습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          카드 목록을 불러오지 못했습니다.
+        </div>
       ) : null}
       {deleteError ? (
-        <div className="list-empty">카드를 삭제하지 못했습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-error">
+          카드를 삭제하지 못했습니다.
+        </div>
       ) : null}
       {startError ? (
-        <div className="list-empty">학습을 시작하지 못했습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-error">
+          학습을 시작하지 못했습니다.
+        </div>
       ) : null}
       {!loading && !loadError && cards.length === 0 ? (
-        <div className="list-empty">등록된 카드가 없습니다.</div>
+        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+          등록된 카드가 없습니다.
+        </div>
       ) : null}
-      <div className="card-editor-list">
+      <div className="grid gap-2">
         {cards.map((card) => (
           <article
             key={card.id}
-            className="card-editor card-editor--selectable"
+            className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-inq-line bg-inq-canvas p-4"
           >
-            <label className="card-editor__select">
+            <label className="grid size-11 cursor-pointer place-items-start [&_input:checked+span]:border-inq-highlight [&_input:checked+span]:bg-inq-highlight">
               <input
+                className="sr-only"
                 type="checkbox"
                 checked={selectedCardIds.includes(card.id)}
                 onChange={() => toggleCardSelection(card.id)}
                 aria-label="카드 선택"
               />
-              <span className="card-editor__checkbox" aria-hidden="true">
+              <span
+                className="grid size-5 place-items-center rounded border border-inq-line text-inq-on-highlight"
+                aria-hidden="true"
+              >
                 {selectedCardIds.includes(card.id) ? (
                   <Check size={16} strokeWidth={3} />
                 ) : null}
               </span>
             </label>
             <DeckQuizText
-              className="card-editor__revealed"
+              className="min-w-0 text-base leading-[1.6]"
               mode="revealed"
               segments={card.segments}
               tone="study"
             />
-            <div className="card-editor__actions">
+            <div className="flex gap-1">
               <Link
-                className="row-action-link"
+                className="grid size-11 place-items-center rounded-lg text-inq-ink no-underline hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
                 to={`/cards/${card.id}/edit`}
                 aria-label="카드 수정"
                 title="카드 수정"
@@ -217,6 +237,7 @@ export function DeckDetailPage() {
                 <PencilLine aria-hidden="true" size={17} strokeWidth={2.1} />
               </Link>
               <button
+                className="grid size-11 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-inq-error hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
                 type="button"
                 aria-label="카드 삭제"
                 title="카드 삭제"
@@ -230,7 +251,7 @@ export function DeckDetailPage() {
       </div>
       {selectedCardIds.length > 0 ? (
         <button
-          className="floating-delete-button"
+          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 grid size-14 cursor-pointer place-items-center rounded-full border-0 bg-inq-error text-inq-canvas shadow-[0_2px_8px_rgb(13_22_15_/_12%)] disabled:cursor-not-allowed disabled:bg-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           disabled={bulkDeleting}
           aria-label={

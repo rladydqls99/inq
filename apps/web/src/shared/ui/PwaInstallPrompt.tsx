@@ -83,20 +83,26 @@ export function PwaInstallPrompt() {
 
   return (
     <aside
-      className="pwa-install-prompt"
+      className="fixed right-[max(16px,calc((100vw-720px)/2+16px))] bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+12px)] left-[max(16px,calc((100vw-720px)/2+16px))] z-30 grid grid-cols-[44px_minmax(0,1fr)_44px] items-start gap-3 rounded-xl bg-inq-surface p-4 text-inq-ink shadow-[0_4px_8px_rgb(13_22_15_/_18%)]"
       aria-labelledby="pwa-install-prompt-title"
       aria-live="polite"
     >
-      <div className="pwa-install-prompt__icon" aria-hidden="true">
+      <div
+        className="grid size-11 place-items-center rounded-lg bg-inq-highlight text-inq-on-highlight"
+        aria-hidden="true"
+      >
         {isIos ? <Share2 size={22} /> : <Download size={22} />}
       </div>
-      <div className="pwa-install-prompt__content">
-        <strong id="pwa-install-prompt-title">
+      <div className="grid min-w-0 gap-1.5">
+        <strong
+          id="pwa-install-prompt-title"
+          className="text-xl font-bold leading-[1.35] tracking-[-0.015em] text-balance"
+        >
           {canInstallDirectly
             ? "inq 앱을 설치하세요"
             : "inq를 홈 화면에 추가하세요"}
         </strong>
-        <p>
+        <p className="m-0 text-sm font-medium leading-[1.4] text-inq-ink-soft text-pretty">
           {isIos
             ? "브라우저의 공유 버튼을 누른 뒤 ‘홈 화면에 추가’를 선택하세요."
             : canInstallDirectly
@@ -105,7 +111,7 @@ export function PwaInstallPrompt() {
         </p>
         {canInstallDirectly ? (
           <button
-            className="pwa-install-prompt__install-button"
+            className="mt-1.5 min-h-12 cursor-pointer rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas active:scale-[0.98] focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
             type="button"
             onClick={() => void installApp()}
           >
@@ -114,7 +120,7 @@ export function PwaInstallPrompt() {
         ) : null}
       </div>
       <button
-        className="pwa-install-prompt__close-button"
+        className="grid size-11 cursor-pointer place-items-center rounded-lg border-0 bg-transparent p-0 text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
         type="button"
         aria-label="설치 안내 닫기"
         onClick={() => setDismissed(true)}

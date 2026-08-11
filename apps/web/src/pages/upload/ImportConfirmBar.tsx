@@ -12,9 +12,14 @@ export function ImportConfirmBar({
   onConfirm,
 }: ImportConfirmBarProps) {
   return (
-    <div className="upload-actions">
-      {createdMessage ? <span role="status">{createdMessage}</span> : null}
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      {createdMessage ? (
+        <span className="text-sm font-bold text-inq-success" role="status">
+          {createdMessage}
+        </span>
+      ) : null}
       <button
+        className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
         type="button"
         disabled={!canCreate}
         onClick={() => void onConfirm()}
