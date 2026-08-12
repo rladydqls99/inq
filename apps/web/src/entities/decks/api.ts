@@ -104,6 +104,7 @@ export function useDeleteCard(deckId?: string) {
         queryKey: deckKeys.cards(deckId),
         refetchType: "none",
       });
+      queryClient.invalidateQueries({ queryKey: deckKeys.run(deckId) });
     },
   });
 }

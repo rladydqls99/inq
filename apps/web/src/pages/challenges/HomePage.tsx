@@ -47,7 +47,7 @@ export function HomePage() {
       <header className="mb-8 grid gap-2">
         <h1
           id="home-page-title"
-          className="m-0 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+          className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
         >
           오늘의 복습
         </h1>
@@ -83,7 +83,7 @@ function FeaturedReview({ challenge }: { challenge: ChallengeResponse }) {
         </p>
         <h2
           id="featured-review-title"
-          className="m-0 line-clamp-2 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+          className="m-0 line-clamp-2 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
           title={challenge.name}
         >
           {challenge.name}
@@ -113,7 +113,7 @@ function CompletedReview({ challenges }: { challenges: ChallengeResponse[] }) {
 
   return (
     <section
-      className="flex items-start gap-3 rounded-xl bg-inq-surface p-4"
+      className="flex items-start gap-3 rounded-lg bg-inq-surface p-4"
       aria-labelledby="completed-review-title"
     >
       <span
@@ -245,7 +245,7 @@ function HomeErrorState({ onRetry }: { onRetry: () => void }) {
         <div className="grid gap-4" role="alert">
           <h1
             id="home-error-title"
-            className="m-0 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+            className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
           >
             복습 목록을 가져오지 못했어요
           </h1>
@@ -275,7 +275,7 @@ function HomeEmptyState() {
       <div className="grid w-full max-w-lg gap-4">
         <h1
           id="home-empty-title"
-          className="m-0 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+          className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
         >
           첫 복습을 만들어 보세요
         </h1>

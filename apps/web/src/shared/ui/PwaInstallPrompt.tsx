@@ -83,12 +83,12 @@ export function PwaInstallPrompt() {
 
   return (
     <aside
-      className="fixed right-[max(16px,calc((100vw-720px)/2+16px))] bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+12px)] left-[max(16px,calc((100vw-720px)/2+16px))] z-30 grid grid-cols-[44px_minmax(0,1fr)_44px] items-start gap-3 rounded-xl bg-inq-surface p-4 text-inq-ink shadow-[0_4px_8px_rgb(13_22_15_/_18%)]"
+      className="fixed right-[max(16px,calc((100vw-720px)/2+16px))] bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+12px)] left-[max(16px,calc((100vw-720px)/2+16px))] z-30 grid grid-cols-[44px_minmax(0,1fr)_44px] items-start gap-3 rounded-lg bg-inq-surface p-4 text-inq-ink shadow-[0_4px_8px_rgb(13_22_15_/_18%)]"
       aria-labelledby="pwa-install-prompt-title"
       aria-live="polite"
     >
       <div
-        className="grid size-11 place-items-center rounded-lg bg-inq-highlight text-inq-on-highlight"
+        className="grid size-11 place-items-center rounded-md bg-inq-highlight text-inq-on-highlight"
         aria-hidden="true"
       >
         {isIos ? <Share2 size={22} /> : <Download size={22} />}

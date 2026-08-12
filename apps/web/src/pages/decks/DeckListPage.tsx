@@ -3,10 +3,12 @@ import { useState } from "react";
 import { BookOpen, Plus } from "lucide-react";
 import { useDeckMutation, useDecks, useDeleteDeck } from "@/entities/decks/api";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
-import { ActionListItem } from "@/shared/ui/ActionListItem";
+import { Button } from "@/shared/ui/Button";
+import { Input } from "@/shared/ui/Input";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { ChallengeCreateDialog } from "@/widgets/ChallengeCreateDialog";
 import { DeckCreateModal } from "@/features/decks/DeckCreateModal";
+import { DeckListItem } from "@/features/decks/DeckListItem";
 
 export function DeckListPage() {
   const {
@@ -65,8 +67,8 @@ export function DeckListPage() {
     !loading && !loadError && decks.length > 0 && editingDeckId === null;
 
   return (
-    <section className="grid gap-4">
-      <div className="grid gap-2">
+    <section className="grid gap-5">
+      <div className="grid gap-2 border-b border-inq-line pb-4">
         <PageHeader title="덱" />
         <p className="m-0 text-sm font-medium text-inq-ink-soft">
           문제를 모아둔 덱을 한눈에 확인하세요.
@@ -135,17 +137,15 @@ export function DeckListPage() {
           </button>
         </div>
       ) : null}
-      <div className="grid gap-2">
+      <div>
         {decks.map((deck) => (
           <div
             key={deck.id}
             className="grid"
             data-testid={`deck-row-${deck.id}`}
           >
-            <ActionListItem
-              to={`/decks/${deck.id}/manage`}
-              title={deck.title}
-              meta={`카드 ${deck.cardCount}장`}
+            <DeckListItem
+              deck={deck}
               action={
                 <ActionMenu
                   label={`${deck.title} 메뉴`}
@@ -181,40 +181,41 @@ export function DeckListPage() {
               <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-2">
                 <label className="grid gap-1 text-sm font-bold">
                   덱 이름
-                  <input
-                    className="min-h-11 rounded-lg border border-inq-line bg-inq-canvas px-3 text-base outline-none focus-visible:ring-3 focus-visible:ring-inq-highlight-strong/30"
+                  <Input
+                    className="min-h-11 px-3"
                     value={editingTitle}
                     onChange={(event) => setEditingTitle(event.target.value)}
                   />
                 </label>
-                <button
-                  className="min-h-11 cursor-pointer rounded-lg border-0 bg-inq-ink px-3 text-sm font-bold text-inq-canvas"
+                <Button
+                  size="compact"
                   type="button"
                   onClick={() => void saveDeckTitle(deck.id)}
                 >
                   저장
-                </button>
-                <button
-                  className="min-h-11 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 text-sm font-bold text-inq-ink"
+                </Button>
+                <Button
+                  size="compact"
+                  variant="secondary"
                   type="button"
                   onClick={() => setEditingDeckId(null)}
                 >
                   취소
-                </button>
+                </Button>
               </div>
             ) : null}
           </div>
         ))}
       </div>
       {showFloatingAdd ? (
-        <button
-          type="button"
-          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 grid size-14 cursor-pointer place-items-center rounded-full border-0 bg-inq-ink text-inq-canvas shadow-[0_2px_8px_rgb(13_22_15_/_12%)] focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+        <Button
+          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 shadow-[0_2px_8px_rgb(13_22_15_/_12%)]"
+          size="floating"
           aria-label="덱 만들기"
           onClick={() => setCreateModalOpen(true)}
         >
           <Plus size={26} strokeWidth={2.4} aria-hidden="true" />
-        </button>
+        </Button>
       ) : null}
       {createModalOpen ? (
         <DeckCreateModal

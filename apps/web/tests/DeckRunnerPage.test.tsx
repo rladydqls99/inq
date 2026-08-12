@@ -105,10 +105,16 @@ describe("DeckRunnerPage", () => {
     ).toBeTruthy();
   });
 
-  it("deletes the deck immediately from the vehicle control area", async () => {
+  it("deletes the current card from the learning progress row", async () => {
     const user = userEvent.setup();
+    let deleted = false;
     const fetchMock = mockFetchByPath({
-      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
+      "/api/decks/deck-1/run": () =>
+        deleted ? deckRunAfterDeletingFirstCard() : deckRun({ cursor: 0 }),
+      "/api/cards/card-1": (_input: RequestInfo | URL, init?: RequestInit) => {
+        deleted = init?.method === "DELETE";
+        return null;
+      },
     });
 
     renderDeckRunner();
@@ -116,10 +122,12 @@ describe("DeckRunnerPage", () => {
     await user.click(await screen.findByRole("button", { name: "삭제" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
-      "/api/decks/deck-1",
+      "/api/cards/card-1",
       expect.objectContaining({ method: "DELETE" }),
     );
-    expect(await screen.findByText("덱 목록")).toBeTruthy();
+    expect(
+      await screen.findByText(matchesTextContent("수도는 ____이다.")),
+    ).toBeTruthy();
   });
 
   it("shows an error and keeps the current card when moving fails", async () => {
@@ -450,6 +458,13 @@ function deckRun(input: { cursor: number; completedAt?: string | null }) {
         ],
       },
     ],
+  };
+}
+
+function deckRunAfterDeletingFirstCard() {
+  return {
+    ...deckRun({ cursor: 0 }),
+    cards: [deckRun({ cursor: 0 }).cards[1]],
   };
 }
 

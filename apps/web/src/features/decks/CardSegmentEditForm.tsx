@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import type { QuizSegment } from "@inq/shared";
+import { Button } from "@/shared/ui/Button";
 import { DeckQuizPreview } from "./DeckQuizPreview";
 
 type CardSegmentEditFormProps = {
@@ -58,13 +59,9 @@ export function CardSegmentEditForm({
           </label>
         ))}
       </div>
-      <button
-        className="min-h-12 cursor-pointer rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 active:scale-[0.98]"
-        type="submit"
-        disabled={!canSave}
-      >
+      <Button type="submit" disabled={!canSave}>
         저장
-      </button>
+      </Button>
     </form>
   );
 }

@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 import { useBackupExport } from "@/entities/settings/api";
+import { Button } from "@/shared/ui/Button";
 
 export function BackupExportButton() {
   const [exported, setExported] = useState(false);
@@ -34,27 +35,22 @@ export function BackupExportButton() {
 
   return (
     <div className="flex items-center gap-2.5">
-      <button
-        className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink disabled:cursor-not-allowed disabled:bg-inq-surface disabled:text-inq-ink-soft"
+      <Button
+        size="compact"
+        variant="secondary"
         disabled={backupExport.isPending}
         type="button"
         onClick={() => void exportBackup()}
       >
         {backupExport.isPending ? "내보내는 중" : "백업 내보내기"}
-      </button>
+      </Button>
       {exported ? (
-        <span
-          className="text-[13px] font-extrabold text-inq-success"
-          role="status"
-        >
+        <span className="text-sm font-extrabold text-inq-success" role="status">
           백업 파일이 준비되었습니다.
         </span>
       ) : null}
       {error ? (
-        <span
-          className="text-[13px] font-extrabold text-inq-error"
-          role="alert"
-        >
+        <span className="text-sm font-extrabold text-inq-error" role="alert">
           백업을 내보내지 못했습니다.
         </span>
       ) : null}

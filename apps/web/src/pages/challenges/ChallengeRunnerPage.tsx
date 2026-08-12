@@ -233,7 +233,7 @@ export function ChallengeRunnerPage() {
   return (
     <section className="grid gap-4">
       <PageHeader title="챌린지 학습" />
-      <div className="grid min-h-[calc(100dvh-11rem)] gap-4">
+      <div className="flex min-h-[calc(100dvh-11rem)] flex-col gap-4">
         <ChallengeCardPlayer
           key={currentCard.sessionCardId}
           segments={currentCard.segments}

@@ -148,6 +148,37 @@ describe("UploadPage", () => {
         .disabled,
     ).toBe(true);
   });
+
+  it("lets the user move between multiple uploaded markdown files", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어" })],
+    });
+
+    renderUploadPage();
+
+    const sourcePane = await screen.findByTestId("upload-source-pane");
+    await user.upload(within(sourcePane).getByLabelText("마크다운 파일"), [
+      new File(["첫 번째 파일"], "first.md", { type: "text/markdown" }),
+      new File(["두 번째 파일"], "second.md", { type: "text/markdown" }),
+    ]);
+
+    expect(within(sourcePane).getByLabelText("마크다운 내용")).toHaveProperty(
+      "value",
+      "첫 번째 파일",
+    );
+    expect(within(sourcePane).getByText("first.md (1/2)")).toBeTruthy();
+
+    await user.click(
+      within(sourcePane).getByRole("button", { name: "다음 파일" }),
+    );
+
+    expect(within(sourcePane).getByLabelText("마크다운 내용")).toHaveProperty(
+      "value",
+      "두 번째 파일",
+    );
+    expect(within(sourcePane).getByText("second.md (2/2)")).toBeTruthy();
+  });
 });
 
 function renderUploadPage() {

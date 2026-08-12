@@ -13,7 +13,7 @@ export function Modal({ title, children, onClose }: ModalProps) {
       role="presentation"
     >
       <section
-        className="grid max-h-[calc(100dvh-32px)] w-full max-w-lg gap-4 overflow-auto rounded-xl bg-inq-canvas p-4 text-inq-ink sm:p-6"
+        className="grid max-h-[calc(100dvh-32px)] w-full max-w-lg gap-4 overflow-auto rounded-lg bg-inq-canvas p-4 text-inq-ink sm:p-6"
         role="dialog"
         aria-modal="true"
         aria-label={title}

@@ -109,6 +109,29 @@ describe("DeckListPage", () => {
     );
   });
 
+  it("closes an open row menu when clicking outside it", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 2 })],
+    });
+
+    renderDeckListPage();
+
+    const listItem = await screen.findByTestId("deck-row-deck-1");
+    await user.click(
+      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+    );
+    expect(
+      within(listItem).getByRole("button", { name: "이름 변경" }),
+    ).toBeTruthy();
+
+    await user.click(document.body);
+
+    expect(
+      within(listItem).queryByRole("button", { name: "이름 변경" }),
+    ).toBeNull();
+  });
+
   it("shows an error when loading decks fails", async () => {
     mockFetchByPath({
       "/api/decks": { body: { error: "deck_list_failed" }, status: 500 },

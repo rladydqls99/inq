@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Navigate, useNavigate, useParams } from "react-router-dom";
+import { Navigate, useParams } from "react-router-dom";
 
 import type { DeckRunResponse } from "@inq/shared";
 import {
   useDeckRun,
-  useDeleteDeck,
+  useDeleteCard,
   useMoveDeckRun,
 } from "@/entities/decks/api";
 import { DeckCardPlayer } from "@/features/decks/DeckCardPlayer";
+import { Button } from "@/shared/ui/Button";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import {
   VehicleMediaSessionController,
@@ -22,8 +23,7 @@ import {
 
 export function DeckRunnerPage() {
   const { deckId } = useParams();
-  const navigate = useNavigate();
-  const deleteMutation = useDeleteDeck();
+  const deleteMutation = useDeleteCard(deckId);
   const [deleteError, setDeleteError] = useState(false);
   const [moveError, setMoveError] = useState(false);
   const [revealedCardId, setRevealedCardId] = useState<string | null>(null);
@@ -75,14 +75,13 @@ export function DeckRunnerPage() {
     };
   }, []);
 
-  async function deleteDeck() {
-    if (!deckId || deleteMutation.isPending) return;
+  async function deleteCard(cardId: string) {
+    if (deleteMutation.isPending) return;
 
     setDeleteError(false);
 
     try {
-      await deleteMutation.mutateAsync(deckId);
-      navigate("/decks");
+      await deleteMutation.mutateAsync(cardId);
     } catch {
       setDeleteError(true);
     }
@@ -238,21 +237,11 @@ export function DeckRunnerPage() {
   return (
     <section className="grid gap-4">
       <PageHeader title="덱 학습" />
-      <div className="grid min-h-[calc(100dvh-11rem)] gap-4">
+      <div className="flex min-h-[calc(100dvh-11rem)] flex-col gap-4">
         <VehicleControlNotice
           status={vehicleControlEnabled ? vehicleControlStatus : "disabled"}
           onRetry={() => void mediaControllerRef.current?.prepare()}
         />
-        <div className="flex justify-end">
-          <button
-            className="cursor-pointer rounded-lg border-0 bg-transparent px-3 text-sm font-bold text-inq-error disabled:cursor-not-allowed disabled:text-inq-ink-soft"
-            type="button"
-            disabled={deleteMutation.isPending}
-            onClick={() => void deleteDeck()}
-          >
-            {deleteMutation.isPending ? "삭제 중" : "삭제"}
-          </button>
-        </div>
         <DeckCardPlayer
           key={currentCard.cardId}
           segments={currentCard.segments}
@@ -265,6 +254,8 @@ export function DeckRunnerPage() {
           onNext={() => void moveTo(cursor + 1)}
           onMoveTo={(index) => void moveTo(index)}
           onAnswerReveal={() => setRevealedCardId(currentCard.cardId)}
+          onDelete={() => void deleteCard(currentCard.cardId)}
+          deleting={deleteMutation.isPending}
         />
         {moveError ? (
           <div className="text-sm font-bold text-inq-error" role="alert">
@@ -273,7 +264,7 @@ export function DeckRunnerPage() {
         ) : null}
         {deleteError ? (
           <div className="text-sm font-bold text-inq-error" role="alert">
-            덱을 삭제하지 못했습니다.
+            카드를 삭제하지 못했습니다.
           </div>
         ) : null}
       </div>
@@ -298,21 +289,15 @@ function VehicleControlNotice({
 
   return (
     <div
-      className={`flex justify-between items-center gap-2 rounded-lg bg-inq-surface px-3 py-2 text-sm font-bold ${status === "failed" ? "text-inq-error" : status === "ready" ? "text-inq-success" : "text-inq-ink-soft"}`}
+      className={`flex items-center justify-between gap-2 rounded-md bg-inq-surface px-3 py-2 text-sm font-bold ${status === "failed" ? "text-inq-error" : status === "ready" ? "text-inq-success" : "text-inq-ink-soft"}`}
       role="status"
       aria-live="polite"
     >
       <span>{copy[status]}</span>
-      {status !== "failed" ? (
-        <div className="flex justify-self-end">
-          <button
-            className="cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 text-sm font-bold text-inq-ink"
-            type="button"
-            onClick={onRetry}
-          >
-            다시 시도
-          </button>
-        </div>
+      {status === "failed" ? (
+        <Button size="compact" variant="secondary" onClick={onRetry}>
+          다시 시도
+        </Button>
       ) : null}
     </div>
   );

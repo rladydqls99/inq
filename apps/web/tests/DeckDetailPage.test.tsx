@@ -45,9 +45,7 @@ describe("DeckDetailPage", () => {
     expect(screen.getByRole("heading", { name: "국어" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "학습 시작" })).toBeTruthy();
     expect(screen.getByText("조선").className).toContain("is-study");
-    expect(
-      screen.getByRole("link", { name: "카드 수정" }).getAttribute("href"),
-    ).toBe("/cards/card-1/edit");
+    expect(screen.getByRole("button", { name: "카드 메뉴" })).toBeTruthy();
   });
 
   it("restarts a completed deck run before opening the study screen", async () => {
@@ -187,8 +185,16 @@ describe("DeckDetailPage", () => {
     expect(cardItem).not.toBeNull();
     await user.click(
       within(cardItem as HTMLElement).getByRole("button", {
-        name: "카드 삭제",
+        name: "카드 메뉴",
       }),
+    );
+    expect(
+      within(cardItem as HTMLElement)
+        .getByRole("link", { name: "수정" })
+        .getAttribute("href"),
+    ).toBe("/cards/card-1/edit");
+    await user.click(
+      within(cardItem as HTMLElement).getByRole("button", { name: "삭제" }),
     );
 
     expect(fetchMock).toHaveBeenCalledWith(
@@ -282,8 +288,11 @@ describe("DeckDetailPage", () => {
     expect(cardItem).not.toBeNull();
     await user.click(
       within(cardItem as HTMLElement).getByRole("button", {
-        name: "카드 삭제",
+        name: "카드 메뉴",
       }),
+    );
+    await user.click(
+      within(cardItem as HTMLElement).getByRole("button", { name: "삭제" }),
     );
 
     expect(await screen.findByText("카드를 삭제하지 못했습니다.")).toBeTruthy();

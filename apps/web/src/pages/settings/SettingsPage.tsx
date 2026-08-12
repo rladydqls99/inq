@@ -2,6 +2,8 @@ import { useState } from "react";
 
 import { useLock } from "@/entities/auth/api";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { Button } from "@/shared/ui/Button";
+import { Switch } from "@/shared/ui/Checkbox";
 import {
   getThemePreference,
   setThemePreference,
@@ -62,7 +64,7 @@ export function SettingsPage() {
           <h2>화면 테마</h2>
           <p
             id="theme-description"
-            className="m-0 text-[13px] leading-[1.45] text-inq-ink-soft"
+            className="m-0 text-sm leading-[1.45] text-inq-ink-soft"
           >
             기본값은 다크 모드입니다. 시스템 설정을 따르도록 바꿀 수 있습니다.
           </p>
@@ -104,15 +106,13 @@ export function SettingsPage() {
             <span className="grid min-w-0 gap-1">
               <strong className="text-sm font-bold">학습 차량 제어</strong>
               <span
-                className="text-[13px] leading-[1.45] text-inq-ink-soft"
+                className="text-sm leading-[1.45] text-inq-ink-soft"
                 id="vehicle-control-description"
               >
                 덱 학습 중 차량의 이전·다음 버튼으로 카드를 이동합니다.
               </span>
             </span>
-            <input
-              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full bg-inq-line transition-colors after:absolute after:top-1 after:left-1 after:size-5 after:rounded-full after:bg-inq-canvas after:transition-transform checked:bg-inq-highlight checked:after:translate-x-5 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 motion-reduce:transition-none"
-              type="checkbox"
+            <Switch
               role="switch"
               checked={vehicleControlEnabled}
               aria-describedby="vehicle-control-description"
@@ -126,16 +126,14 @@ export function SettingsPage() {
             <span className="grid min-w-0 gap-1">
               <strong className="text-sm font-bold">음성으로 정답 확인</strong>
               <span
-                className="text-[13px] leading-[1.45] text-inq-ink-soft"
+                className="text-sm leading-[1.45] text-inq-ink-soft"
                 id="voice-answer-description"
               >
                 챌린지 학습 중 마이크 음성이 Soniox로 전송되어 정답을
                 판정합니다.
               </span>
             </span>
-            <input
-              className="relative h-7 w-12 shrink-0 cursor-pointer appearance-none rounded-full bg-inq-line transition-colors after:absolute after:top-1 after:left-1 after:size-5 after:rounded-full after:bg-inq-canvas after:transition-transform checked:bg-inq-highlight checked:after:translate-x-5 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 motion-reduce:transition-none"
-              type="checkbox"
+            <Switch
               role="switch"
               checked={voiceAnswerEnabled}
               aria-describedby="voice-answer-description"
@@ -150,17 +148,18 @@ export function SettingsPage() {
         <section className="grid gap-2.5">
           <h2>잠금</h2>
           <div className="flex items-center gap-2.5">
-            <button
-              className="min-h-10 cursor-pointer rounded-lg border border-inq-line bg-inq-canvas px-3 font-bold text-inq-ink disabled:cursor-not-allowed disabled:bg-inq-surface disabled:text-inq-ink-soft"
+            <Button
+              size="compact"
+              variant="secondary"
               disabled={lockMutation.isPending}
               type="button"
               onClick={() => void lock()}
             >
               {lockMutation.isPending ? "잠그는 중" : "잠그기"}
-            </button>
+            </Button>
             {lockError ? (
               <span
-                className="text-[13px] font-extrabold text-inq-error"
+                className="text-sm font-extrabold text-inq-error"
                 role="alert"
               >
                 잠금 처리에 실패했습니다.

@@ -19,7 +19,7 @@ export function ChallengeQuizText({
 }: ChallengeQuizTextProps) {
   return (
     <p
-      className={["m-0 text-[22px] font-semibold text-inq-ink", className]
+      className={["m-0 font-semibold text-inq-ink", className ?? "text-xl"]
         .filter(Boolean)
         .join(" ")}
     >

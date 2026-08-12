@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, PencilLine, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
@@ -9,6 +9,9 @@ import {
   useStartDeckRun,
 } from "@/entities/decks/api";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
+import { Button } from "@/shared/ui/Button";
+import { Checkbox } from "@/shared/ui/Checkbox";
+import { ActionMenu } from "@/shared/ui/ActionMenu";
 import {
   primeVehicleControlFromUserGesture,
   releasePrimedVehicleControl,
@@ -19,6 +22,7 @@ export function DeckDetailPage() {
   const navigate = useNavigate();
   const [deleteError, setDeleteError] = useState(false);
   const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
+  const [openMenuCardId, setOpenMenuCardId] = useState<string | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [startError, setStartError] = useState(false);
   const {
@@ -136,12 +140,12 @@ export function DeckDetailPage() {
   }
 
   return (
-    <section className="grid gap-4">
-      <header className="grid gap-2">
+    <section className="grid gap-6">
+      <header className="grid gap-3 border-b border-inq-line pb-4">
         <p className="m-0 text-sm font-bold text-inq-ink-soft">덱 카드</p>
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div className="grid min-w-0 gap-1">
-            <h1 className="m-0 text-[1.75rem] font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
+            <h1 className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
               {deck?.title ?? "덱 카드"}
             </h1>
             <p className="m-0 text-sm font-medium text-inq-ink-soft">
@@ -150,17 +154,17 @@ export function DeckDetailPage() {
           </div>
           {deckId ? (
             <div className="flex flex-wrap gap-2">
-              <button
-                className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-inq-line bg-inq-canvas px-4 py-3 text-sm font-bold text-inq-error disabled:cursor-not-allowed disabled:text-inq-ink-soft"
+              <Button
+                className="px-3 py-2"
+                variant="danger"
                 type="button"
                 disabled={loading || cards.length === 0 || bulkDeleting}
                 onClick={() => void deleteAllCards()}
               >
-                <Trash2 aria-hidden="true" size={18} strokeWidth={2.2} />
                 {bulkDeleting ? "삭제 중" : "전체 삭제"}
-              </button>
-              <button
-                className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
+              </Button>
+              <Button
+                className="px-3 py-2"
                 type="button"
                 disabled={
                   loading || cards.length === 0 || startRunMutation.isPending
@@ -168,33 +172,33 @@ export function DeckDetailPage() {
                 onClick={() => void startDeckRun()}
               >
                 {startRunMutation.isPending ? "준비 중" : "학습 시작"}
-              </button>
+              </Button>
             </div>
           ) : null}
         </div>
       </header>
       {loading ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           불러오는 중입니다.
         </div>
       ) : null}
       {loadError ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           카드 목록을 불러오지 못했습니다.
         </div>
       ) : null}
       {deleteError ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-error">
+        <div className="mt-4 text-sm font-bold text-inq-error">
           카드를 삭제하지 못했습니다.
         </div>
       ) : null}
       {startError ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-error">
+        <div className="mt-4 text-sm font-bold text-inq-error">
           학습을 시작하지 못했습니다.
         </div>
       ) : null}
       {!loading && !loadError && cards.length === 0 ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           등록된 카드가 없습니다.
         </div>
       ) : null}
@@ -202,56 +206,54 @@ export function DeckDetailPage() {
         {cards.map((card) => (
           <article
             key={card.id}
-            className="relative grid grid-cols-[auto_minmax(0,1fr)_auto] items-start gap-3 rounded-lg border border-inq-line bg-inq-canvas p-4"
+            className="relative grid grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-2 rounded-md border border-inq-line bg-inq-canvas p-3"
           >
-            <label className="grid size-11 cursor-pointer place-items-start [&_input:checked+span]:border-inq-highlight [&_input:checked+span]:bg-inq-highlight">
-              <input
-                className="sr-only"
-                type="checkbox"
+            <label className="grid size-11 cursor-pointer place-items-start pt-0.5">
+              <Checkbox
                 checked={selectedCardIds.includes(card.id)}
                 onChange={() => toggleCardSelection(card.id)}
                 aria-label="카드 선택"
               />
-              <span
-                className="grid size-5 place-items-center rounded border border-inq-line text-inq-on-highlight"
-                aria-hidden="true"
-              >
-                {selectedCardIds.includes(card.id) ? (
-                  <Check size={16} strokeWidth={3} />
-                ) : null}
-              </span>
             </label>
             <DeckQuizText
-              className="min-w-0 text-base leading-[1.6]"
+              className="min-w-0 text-base leading-[1.55]"
               mode="revealed"
               segments={card.segments}
               tone="study"
             />
-            <div className="flex gap-1">
+            <ActionMenu
+              label="카드 메뉴"
+              open={openMenuCardId === card.id}
+              onToggle={() =>
+                setOpenMenuCardId((current) =>
+                  current === card.id ? null : card.id,
+                )
+              }
+            >
               <Link
-                className="grid size-11 place-items-center rounded-lg text-inq-ink no-underline hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
+                className="grid min-h-11 items-center px-3 text-sm font-bold text-inq-ink no-underline hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-[-3px]"
                 to={`/cards/${card.id}/edit`}
-                aria-label="카드 수정"
-                title="카드 수정"
               >
-                <PencilLine aria-hidden="true" size={17} strokeWidth={2.1} />
+                수정
               </Link>
               <button
-                className="grid size-11 cursor-pointer place-items-center rounded-lg border-0 bg-transparent text-inq-error hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2"
+                className="!text-inq-error"
                 type="button"
-                aria-label="카드 삭제"
-                title="카드 삭제"
-                onClick={() => void deleteCard(card.id)}
+                onClick={() => {
+                  setOpenMenuCardId(null);
+                  void deleteCard(card.id);
+                }}
               >
-                <Trash2 aria-hidden="true" size={17} strokeWidth={2.1} />
+                삭제
               </button>
-            </div>
+            </ActionMenu>
           </article>
         ))}
       </div>
       {selectedCardIds.length > 0 ? (
-        <button
-          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 grid size-14 cursor-pointer place-items-center rounded-full border-0 bg-inq-error text-inq-canvas shadow-[0_2px_8px_rgb(13_22_15_/_12%)] disabled:cursor-not-allowed disabled:bg-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+        <Button
+          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 !size-12 !rounded-full bg-inq-error text-inq-canvas shadow-[0_4px_8px_rgb(180_35_24_/_28%)] hover:bg-inq-error"
+          size="floating"
           type="button"
           disabled={bulkDeleting}
           aria-label={
@@ -262,7 +264,7 @@ export function DeckDetailPage() {
           onClick={() => void deleteSelectedCards()}
         >
           <Trash2 aria-hidden="true" size={22} strokeWidth={2.4} />
-        </button>
+        </Button>
       ) : null}
     </section>
   );

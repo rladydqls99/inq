@@ -1,5 +1,8 @@
 import { useState } from "react";
 
+import { Button } from "@/shared/ui/Button";
+import { Input } from "@/shared/ui/Input";
+
 type PinLockScreenProps = {
   error?: string | null;
   onSubmit: (pin: string) => Promise<void>;
@@ -24,10 +27,10 @@ export function PinLockScreen({ error, onSubmit }: PinLockScreenProps) {
     <main className="grid min-h-dvh place-items-center bg-inq-canvas p-6 text-inq-ink">
       <form className="grid w-full max-w-sm gap-3.5" onSubmit={submit}>
         <h1 className="mb-1 text-2xl font-bold">잠금 해제</h1>
-        <label className="grid gap-1.5 text-[13px] font-bold text-inq-ink-soft">
+        <label className="grid gap-1.5 text-sm font-bold text-inq-ink-soft">
           PIN
-          <input
-            className="min-h-11 rounded-lg border border-inq-line bg-inq-canvas px-3 text-inq-ink outline-offset-2 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong"
+          <Input
+            className="min-h-11 px-3"
             autoComplete="current-password"
             inputMode="numeric"
             type="password"
@@ -36,17 +39,17 @@ export function PinLockScreen({ error, onSubmit }: PinLockScreenProps) {
           />
         </label>
         {error ? (
-          <p className="m-0 text-[13px] font-bold text-inq-error" role="alert">
+          <p className="m-0 text-sm font-bold text-inq-error" role="alert">
             {error}
           </p>
         ) : null}
-        <button
-          className="min-h-11 cursor-pointer rounded-lg border-0 bg-inq-ink font-extrabold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
+        <Button
+          className="min-h-11"
           type="submit"
           disabled={submitting || pin.length === 0}
         >
           열기
-        </button>
+        </Button>
       </form>
     </main>
   );

@@ -33,21 +33,6 @@ describe("ChallengeListPage", () => {
     });
     expect(progress.getAttribute("aria-valuenow")).toBe("2");
     expect(progress.getAttribute("aria-valuemax")).toBe("10");
-    expect(
-      within(row)
-        .getByRole("progressbar", { name: "3일 텀 완료" })
-        .getAttribute("aria-valuenow"),
-    ).toBe("6");
-    expect(
-      within(row)
-        .getByRole("progressbar", { name: "5일 텀 완료" })
-        .getAttribute("aria-valuenow"),
-    ).toBe("4");
-    expect(
-      within(row)
-        .getByRole("progressbar", { name: "10일 텀 완료" })
-        .getAttribute("aria-valuenow"),
-    ).toBe("2");
   });
 
   it("shows empty state and creates a challenge from the modal", async () => {

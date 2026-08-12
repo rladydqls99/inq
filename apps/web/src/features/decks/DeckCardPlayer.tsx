@@ -10,6 +10,7 @@ import {
 } from "react";
 
 import type { QuizSegment } from "@inq/shared";
+import { Button } from "@/shared/ui/Button";
 import { DeckQuizText } from "./DeckQuizText";
 
 type DeckCardPlayerProps = {
@@ -23,6 +24,8 @@ type DeckCardPlayerProps = {
   onNext: () => void;
   onMoveTo: (index: number) => void;
   onAnswerReveal: () => void;
+  onDelete?: () => void;
+  deleting?: boolean;
 };
 
 export function DeckCardPlayer({
@@ -36,6 +39,8 @@ export function DeckCardPlayer({
   onNext,
   onMoveTo,
   onAnswerReveal,
+  onDelete,
+  deleting,
 }: DeckCardPlayerProps) {
   const swipeStart = useRef<{ x: number; y: number } | null>(null);
   const progressPreview = useRef<number | null>(null);
@@ -160,9 +165,22 @@ export function DeckCardPlayer({
       <header className="grid gap-2">
         <div className="flex items-center justify-between gap-4 text-sm font-bold leading-[1.4] text-inq-ink-soft [&_strong]:text-inq-ink [&_strong]:tabular-nums">
           <span>학습 진행</span>
-          <strong>
-            {displayIndex} / {totalCards}
-          </strong>
+          <div className="flex items-center gap-2">
+            <strong>
+              {displayIndex} / {totalCards}
+            </strong>
+            {onDelete ? (
+              <Button
+                className="text-inq-error hover:text-inq-error"
+                disabled={deleting}
+                size="compact"
+                variant="ghost"
+                onClick={onDelete}
+              >
+                {deleting ? "삭제 중" : "삭제"}
+              </Button>
+            ) : null}
+          </div>
         </div>
         <div
           className="relative -my-5 h-11 cursor-pointer touch-none before:absolute before:top-5 before:right-0 before:left-0 before:h-1 before:rounded-full before:bg-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 [&>span]:absolute [&>span]:top-5 [&>span]:left-0 [&>span]:h-1 [&>span]:rounded-full [&>span]:bg-inq-highlight-strong [&>span]:transition-[width] [&>span]:duration-180 [&>span]:after:absolute [&>span]:after:top-1/2 [&>span]:after:right-[-6px] [&>span]:after:size-3 [&>span]:after:rounded-full [&>span]:after:bg-inq-highlight-strong [&>span]:after:content-[''] [&>span]:after:-translate-y-1/2 motion-reduce:[&>span]:transition-none"
