@@ -16,10 +16,10 @@ const variants = {
 };
 
 const sizes = {
-  default: "min-h-12 px-4 py-3 text-sm",
+  default: "min-h-11 px-3.5 py-2 text-sm",
   compact: "min-h-11 px-3 text-sm",
   icon: "size-11 p-0",
-  floating: "size-14 rounded-full p-0",
+  floating: "size-12 rounded-full p-0",
 };
 
 export function Button({

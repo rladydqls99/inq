@@ -37,9 +37,9 @@ export function ChallengeListItem({
       : 0;
 
   return (
-    <div className="flex items-start justify-between rounded-md border border-inq-line bg-inq-canvas p-3">
+    <div className="flex min-h-[112px] items-center justify-between gap-2 border-b border-inq-line py-4">
       <Link
-        className="grid min-w-0 flex-1 gap-3 text-inq-ink no-underline transition-colors duration-180 hover:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 active:scale-[0.99] motion-reduce:transition-none"
+        className="grid min-w-0 flex-1 gap-3 rounded-md py-1 text-inq-ink no-underline transition-[background-color,transform] duration-180 hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 active:scale-[0.99] motion-reduce:transition-none"
         to={to ?? `/challenges/${challenge.id}/cards`}
         aria-label={accessibleLabel}
       >
@@ -65,7 +65,7 @@ export function ChallengeListItem({
             />
             {dueCopy}
           </span>
-          <span className="grid gap-1.5 text-xs font-bold text-inq-ink-soft">
+          <span className="grid gap-1.5 text-sm font-medium text-inq-ink-soft">
             <span className="shrink-0">
               {challenge.progress.completedCards}/
               {challenge.progress.totalCards}장 완료

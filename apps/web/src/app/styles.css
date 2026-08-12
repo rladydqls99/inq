@@ -64,6 +64,17 @@
     margin: 0;
   }
 
+  @keyframes inq-answer-reveal {
+    from {
+      opacity: 0;
+      transform: translateY(4px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
   button,
   input,
   select,

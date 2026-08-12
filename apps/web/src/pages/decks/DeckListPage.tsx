@@ -67,12 +67,9 @@ export function DeckListPage() {
     !loading && !loadError && decks.length > 0 && editingDeckId === null;
 
   return (
-    <section className="grid gap-5">
-      <div className="grid gap-2 border-b border-inq-line pb-4">
-        <PageHeader title="덱" />
-        <p className="m-0 text-sm font-medium text-inq-ink-soft">
-          문제를 모아둔 덱을 한눈에 확인하세요.
-        </p>
+    <section className="grid gap-6">
+      <div className="border-b border-inq-line pb-5">
+        <PageHeader title="덱" description="문제를 모아 자유롭게 학습해요." />
       </div>
       <div className="grid gap-2" aria-live="polite">
         {renameError ? (
@@ -137,7 +134,7 @@ export function DeckListPage() {
           </button>
         </div>
       ) : null}
-      <div>
+      <div className="border-t border-inq-line">
         {decks.map((deck) => (
           <div
             key={deck.id}
@@ -209,7 +206,7 @@ export function DeckListPage() {
       </div>
       {showFloatingAdd ? (
         <Button
-          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 shadow-[0_2px_8px_rgb(13_22_15_/_12%)]"
+          className="fixed right-5 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 shadow-[0_2px_8px_rgb(13_22_15_/_12%)]"
           size="floating"
           aria-label="덱 만들기"
           onClick={() => setCreateModalOpen(true)}

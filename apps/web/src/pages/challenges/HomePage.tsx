@@ -44,10 +44,10 @@ export function HomePage() {
       className="mx-auto flex min-h-full w-full max-w-[40rem] flex-col"
       aria-labelledby="home-page-title"
     >
-      <header className="mb-8 grid gap-2">
+      <header className="mb-7 grid gap-1.5">
         <h1
           id="home-page-title"
-          className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+          className="m-0 text-[28px] font-extrabold leading-[1.25] tracking-[-0.03em] text-inq-ink text-balance"
         >
           오늘의 복습
         </h1>
@@ -71,9 +71,12 @@ export function HomePage() {
 
 function FeaturedReview({ challenge }: { challenge: ChallengeResponse }) {
   return (
-    <section className="flex flex-col" aria-labelledby="featured-review-title">
-      <div className="grid gap-2">
-        <p className="m-0 mb-1 text-sm font-bold leading-[1.4] text-inq-on-highlight">
+    <section
+      className="flex flex-col border-b border-inq-line pb-7"
+      aria-labelledby="featured-review-title"
+    >
+      <div className="grid gap-2.5">
+        <p className="m-0 text-sm font-bold leading-[1.4] text-inq-on-highlight">
           <span
             className="inline-block rounded bg-inq-highlight p-1"
             aria-label={`오늘 풀 문제는 ${challenge.dueCount}개입니다.`}
@@ -83,7 +86,7 @@ function FeaturedReview({ challenge }: { challenge: ChallengeResponse }) {
         </p>
         <h2
           id="featured-review-title"
-          className="m-0 line-clamp-2 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-inq-ink text-balance"
+          className="m-0 line-clamp-2 text-[26px] font-extrabold leading-[1.28] tracking-[-0.03em] text-inq-ink text-balance"
           title={challenge.name}
         >
           {challenge.name}
@@ -93,7 +96,7 @@ function FeaturedReview({ challenge }: { challenge: ChallengeResponse }) {
         </p>
       </div>
       <Link
-        className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold leading-[1.4] text-inq-canvas no-underline transition-[background-color,color,transform] duration-180 hover:bg-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.98] active:bg-inq-highlight-strong active:text-inq-on-highlight motion-reduce:transition-none"
+        className="mt-5 inline-flex min-h-11 w-fit items-center justify-center rounded-md border-0 bg-inq-ink px-4 py-2 text-sm font-bold leading-[1.4] text-inq-canvas no-underline transition-[background-color,color,transform] duration-180 hover:bg-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.98] active:bg-inq-highlight-strong active:text-inq-on-highlight motion-reduce:transition-none"
         to={`/challenges/${challenge.id}/run`}
       >
         복습 시작
@@ -112,7 +115,7 @@ function CompletedReview({ challenges }: { challenges: ChallengeResponse[] }) {
 
   return (
     <section
-      className="flex items-start gap-3 rounded-lg bg-inq-surface p-4"
+      className="flex items-start gap-3 rounded-xl bg-inq-surface p-4"
       aria-labelledby="completed-review-title"
     >
       <span
@@ -143,7 +146,7 @@ function CompletedReview({ challenges }: { challenges: ChallengeResponse[] }) {
 
 function UpcomingReviews({ challenges }: { challenges: ChallengeResponse[] }) {
   return (
-    <section className="mt-12" aria-labelledby="upcoming-reviews-title">
+    <section className="mt-8" aria-labelledby="upcoming-reviews-title">
       <h2
         id="upcoming-reviews-title"
         className="m-0 text-xl font-bold leading-[1.35] tracking-[-0.015em] text-inq-ink text-balance"
@@ -163,7 +166,7 @@ function UpcomingReviews({ challenges }: { challenges: ChallengeResponse[] }) {
 
           return (
             <Link
-              className="flex min-h-[72px] items-center justify-between gap-3 border-b border-inq-line py-4 text-inq-ink no-underline transition-[background-color,transform] duration-180 hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.99] motion-reduce:transition-none"
+              className="flex min-h-[76px] items-center justify-between gap-3 border-b border-inq-line py-4 text-inq-ink no-underline transition-[background-color,transform] duration-180 hover:bg-inq-surface focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.99] motion-reduce:transition-none"
               key={challenge.id}
               to={destination}
             >

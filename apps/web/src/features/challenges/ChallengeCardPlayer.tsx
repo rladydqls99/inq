@@ -101,7 +101,14 @@ export function ChallengeCardPlayer({
           <ChevronLeft aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
         <div className="grid w-full max-w-[34rem] place-items-center self-stretch rounded-lg px-0 py-4 text-center">
-          <div aria-live="polite">
+          <div
+            className={
+              answerRevealed || selectedResult
+                ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
+                : undefined
+            }
+            aria-live="polite"
+          >
             <ChallengeQuizText
               mode={answerRevealed || selectedResult ? "revealed" : "prompt"}
               segments={segments}
@@ -123,7 +130,7 @@ export function ChallengeCardPlayer({
       </div>
       <div className="grid grid-cols-2 gap-2" aria-label="학습 결과">
         <button
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-error aria-pressed:bg-inq-error aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-error transition-[background-color,color,transform] duration-180 aria-pressed:bg-inq-error aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98] motion-reduce:transition-none"
           type="button"
           aria-pressed={selectedResult === "wrong"}
           onClick={() => {
@@ -134,7 +141,7 @@ export function ChallengeCardPlayer({
           틀렸어요
         </button>
         <button
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-success)_12%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-success aria-pressed:bg-inq-success aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-success)_12%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-success transition-[background-color,color,transform] duration-180 aria-pressed:bg-inq-success aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98] motion-reduce:transition-none"
           type="button"
           aria-pressed={selectedResult === "correct"}
           onClick={() => {

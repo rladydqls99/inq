@@ -222,7 +222,14 @@ export function DeckCardPlayer({
           }
           onKeyDown={!answerRevealed ? handleQuestionKeyDown : undefined}
         >
-          <div aria-live="polite">
+          <div
+            className={
+              answerRevealed
+                ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
+                : undefined
+            }
+            aria-live="polite"
+          >
             <DeckQuizText
               mode={answerRevealed ? "revealed" : "prompt"}
               segments={segments}

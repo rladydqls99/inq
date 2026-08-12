@@ -141,21 +141,20 @@ export function DeckDetailPage() {
 
   return (
     <section className="grid gap-6">
-      <header className="grid gap-3 border-b border-inq-line pb-4">
-        <p className="m-0 text-sm font-bold text-inq-ink-soft">덱 카드</p>
+      <header className="grid gap-4 border-b border-inq-line pb-5">
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="grid min-w-0 gap-1">
+          <div className="grid min-w-0 gap-1.5">
             <h1 className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
               {deck?.title ?? "덱 카드"}
             </h1>
             <p className="m-0 text-sm font-medium text-inq-ink-soft">
-              {loading ? "카드를 불러오는 중" : `카드 ${cards.length}장`}
+              {loading ? "카드를 불러오고 있어요" : `카드 ${cards.length}장`}
             </p>
           </div>
           {deckId ? (
             <div className="flex flex-wrap gap-2">
               <Button
-                className="px-3 py-2"
+                size="compact"
                 variant="danger"
                 type="button"
                 disabled={loading || cards.length === 0 || bulkDeleting}
@@ -164,7 +163,7 @@ export function DeckDetailPage() {
                 {bulkDeleting ? "삭제 중" : "전체 삭제"}
               </Button>
               <Button
-                className="px-3 py-2"
+                size="compact"
                 type="button"
                 disabled={
                   loading || cards.length === 0 || startRunMutation.isPending
@@ -206,7 +205,7 @@ export function DeckDetailPage() {
         {cards.map((card) => (
           <article
             key={card.id}
-            className="relative grid grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-2 rounded-md border border-inq-line bg-inq-canvas p-3"
+            className="relative grid grid-cols-[44px_minmax(0,1fr)_auto] items-start gap-2 border-b border-inq-line py-4"
           >
             <label className="grid size-11 cursor-pointer place-items-start pt-0.5">
               <Checkbox

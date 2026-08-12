@@ -93,12 +93,9 @@ export function ChallengeListPage() {
     editingChallengeId === null;
 
   return (
-    <section className="grid gap-5">
-      <div className="grid gap-2 border-b border-inq-line pb-4">
-        <PageHeader title="챌린지" />
-        <p className="m-0 text-sm font-medium text-inq-ink-soft">
-          내가 만든 복습 루틴을 한눈에 확인하세요.
-        </p>
+    <section className="grid gap-6">
+      <div className="border-b border-inq-line pb-5">
+        <PageHeader title="챌린지" description="오늘의 복습 흐름을 이어가요." />
       </div>
       <div className="grid gap-2" aria-live="polite">
         {updateMessage ? (
@@ -180,7 +177,7 @@ export function ChallengeListPage() {
           </button>
         </div>
       ) : null}
-      <div className="grid gap-3">
+      <div className="grid border-t border-inq-line">
         {challenges.map((challenge) => (
           <div
             key={challenge.id}
@@ -255,7 +252,7 @@ export function ChallengeListPage() {
       </div>
       {showFloatingAdd ? (
         <Button
-          className="fixed right-4 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 shadow-[0_2px_8px_rgb(13_22_15_/_12%)]"
+          className="fixed right-5 bottom-[calc(var(--bottom-tab-height)+env(safe-area-inset-bottom,0px)+16px)] z-10 shadow-[0_2px_8px_rgb(13_22_15_/_12%)]"
           size="floating"
           aria-label="챌린지 등록"
           onClick={() => setCreateModalOpen(true)}

@@ -18,17 +18,17 @@ export function ChallengeDetailPage() {
   );
 
   return (
-    <section className="grid gap-5">
-      <header className="grid gap-3 border-b border-inq-line pb-4">
-        <p className="m-0 text-sm font-bold text-inq-ink-soft">챌린지 카드</p>
+    <section className="grid gap-6">
+      <header className="grid gap-4 border-b border-inq-line pb-5">
+        <span className="sr-only">챌린지 카드</span>
         <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="grid min-w-0 gap-1">
+          <div className="grid min-w-0 gap-1.5">
             <h1 className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
               {challenge?.name ?? "챌린지 카드"}
             </h1>
             <p className="m-0 text-sm font-medium text-inq-ink-soft">
               {loading
-                ? "카드를 불러오는 중"
+                ? "카드를 불러오고 있어요"
                 : challenge
                   ? `${challenge.deckTitle} 덱 · 카드 ${cards.length}장`
                   : `카드 ${cards.length}장`}
@@ -37,7 +37,7 @@ export function ChallengeDetailPage() {
           {challengeId ? (
             <div>
               <Link
-                className="inline-flex min-h-12 items-center justify-center rounded-md bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas no-underline active:scale-[0.98]"
+                className="inline-flex min-h-11 items-center justify-center rounded-md bg-inq-ink px-4 py-2 text-sm font-bold text-inq-canvas no-underline transition-[background-color,transform] duration-180 hover:bg-inq-ink-soft active:scale-[0.98] motion-reduce:transition-none"
                 to={`/challenges/${challengeId}/run`}
               >
                 학습 시작
@@ -61,11 +61,11 @@ export function ChallengeDetailPage() {
           등록된 카드가 없습니다.
         </div>
       ) : null}
-      <div className="grid gap-3">
+      <div className="grid border-t border-inq-line">
         {cards.map((card) => (
           <article
             key={card.challengeCardId}
-            className="grid gap-2 rounded-md border border-inq-line bg-inq-canvas p-3"
+            className="grid gap-2 border-b border-inq-line py-4"
           >
             <ChallengeQuizText
               className="text-base leading-[1.6]"
