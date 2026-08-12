@@ -129,11 +129,11 @@ export function DeckListPage() {
             </p>
           </div>
           <button
-            className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
+            className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas"
             type="button"
             onClick={() => setCreateModalOpen(true)}
           >
-            <Plus size={18} aria-hidden="true" />덱 등록하기
+            덱 등록하기
           </button>
         </div>
       ) : null}

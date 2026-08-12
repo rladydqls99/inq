@@ -1,4 +1,4 @@
-import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import {
   useEffect,
   useRef,
@@ -242,24 +242,20 @@ export function DeckCardPlayer({
       </div>
       {answerRevealed ? (
         <button
-          className="relative inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas disabled:cursor-default disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas disabled:cursor-default disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-label="다음 카드로 이동"
           disabled={!canNext}
           onClick={onNext}
         >
-          <span>다음</span>
-          <span className="absolute right-[18px] inline-flex items-center gap-1.5">
-            <ChevronRight aria-hidden="true" size={20} strokeWidth={2.2} />
-          </span>
+          다음
         </button>
       ) : (
         <button
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           onClick={revealAnswer}
         >
-          <Eye aria-hidden="true" size={20} strokeWidth={2.2} />
           정답 보기
         </button>
       )}

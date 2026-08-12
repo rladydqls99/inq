@@ -1,5 +1,5 @@
 import type { ImportValidationError } from "@inq/shared";
-import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { importErrorMessage } from "./importErrorMessages";
 
@@ -129,12 +129,11 @@ export function MarkdownUploadPane({
           </div>
         ) : null}
         <button
-          className="ml-auto inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
+          className="ml-auto inline-flex min-h-12 cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold text-inq-canvas disabled:cursor-not-allowed disabled:bg-inq-line disabled:text-inq-ink-soft"
           type="button"
           disabled={!canValidate}
           onClick={() => void onValidate()}
         >
-          <Check aria-hidden="true" size={18} strokeWidth={2.25} />
           검증하기
         </button>
       </div>

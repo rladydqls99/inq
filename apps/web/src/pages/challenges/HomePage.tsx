@@ -93,11 +93,10 @@ function FeaturedReview({ challenge }: { challenge: ChallengeResponse }) {
         </p>
       </div>
       <Link
-        className="mt-6 inline-flex min-h-12 w-full items-center justify-between rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold leading-[1.4] text-inq-canvas no-underline transition-[background-color,color,transform] duration-180 hover:bg-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.98] active:bg-inq-highlight-strong active:text-inq-on-highlight motion-reduce:transition-none"
+        className="mt-6 inline-flex min-h-12 w-full items-center justify-center rounded-lg border-0 bg-inq-ink px-4 py-3 text-sm font-bold leading-[1.4] text-inq-canvas no-underline transition-[background-color,color,transform] duration-180 hover:bg-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-ink focus-visible:outline-offset-3 active:scale-[0.98] active:bg-inq-highlight-strong active:text-inq-on-highlight motion-reduce:transition-none"
         to={`/challenges/${challenge.id}/run`}
       >
-        <span>복습 시작</span>
-        <ArrowRight aria-hidden="true" size={20} strokeWidth={2.4} />
+        복습 시작
       </Link>
     </section>
   );

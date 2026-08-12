@@ -1,4 +1,4 @@
-import { Check, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 
 import type { QuizSegment } from "@inq/shared";
@@ -123,7 +123,7 @@ export function ChallengeCardPlayer({
       </div>
       <div className="grid grid-cols-2 gap-2" aria-label="학습 결과">
         <button
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-error aria-pressed:bg-inq-error aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-error aria-pressed:bg-inq-error aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-pressed={selectedResult === "wrong"}
           onClick={() => {
@@ -131,11 +131,10 @@ export function ChallengeCardPlayer({
             onResult("wrong");
           }}
         >
-          <X aria-hidden="true" size={20} strokeWidth={2.4} />
           틀렸어요
         </button>
         <button
-          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-success)_12%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-success aria-pressed:bg-inq-success aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-[color-mix(in_srgb,var(--inq-success)_12%,var(--inq-canvas))] p-3 text-sm font-bold leading-[1.4] text-inq-success aria-pressed:bg-inq-success aria-pressed:text-inq-canvas focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           aria-pressed={selectedResult === "correct"}
           onClick={() => {
@@ -143,7 +142,6 @@ export function ChallengeCardPlayer({
             onResult("correct");
           }}
         >
-          <Check aria-hidden="true" size={20} strokeWidth={2.4} />
           맞았어요
         </button>
       </div>
@@ -158,21 +156,20 @@ export function ChallengeCardPlayer({
       ) : null}
       {selectedResult ? (
         <button
-          className="relative inline-flex min-h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas disabled:cursor-default disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
+          className="relative inline-flex min-h-12 w-full cursor-pointer items-center justify-center rounded-lg border-0 bg-inq-ink px-[18px] py-3 text-sm font-bold leading-[1.4] text-inq-canvas disabled:cursor-default disabled:bg-inq-line disabled:text-inq-ink-soft focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 active:scale-[0.98]"
           type="button"
           disabled={!canNext}
           onClick={onNext}
         >
           <span>다음 문제</span>
-          <span className="absolute right-[18px] inline-flex items-center gap-1.5">
-            {autoAdvanceSeconds ? (
+          {autoAdvanceSeconds ? (
+            <span className="absolute right-[18px]">
               <AutoAdvanceTimer
                 key={selectedResult}
                 seconds={autoAdvanceSeconds}
               />
-            ) : null}
-            <ChevronRight aria-hidden="true" size={20} strokeWidth={2.2} />
-          </span>
+            </span>
+          ) : null}
         </button>
       ) : null}
     </section>

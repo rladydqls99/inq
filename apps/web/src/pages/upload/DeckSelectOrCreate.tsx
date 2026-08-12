@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { Plus } from "lucide-react";
 
 import { useDecks } from "@/entities/decks/api";
 import { DeckCreateDialog } from "@/widgets/DeckCreateDialog";
@@ -39,10 +38,10 @@ export function DeckSelectOrCreate({
       </label>
       <button
         type="button"
-        className="inline-flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-lg border border-inq-line bg-inq-canvas px-4 py-3 text-sm font-bold text-inq-ink"
+        className="inline-flex min-h-12 cursor-pointer items-center justify-center rounded-lg border border-inq-line bg-inq-canvas px-4 py-3 text-sm font-bold text-inq-ink"
         onClick={() => setCreateOpen(true)}
       >
-        <Plus aria-hidden="true" size={18} strokeWidth={2.25} />덱 만들기
+        덱 만들기
       </button>
       {loadError ? (
         <div className="w-full rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error">
