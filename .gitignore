@@ -13,6 +13,8 @@ coverage/
 .playwright-cli
 playwright-report/
 test-results/
+output/playwright/
+.impeccable/audit/
 
 *.db
 *.db-journal
@@ -28,4 +30,3 @@ deploy/data/
 docker-data/
 
 .DS_Store
-
