@@ -11,6 +11,7 @@ import { ActionMenu } from "@/shared/ui/ActionMenu";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChallengeCreateModal } from "@/features/challenges/ChallengeCreateModal";
 import { ChallengeListItem } from "@/features/challenges/ChallengeListItem";
 
@@ -280,10 +281,10 @@ function ChallengeListSkeleton() {
           key={item}
           aria-hidden="true"
         >
-          <span className="h-5 w-3/5 rounded bg-inq-line" />
-          <span className="h-4 w-2/5 rounded bg-inq-line" />
-          <span className="h-4 w-1/3 rounded bg-inq-line" />
-          <span className="h-1 w-full rounded bg-inq-line" />
+          <Skeleton className="h-5 w-3/5" />
+          <Skeleton className="h-4 w-2/5" />
+          <Skeleton className="h-4 w-1/3" />
+          <Skeleton className="h-1 w-full" />
         </div>
       ))}
     </div>

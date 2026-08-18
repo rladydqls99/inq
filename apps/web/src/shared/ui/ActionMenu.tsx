@@ -18,14 +18,12 @@ export function ActionMenu({
 
   useEffect(() => {
     if (!open) return;
-
     const closeOnOutsidePointerDown = (event: PointerEvent) => {
       if (!menuRef.current?.contains(event.target as Node)) onToggle();
     };
     const closeOnEscape = (event: KeyboardEvent) => {
       if (event.key === "Escape") onToggle();
     };
-
     document.addEventListener("pointerdown", closeOnOutsidePointerDown);
     document.addEventListener("keydown", closeOnEscape);
     return () => {

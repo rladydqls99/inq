@@ -10,7 +10,7 @@ import {
 } from "@/entities/decks/api";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
 import { Button } from "@/shared/ui/Button";
-import { Checkbox } from "@/shared/ui/Checkbox";
+import { Checkbox } from "@/components/ui/checkbox";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
 import {
   primeVehicleControlFromUserGesture,
@@ -210,7 +210,7 @@ export function DeckDetailPage() {
             <label className="grid size-11 cursor-pointer place-items-start pt-0.5">
               <Checkbox
                 checked={selectedCardIds.includes(card.id)}
-                onChange={() => toggleCardSelection(card.id)}
+                onCheckedChange={() => toggleCardSelection(card.id)}
                 aria-label="카드 선택"
               />
             </label>

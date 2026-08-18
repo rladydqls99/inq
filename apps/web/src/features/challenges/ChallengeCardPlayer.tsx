@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 
 import type { QuizSegment } from "@inq/shared";
+import { Progress } from "@/components/ui/progress";
 import { ChallengeQuizText } from "./ChallengeQuizText";
 
 type ChallengeCardPlayerProps = {
@@ -79,16 +80,12 @@ export function ChallengeCardPlayer({
             {displayIndex} / {totalCards}
           </strong>
         </div>
-        <div
-          className="relative -my-5 h-11 cursor-pointer touch-none before:absolute before:top-5 before:right-0 before:left-0 before:h-1 before:rounded-full before:bg-inq-line focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-3 [&>span]:absolute [&>span]:top-5 [&>span]:left-0 [&>span]:h-1 [&>span]:rounded-full [&>span]:bg-inq-highlight-strong [&>span]:transition-[width] [&>span]:duration-180 [&>span]:after:absolute [&>span]:after:top-1/2 [&>span]:after:right-[-6px] [&>span]:after:size-3 [&>span]:after:rounded-full [&>span]:after:bg-inq-highlight-strong [&>span]:after:content-[''] [&>span]:after:-translate-y-1/2 motion-reduce:[&>span]:transition-none"
-          role="progressbar"
+        <Progress
+          className="-my-3 py-3"
           aria-label="카드 학습 진행률"
-          aria-valuemin={1}
-          aria-valuemax={totalCards}
-          aria-valuenow={displayIndex}
-        >
-          <span style={{ width: `${progress}%` }} />
-        </div>
+          aria-valuetext={`${displayIndex} / ${totalCards}`}
+          value={progress}
+        />
       </header>
       <div className="grid min-h-[260px] flex-1 grid-cols-[44px_minmax(0,1fr)_44px] items-center">
         <button

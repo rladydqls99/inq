@@ -6,6 +6,7 @@ import { ActionMenu } from "@/shared/ui/ActionMenu";
 import { Button } from "@/shared/ui/Button";
 import { Input } from "@/shared/ui/Input";
 import { PageHeader } from "@/shared/ui/PageHeader";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ChallengeCreateDialog } from "@/widgets/ChallengeCreateDialog";
 import { DeckCreateModal } from "@/features/decks/DeckCreateModal";
 import { DeckListItem } from "@/features/decks/DeckListItem";
@@ -241,8 +242,8 @@ function DeckListSkeleton() {
           key={item}
           aria-hidden="true"
         >
-          <span className="h-5 w-3/5 rounded bg-inq-line" />
-          <span className="h-4 w-2/5 rounded bg-inq-line" />
+          <Skeleton className="h-5 w-3/5" />
+          <Skeleton className="h-4 w-2/5" />
         </div>
       ))}
     </div>

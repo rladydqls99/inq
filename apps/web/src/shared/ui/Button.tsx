@@ -1,4 +1,5 @@
 import type { ButtonHTMLAttributes } from "react";
+import { Button as ShadcnButton } from "@/components/ui/button";
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: "primary" | "secondary" | "danger" | "ghost";
@@ -6,21 +7,11 @@ type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
 };
 
 const variants = {
-  primary:
-    "border-0 bg-inq-ink text-inq-canvas hover:bg-inq-ink-soft active:bg-inq-highlight-strong active:text-inq-on-highlight",
-  secondary:
-    "border border-inq-line bg-inq-canvas text-inq-ink hover:bg-inq-surface",
-  danger:
-    "border border-inq-error/40 bg-[color-mix(in_srgb,var(--inq-error)_10%,var(--inq-canvas))] text-inq-error hover:bg-[color-mix(in_srgb,var(--inq-error)_16%,var(--inq-canvas))]",
-  ghost: "border-0 bg-transparent text-inq-ink hover:bg-inq-surface",
-};
-
-const sizes = {
-  default: "min-h-11 px-3.5 py-2 text-sm",
-  compact: "min-h-11 px-3 text-sm",
-  icon: "size-11 p-0",
-  floating: "size-12 rounded-full p-0",
-};
+  primary: "default",
+  secondary: "secondary",
+  danger: "destructive",
+  ghost: "ghost",
+} as const;
 
 export function Button({
   className = "",
@@ -30,8 +21,10 @@ export function Button({
   ...props
 }: ButtonProps) {
   return (
-    <button
-      className={`inline-flex cursor-pointer items-center justify-center gap-2 rounded-md font-bold leading-[1.4] transition-[background-color,color,transform] duration-180 focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2 active:scale-[0.98] disabled:cursor-not-allowed disabled:border-inq-line disabled:bg-inq-line disabled:text-inq-ink-soft motion-reduce:transition-none ${variants[variant]} ${sizes[size]} ${className}`}
+    <ShadcnButton
+      className={className}
+      variant={variants[variant]}
+      size={size}
       type={type}
       {...props}
     />
