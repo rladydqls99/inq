@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-import { Button } from "@/shared/ui/Button";
-import { Input } from "@/shared/ui/Input";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 
 type PinLockScreenProps = {
   error?: string | null;

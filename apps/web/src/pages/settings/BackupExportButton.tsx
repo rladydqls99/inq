@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { useBackupExport } from "@/entities/settings/api";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/shared/ui/button";
 
 export function BackupExportButton() {
   const [exported, setExported] = useState(false);

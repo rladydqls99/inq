@@ -2,7 +2,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useRef, useState, type TouchEvent } from "react";
 
 import type { QuizSegment } from "@inq/shared";
-import { Progress } from "@/components/ui/progress";
+import { Progress } from "@/shared/ui/progress";
 import { ChallengeQuizText } from "./ChallengeQuizText";
 
 type ChallengeCardPlayerProps = {

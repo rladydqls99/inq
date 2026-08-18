@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { SettingsPage } from "../src/pages/settings/SettingsPage";
 import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
-import { THEME_STORAGE_KEY } from "../src/shared/theme";
+import { THEME_STORAGE_KEY } from "../src/shared/lib/theme";
 
 describe("SettingsPage", () => {
   afterEach(() => {

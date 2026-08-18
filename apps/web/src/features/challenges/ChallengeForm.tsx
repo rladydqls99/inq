@@ -2,8 +2,8 @@ import { useEffect, useState } from "react";
 
 import { useChallengeMutation } from "@/entities/challenges/api";
 import { useDecks } from "@/entities/decks/api";
-import { Button } from "@/shared/ui/Button";
-import { Input, Select } from "@/shared/ui/Input";
+import { Button } from "@/shared/ui/button";
+import { Input, Select } from "@/shared/ui/input";
 
 type ChallengeFormProps = {
   onCreated: () => Promise<void> | void;

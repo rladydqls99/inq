@@ -2,13 +2,13 @@ import { useState } from "react";
 
 import { useLock } from "@/entities/auth/api";
 import { PageHeader } from "@/shared/ui/PageHeader";
-import { Button } from "@/shared/ui/Button";
-import { Switch } from "@/shared/ui/Checkbox";
+import { Button } from "@/shared/ui/button";
+import { Switch } from "@/shared/ui/checkbox";
 import {
   getThemePreference,
   setThemePreference,
   type ThemePreference,
-} from "@/shared/theme";
+} from "@/shared/lib/theme";
 import { BackupExportButton } from "./BackupExportButton";
 import {
   isVehicleControlEnabled,

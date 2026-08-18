@@ -8,10 +8,10 @@ import {
   useUpdateChallengeFromDeck,
 } from "@/entities/challenges/api";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
-import { Button } from "@/shared/ui/Button";
-import { Input } from "@/shared/ui/Input";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/PageHeader";
-import { Skeleton } from "@/components/ui/skeleton";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { ChallengeCreateModal } from "@/features/challenges/ChallengeCreateModal";
 import { ChallengeListItem } from "@/features/challenges/ChallengeListItem";
 

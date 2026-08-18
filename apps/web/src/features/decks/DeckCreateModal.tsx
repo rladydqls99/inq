@@ -2,8 +2,8 @@ import { useState } from "react";
 
 import type { DeckResponse } from "@inq/shared";
 import { useDeckMutation } from "@/entities/decks/api";
-import { Button } from "@/shared/ui/Button";
-import { Input } from "@/shared/ui/Input";
+import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import { Modal } from "@/shared/ui/Modal";
 
 type DeckCreateModalProps = {

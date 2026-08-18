@@ -1,7 +1,7 @@
 import { Radio as RadioPrimitive } from "@base-ui/react/radio";
 import { RadioGroup as RadioGroupPrimitive } from "@base-ui/react/radio-group";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 function RadioGroup({ className, ...props }: RadioGroupPrimitive.Props) {
   return (
@@ -23,7 +23,10 @@ function RadioGroupItem({ className, ...props }: RadioPrimitive.Root.Props) {
       )}
       {...props}
     >
-      <RadioPrimitive.Indicator className="size-2 rounded-full bg-inq-on-highlight" />
+      <RadioPrimitive.Indicator
+        data-slot="radio-group-indicator"
+        className="size-2 rounded-full bg-inq-on-highlight"
+      />
     </RadioPrimitive.Root>
   );
 }

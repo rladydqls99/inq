@@ -19,6 +19,11 @@ export default [
         {
           patterns: [
             {
+              group: ["@/components", "@/components/*", "@/lib", "@/lib/*"],
+              message:
+                "Use the FSD shared layer (for example, @/shared/ui or @/shared/lib).",
+            },
+            {
               group: [
                 "../challenges/*",
                 "../decks/*",
@@ -27,6 +32,33 @@ export default [
                 "../auth/*",
               ],
               message: "Use entities or a widget boundary between domains.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ["apps/web/src/shared/**/*.{ts,tsx}"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/components", "@/components/*", "@/lib", "@/lib/*"],
+              message:
+                "Use the FSD shared layer (for example, @/shared/ui or @/shared/lib).",
+            },
+            {
+              group: [
+                "@/app/*",
+                "@/pages/*",
+                "@/widgets/*",
+                "@/features/*",
+                "@/entities/*",
+              ],
+              message: "The shared layer cannot depend on higher FSD layers.",
             },
           ],
         },

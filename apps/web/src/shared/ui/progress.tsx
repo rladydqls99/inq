@@ -1,6 +1,6 @@
 import { Progress as ProgressPrimitive } from "@base-ui/react/progress";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 function Progress({
   className,
@@ -9,8 +9,8 @@ function Progress({
 }: ProgressPrimitive.Root.Props) {
   return (
     <ProgressPrimitive.Root
-      value={value}
       data-slot="progress"
+      value={value}
       className={cn("block w-full", className)}
       {...props}
     >

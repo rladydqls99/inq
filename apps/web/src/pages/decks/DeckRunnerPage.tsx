@@ -8,7 +8,7 @@ import {
   useMoveDeckRun,
 } from "@/entities/decks/api";
 import { DeckCardPlayer } from "@/features/decks/DeckCardPlayer";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/shared/ui/button";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import {
   VehicleMediaSessionController,

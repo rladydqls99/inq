@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useEffect, useState, type ReactNode } from "react";
-import { applyThemePreference, getThemePreference } from "@/shared/theme";
+import { applyThemePreference, getThemePreference } from "@/shared/lib/theme";
 
 export function AppProviders({ children }: { children: ReactNode }) {
   const [queryClient] = useState(

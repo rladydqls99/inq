@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import type { QuizSegment } from "@inq/shared";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/shared/ui/button";
 import { DeckQuizPreview } from "./DeckQuizPreview";
 
 type CardSegmentEditFormProps = {

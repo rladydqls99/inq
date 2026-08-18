@@ -9,8 +9,8 @@ import {
   useStartDeckRun,
 } from "@/entities/decks/api";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
-import { Button } from "@/shared/ui/Button";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Button } from "@/shared/ui/button";
+import { Checkbox } from "@/shared/ui/checkbox";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
 import {
   primeVehicleControlFromUserGesture,

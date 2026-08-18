@@ -1,13 +1,13 @@
-import * as React from "react";
 import { OTPInput, OTPInputContext } from "input-otp";
+import { useContext, type ComponentProps } from "react";
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/shared/lib/utils";
 
 function InputOTP({
   className,
   containerClassName,
   ...props
-}: React.ComponentProps<typeof OTPInput> & { containerClassName?: string }) {
+}: ComponentProps<typeof OTPInput> & { containerClassName?: string }) {
   return (
     <OTPInput
       data-slot="input-otp"
@@ -19,7 +19,7 @@ function InputOTP({
   );
 }
 
-function InputOTPGroup({ className, ...props }: React.ComponentProps<"div">) {
+function InputOTPGroup({ className, ...props }: ComponentProps<"div">) {
   return (
     <div
       data-slot="input-otp-group"
@@ -33,8 +33,8 @@ function InputOTPSlot({
   index,
   className,
   ...props
-}: React.ComponentProps<"div"> & { index: number }) {
-  const slot = React.useContext(OTPInputContext)?.slots[index];
+}: ComponentProps<"div"> & { index: number }) {
+  const slot = useContext(OTPInputContext)?.slots[index];
   return (
     <div
       data-slot="input-otp-slot"

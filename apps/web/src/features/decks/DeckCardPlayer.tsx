@@ -10,7 +10,7 @@ import {
 } from "react";
 
 import type { QuizSegment } from "@inq/shared";
-import { Button } from "@/shared/ui/Button";
+import { Button } from "@/shared/ui/button";
 import { DeckQuizText } from "./DeckQuizText";
 
 type DeckCardPlayerProps = {
