@@ -47,5 +47,6 @@ jobs:
       - name: Docker build
         run: pnpm docker:build
         env:
+          DOMAIN: ci.example.com
           INITIAL_PIN: ci-initial-pin
           SESSION_SECRET: ci-session-secret-for-image-build
