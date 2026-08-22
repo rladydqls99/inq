@@ -13,7 +13,7 @@ describe("CardEditPage", () => {
     vi.restoreAllMocks();
   });
 
-  it("loads a card and renders editable segment values with previews", async () => {
+  it("loads a card into a bracketed quiz textarea", async () => {
     mockFetchByPath({
       "/api/cards/card-1": card(),
     });
@@ -21,18 +21,10 @@ describe("CardEditPage", () => {
     renderCardEdit();
 
     expect(
-      ((await screen.findByLabelText("본문 1")) as HTMLTextAreaElement).value,
-    ).toBe("훈민정음을 만든 ");
-    expect((screen.getByLabelText("정답 1") as HTMLTextAreaElement).value).toBe(
-      "조선",
-    );
-    expect((screen.getByLabelText("정답 2") as HTMLTextAreaElement).value).toBe(
-      "세종대왕",
-    );
+      (await screen.findByLabelText("퀴즈 내용")) as HTMLTextAreaElement,
+    ).toHaveProperty("value", "훈민정음을 만든 [조선]의 왕은 [세종대왕]이다.");
     expect(
-      screen.getByText(
-        matchesTextContent("훈민정음을 만든 조선의 왕은 세종대왕이다."),
-      ),
+      screen.getByText(/정답으로 만들 단어를 대괄호로 감싸세요/),
     ).toBeTruthy();
   });
 
@@ -50,72 +42,97 @@ describe("CardEditPage", () => {
     expect(screen.queryByText("카드를 찾을 수 없습니다.")).toBeNull();
   });
 
-  it("saves changed segment values without changing segment structure", async () => {
+  it("validates the changed quiz text before saving the complete card", async () => {
     const user = userEvent.setup();
+    const markdown = "[훈민정음]을 만든 조선의 왕은 [세종대왕]이다.";
     const fetchMock = mockFetchByPath({
       "/api/cards/card-1": card(),
+      "/api/import/markdown/preview": preview(),
     });
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("정답 1");
-    await user.clear(answerInput);
-    await user.type(answerInput, "대한민국");
-    await user.click(screen.getByRole("button", { name: "저장" }));
+    const quizInput = await screen.findByLabelText("퀴즈 내용");
+    fireEvent.change(quizInput, { target: { value: markdown } });
+    expect(screen.getByRole("button", { name: "퀴즈로 저장" })).toHaveProperty(
+      "disabled",
+      true,
+    );
+
+    await user.click(screen.getByRole("button", { name: "검증하기" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/import/markdown/preview",
+      expect.objectContaining({
+        method: "POST",
+        body: JSON.stringify({ markdown }),
+      }),
+    );
+    expect(await screen.findByText("1장 검증 완료")).toBeTruthy();
+    expect(screen.getByLabelText("검증된 퀴즈 미리보기").textContent).toContain(
+      "훈민정음을 만든 조선의 왕은 세종대왕이다.",
+    );
+
+    await user.click(screen.getByRole("button", { name: "퀴즈로 저장" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/cards/card-1",
       expect.objectContaining({
         method: "PATCH",
-        body: JSON.stringify({
-          segments: [
-            { type: "text", value: "훈민정음을 만든 " },
-            { type: "answer", id: "answer-1", value: "대한민국" },
-            { type: "text", value: "의 왕은 " },
-            { type: "answer", id: "answer-2", value: "세종대왕" },
-            { type: "text", value: "이다." },
-          ],
-          version: 1,
-        }),
+        body: JSON.stringify({ markdown, version: 1 }),
       }),
     );
     expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
   });
 
-  it("clears the saved state when editing after saving", async () => {
+  it("requires validation again after the quiz text changes", async () => {
     const user = userEvent.setup();
     mockFetchByPath({
       "/api/cards/card-1": card(),
+      "/api/import/markdown/preview": preview(),
     });
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("정답 1");
-    await user.clear(answerInput);
-    await user.type(answerInput, "대한민국");
-    await user.click(screen.getByRole("button", { name: "저장" }));
-    expect(await screen.findByText("저장되었습니다.")).toBeTruthy();
+    await user.click(await screen.findByRole("button", { name: "검증하기" }));
+    expect(await screen.findByText("1장 검증 완료")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "퀴즈로 저장" })).toHaveProperty(
+      "disabled",
+      false,
+    );
 
-    await user.type(screen.getByLabelText("정답 1"), "!");
+    await user.type(screen.getByLabelText("퀴즈 내용"), "!");
 
-    expect(screen.queryByText("저장되었습니다.")).toBeNull();
+    expect(screen.queryByText("1장 검증 완료")).toBeNull();
+    expect(screen.getByRole("button", { name: "퀴즈로 저장" })).toHaveProperty(
+      "disabled",
+      true,
+    );
   });
 
-  it("disables save when an answer segment is blank", async () => {
+  it("shows validation errors and prevents saving an invalid quiz", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetchByPath({
       "/api/cards/card-1": card(),
+      "/api/import/markdown/preview": invalidPreview(),
     });
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("정답 1");
-    await user.clear(answerInput);
+    const quizInput = await screen.findByLabelText("퀴즈 내용");
+    await user.clear(quizInput);
+    await user.type(quizInput, "정답 괄호가 없다.");
+    await user.click(screen.getByRole("button", { name: "검증하기" }));
 
-    const saveButton = screen.getByRole("button", { name: "저장" });
-    expect(saveButton).toHaveProperty("disabled", true);
-
-    await user.click(saveButton);
+    expect(
+      await screen.findByText(
+        "정답 구간이 없습니다. 정답은 대괄호로 감싸 주세요.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByRole("button", { name: "퀴즈로 저장" })).toHaveProperty(
+      "disabled",
+      true,
+    );
     expect(fetchMock).not.toHaveBeenCalledWith(
       "/api/cards/card-1",
       expect.objectContaining({ method: "PATCH" }),
@@ -129,14 +146,14 @@ describe("CardEditPage", () => {
         card(),
         { body: { error: "card_version_conflict" }, status: 409 },
       ],
+      "/api/import/markdown/preview": preview(),
     });
 
     renderCardEdit();
 
-    const answerInput = await screen.findByLabelText("정답 1");
-    await user.clear(answerInput);
-    await user.type(answerInput, "대한민국");
-    fireEvent.click(screen.getByRole("button", { name: "저장" }));
+    await user.click(await screen.findByRole("button", { name: "검증하기" }));
+    await screen.findByText("1장 검증 완료");
+    fireEvent.click(screen.getByRole("button", { name: "퀴즈로 저장" }));
 
     expect(
       await screen.findByText("카드가 이미 변경되었습니다. 다시 열어 주세요."),
@@ -197,6 +214,41 @@ function isMockErrorResponse(
   );
 }
 
+function preview() {
+  return {
+    parsed: 1,
+    errors: [],
+    previewCards: [
+      {
+        blockIndex: 0,
+        segments: [
+          { type: "answer", id: "answer-1", value: "훈민정음" },
+          { type: "text", value: "을 만든 조선의 왕은 " },
+          { type: "answer", id: "answer-2", value: "세종대왕" },
+          { type: "text", value: "이다." },
+        ],
+      },
+    ],
+  };
+}
+
+function invalidPreview() {
+  return {
+    parsed: 0,
+    errors: [
+      {
+        blockIndex: 0,
+        line: 1,
+        column: null,
+        code: "missing_answer",
+        message: "Quiz card must contain at least one answer segment.",
+        snippet: "정답 괄호가 없다.",
+      },
+    ],
+    previewCards: [],
+  };
+}
+
 function card() {
   return {
     id: "card-1",
@@ -214,12 +266,4 @@ function card() {
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };
-}
-
-function matchesTextContent(expected: string) {
-  return (_content: string, element: Element | null) =>
-    element?.textContent === expected &&
-    Array.from(element.children).every(
-      (child) => child.textContent !== expected,
-    );
 }

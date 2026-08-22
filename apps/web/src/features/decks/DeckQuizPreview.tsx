@@ -7,7 +7,7 @@ export function DeckQuizPreview({ segments }: { segments: QuizSegment[] }) {
     <div className="grid gap-2">
       <DeckQuizText mode="revealed" segments={segments} tone="study" />
       <span className="text-xs font-bold text-inq-ink-soft">
-        {getAnswers(segments).length}
+        정답 {getAnswers(segments).length}개
       </span>
     </div>
   );

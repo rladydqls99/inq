@@ -1,7 +1,7 @@
 import type { ImportValidationError } from "@inq/shared";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useState } from "react";
-import { importErrorMessage } from "./importErrorMessages";
+import { importErrorMessage } from "@/shared/lib/importErrorMessages";
 
 type MarkdownUploadPaneProps = {
   markdown: string;

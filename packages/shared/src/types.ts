@@ -39,7 +39,7 @@ export type CardResponse = {
 };
 
 export type UpdateCardRequest = {
-  segments: QuizSegment[];
+  markdown: string;
   version: number;
 };
 

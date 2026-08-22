@@ -1,5 +1,5 @@
 import type { ImportValidationError } from "@inq/shared";
-import { importErrorMessage } from "./importErrorMessages";
+import { importErrorMessage } from "@/shared/lib/importErrorMessages";
 
 type ImportErrorListProps = {
   errors: ImportValidationError[];

@@ -1,11 +1,12 @@
 import { Hono } from "hono";
 
 import type { PrismaClient } from "@inq/db";
+import { listCardsByDeck, updateCard } from "@inq/db/repositories/cards";
 import {
-  listCardsByDeck,
-  updateCard,
-} from "@inq/db/repositories/cards";
-import { hasAnswerSegment, type CardResponse, type QuizSegment } from "@inq/shared";
+  parseMarkdownImport,
+  type CardResponse,
+  type QuizSegment,
+} from "@inq/shared";
 
 export function createCardRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
@@ -40,19 +41,29 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/cards/:cardId", async (context) => {
     const body = await context.req.json();
-    const segments = readField(body, "segments");
+    const markdown = readField(body, "markdown");
     const version = readField(body, "version");
 
     if (
-      !segments ||
+      typeof markdown !== "string" ||
       typeof version !== "number" ||
       !Number.isInteger(version)
     ) {
       return context.json({ error: "card_update_fields_required" }, 400);
     }
 
-    if (!isValidQuizSegments(segments)) {
-      return context.json({ error: "invalid_card_segments" }, 400);
+    const preview = parseMarkdownImport(markdown);
+    const [quiz] = preview.previewCards;
+
+    if (preview.errors.length > 0) {
+      return context.json(
+        { error: "invalid_card_markdown", errors: preview.errors },
+        400,
+      );
+    }
+
+    if (!quiz || preview.previewCards.length !== 1) {
+      return context.json({ error: "card_update_requires_single_quiz" }, 400);
     }
 
     const cardId = context.req.param("cardId");
@@ -70,7 +81,7 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     }
 
     const card = await updateCard(options.prisma, cardId, {
-      segments: normalizeQuizSegments(segments),
+      segments: quiz.segments,
       version,
     });
 
@@ -114,47 +125,10 @@ function toCardResponse(card: {
   };
 }
 
-function isValidQuizSegments(segments: unknown): segments is QuizSegment[] {
-  return (
-    Array.isArray(segments) &&
-    segments.length > 0 &&
-    segments.every(isValidQuizSegment) &&
-    hasAnswerSegment(segments)
-  );
-}
-
 function readField(value: unknown, field: string): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
   }
 
   return (value as Record<string, unknown>)[field];
-}
-
-function normalizeQuizSegments(segments: QuizSegment[]): QuizSegment[] {
-  return segments.map((segment) =>
-    segment.type === "answer"
-      ? { ...segment, value: segment.value.trim() }
-      : segment,
-  );
-}
-
-function isValidQuizSegment(segment: unknown): segment is QuizSegment {
-  if (!segment || typeof segment !== "object") {
-    return false;
-  }
-
-  const candidate = segment as Partial<QuizSegment>;
-
-  if (candidate.type === "text") {
-    return typeof candidate.value === "string";
-  }
-
-  return (
-    candidate.type === "answer" &&
-    typeof candidate.id === "string" &&
-    candidate.id.trim().length > 0 &&
-    typeof candidate.value === "string" &&
-    candidate.value.trim().length > 0
-  );
 }

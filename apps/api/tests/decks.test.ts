@@ -237,7 +237,9 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -256,7 +258,9 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -274,7 +278,9 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "card_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "card_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -289,7 +295,7 @@ describe("deck and card routes", () => {
 
       const response = await app.request("/api/cards/missing-card", {
         method: "PATCH",
-        body: JSON.stringify({ segments, version: 1 }),
+        body: JSON.stringify({ markdown: "수정된 [정답]", version: 1 }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -297,7 +303,9 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "card_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "card_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -316,7 +324,9 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "card_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "card_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -334,13 +344,15 @@ describe("deck and card routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
   });
 
-  it("lists, reads, and updates card segments", async () => {
+  it("lists, reads, and updates cards from validated quiz text", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -376,13 +388,14 @@ describe("deck and card routes", () => {
         version: 1,
       });
 
+      const nextMarkdown = "수정된 [정답]";
       const nextSegments: QuizSegment[] = [
         { type: "text", value: "수정된 " },
         { type: "answer", id: "answer-1", value: "정답" },
       ];
       const updateResponse = await app.request(`/api/cards/${card.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ segments: nextSegments, version: 1 }),
+        body: JSON.stringify({ markdown: nextMarkdown, version: 1 }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -396,13 +409,9 @@ describe("deck and card routes", () => {
         version: 2,
       });
 
-      const spacedAnswerSegments: QuizSegment[] = [
-        { type: "text", value: "수정된 " },
-        { type: "answer", id: "answer-1", value: "  정답  " },
-      ];
       const trimmedAnswerResponse = await app.request(`/api/cards/${card.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ segments: spacedAnswerSegments, version: 2 }),
+        body: JSON.stringify({ markdown: "수정된 [  정답  ]", version: 2 }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -418,16 +427,15 @@ describe("deck and card routes", () => {
         version: 3,
       });
 
-      for (const invalidSegments of [
-        [{ type: "text", value: "정답 없는 카드" }],
-        [{ type: "answer", id: "answer-1", value: "" }],
-        [{ type: "answer", id: "answer-1", value: "   " }],
-        [{ type: "answer", id: "   ", value: "정답" }],
+      for (const invalidMarkdown of [
+        "정답 없는 카드",
+        "빈 답 []",
+        "중첩 [[정답]]",
       ]) {
         const invalidResponse = await app.request(`/api/cards/${card.id}`, {
           method: "PATCH",
           body: JSON.stringify({
-            segments: invalidSegments,
+            markdown: invalidMarkdown,
             version: 3,
           }),
           headers: {
@@ -436,14 +444,34 @@ describe("deck and card routes", () => {
           },
         });
         expect(invalidResponse.status).toBe(400);
-        await expect(invalidResponse.json()).resolves.toEqual({
-          error: "invalid_card_segments",
+        await expect(invalidResponse.json()).resolves.toMatchObject({
+          error: "invalid_card_markdown",
+          errors: expect.any(Array),
         });
       }
 
+      const multipleQuizzesResponse = await app.request(
+        `/api/cards/${card.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({
+            markdown: "첫 [정답]\n---\n둘 [정답]",
+            version: 3,
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(multipleQuizzesResponse.status).toBe(400);
+      await expect(multipleQuizzesResponse.json()).resolves.toEqual({
+        error: "card_update_requires_single_quiz",
+      });
+
       const staleVersionResponse = await app.request(`/api/cards/${card.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ segments: nextSegments, version: 2 }),
+        body: JSON.stringify({ markdown: nextMarkdown, version: 2 }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -458,7 +486,7 @@ describe("deck and card routes", () => {
         `/api/cards/${card.id}`,
         {
           method: "PATCH",
-          body: JSON.stringify({ segments: nextSegments, version: 2.5 }),
+          body: JSON.stringify({ markdown: nextMarkdown, version: 2.5 }),
           headers: {
             "content-type": "application/json",
             cookie,

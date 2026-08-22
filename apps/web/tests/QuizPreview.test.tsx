@@ -26,6 +26,7 @@ describe("DeckQuizPreview", () => {
           element?.textContent === "조선의 왕은 세종대왕 이다.",
       ),
     ).toBeTruthy();
+    expect(screen.getByText("정답 1개")).toBeTruthy();
     expect(screen.queryByText("조선의 왕은 ____ 이다.")).toBeNull();
   });
 });

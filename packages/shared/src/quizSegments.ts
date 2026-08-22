@@ -19,3 +19,11 @@ export function getAnswers(segments: QuizSegment[]): string[] {
 export function hasAnswerSegment(segments: QuizSegment[]): boolean {
   return segments.some((segment) => segment.type === "answer");
 }
+
+export function toQuizText(segments: QuizSegment[]): string {
+  return segments
+    .map((segment) =>
+      segment.type === "answer" ? `[${segment.value}]` : segment.value,
+    )
+    .join("");
+}

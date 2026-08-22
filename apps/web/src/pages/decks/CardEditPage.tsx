@@ -1,11 +1,10 @@
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 
-import type { QuizSegment } from "@inq/shared";
 import { useCard, useCardMutation } from "@/entities/decks/api";
 import { ApiError } from "@/shared/api/client";
 import { PageHeader } from "@/shared/ui/PageHeader";
-import { CardSegmentEditForm } from "@/features/decks/CardSegmentEditForm";
+import { CardTextEditForm } from "@/features/decks/CardTextEditForm";
 
 export function CardEditPage() {
   const { cardId } = useParams();
@@ -18,7 +17,7 @@ export function CardEditPage() {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  async function saveCard(segments: QuizSegment[]) {
+  async function saveCard(markdown: string) {
     if (!card) {
       return;
     }
@@ -26,7 +25,7 @@ export function CardEditPage() {
     try {
       await saveMutation.mutateAsync({
         id: card.id,
-        segments,
+        markdown,
         version: card.version,
       });
       setSaved(true);
@@ -62,9 +61,10 @@ export function CardEditPage() {
       ) : null}
       {card ? (
         <div className="grid gap-3">
-          <CardSegmentEditForm
+          <CardTextEditForm
             key={card.version}
             segments={card.segments}
+            isSaving={saveMutation.isPending}
             onDirty={markDirty}
             onSave={saveCard}
           />
@@ -85,6 +85,10 @@ export function CardEditPage() {
 function toSaveErrorMessage(error: unknown) {
   if (error instanceof ApiError && error.status === 409) {
     return "카드가 이미 변경되었습니다. 다시 열어 주세요.";
+  }
+
+  if (error instanceof ApiError && error.status === 400) {
+    return "입력한 퀴즈 형식이 올바르지 않습니다. 다시 검증해 주세요.";
   }
 
   return "카드를 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.";

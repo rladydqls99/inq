@@ -6,6 +6,7 @@ import {
   getPromptText,
   getRevealedText,
   hasAnswerSegment,
+  toQuizText,
 } from "../src";
 
 const quizSegments: QuizSegment[] = [
@@ -31,6 +32,12 @@ describe("quiz segment helpers", () => {
 
   it("extracts answers in segment order", () => {
     expect(getAnswers(quizSegments)).toEqual(["조선", "세종대왕"]);
+  });
+
+  it("serializes segments to the bracketed quiz text format", () => {
+    expect(toQuizText(quizSegments)).toBe(
+      "훈민정음을 만든 [조선]의 왕은 [세종대왕]이다.",
+    );
   });
 
   it("detects whether any answer segment exists", () => {

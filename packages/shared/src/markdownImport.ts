@@ -264,11 +264,15 @@ function normalizeTextSegments(segments: QuizSegment[]): QuizSegment[] {
   const firstTextIndex = textIndexes[0];
   const lastTextIndex = textIndexes.at(-1);
 
-  if (firstTextIndex !== undefined && normalized[firstTextIndex]?.type === "text") {
-    normalized[firstTextIndex].value = normalized[firstTextIndex].value.trimStart();
+  if (firstTextIndex === 0 && normalized[firstTextIndex]?.type === "text") {
+    normalized[firstTextIndex].value =
+      normalized[firstTextIndex].value.trimStart();
   }
 
-  if (lastTextIndex !== undefined && normalized[lastTextIndex]?.type === "text") {
+  if (
+    lastTextIndex === normalized.length - 1 &&
+    normalized[lastTextIndex]?.type === "text"
+  ) {
     normalized[lastTextIndex].value = normalized[lastTextIndex].value.trimEnd();
   }
 

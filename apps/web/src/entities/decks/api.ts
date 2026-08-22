@@ -3,7 +3,8 @@ import type {
   CardResponse,
   DeckResponse,
   DeckRunResponse,
-  QuizSegment,
+  ImportPreviewResponse,
+  UpdateCardRequest,
 } from "@inq/shared";
 import { apiRequest } from "@/shared/api/client";
 
@@ -70,18 +71,10 @@ export function useDeleteDeck() {
 export function useCardMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({
-      id,
-      segments,
-      version,
-    }: {
-      id: string;
-      segments: QuizSegment[];
-      version: number;
-    }) =>
+    mutationFn: ({ id, ...body }: { id: string } & UpdateCardRequest) =>
       apiRequest<CardResponse>(`/cards/${id}`, {
         method: "PATCH",
-        body: JSON.stringify({ segments, version }),
+        body: JSON.stringify(body),
       }),
     onSuccess: (card) => {
       queryClient.setQueryData(deckKeys.card(card.id), card);
@@ -89,6 +82,15 @@ export function useCardMutation() {
     },
   });
 }
+
+export const useQuizTextPreview = () =>
+  useMutation({
+    mutationFn: (markdown: string) =>
+      apiRequest<ImportPreviewResponse>("/import/markdown/preview", {
+        method: "POST",
+        body: JSON.stringify({ markdown }),
+      }),
+  });
 export function useDeleteCard(deckId?: string) {
   const queryClient = useQueryClient();
   return useMutation({

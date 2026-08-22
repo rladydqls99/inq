@@ -40,13 +40,37 @@ describe("parseMarkdownImport", () => {
   });
 
   it("trims whitespace around answer values", () => {
-    const result = parseMarkdownImport("동명사를 목적어로 취하는 동사는 [ avoid ]이다.");
+    const result = parseMarkdownImport(
+      "동명사를 목적어로 취하는 동사는 [ avoid ]이다.",
+    );
 
     expect(result.errors).toEqual([]);
     expect(result.previewCards[0]?.segments).toEqual([
       { type: "text", value: "동명사를 목적어로 취하는 동사는 " },
       { type: "answer", id: "answer-1", value: "avoid" },
       { type: "text", value: "이다." },
+    ]);
+  });
+
+  it("preserves spaces that separate text and an answer at either card edge", () => {
+    const result = parseMarkdownImport("첫 [정답]\n---\n[정답] 뒤");
+
+    expect(result.errors).toEqual([]);
+    expect(result.previewCards).toEqual([
+      {
+        blockIndex: 0,
+        segments: [
+          { type: "text", value: "첫 " },
+          { type: "answer", id: "answer-1", value: "정답" },
+        ],
+      },
+      {
+        blockIndex: 1,
+        segments: [
+          { type: "answer", id: "answer-1", value: "정답" },
+          { type: "text", value: " 뒤" },
+        ],
+      },
     ]);
   });
 
