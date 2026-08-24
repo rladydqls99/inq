@@ -22,6 +22,7 @@ describe("DeckDetailPage", () => {
   });
 
   it("lists cards for the selected deck", async () => {
+    const user = userEvent.setup();
     mockFetchByPath({
       "/api/decks/deck-1/cards": [
         card({
@@ -46,6 +47,45 @@ describe("DeckDetailPage", () => {
     expect(screen.getByRole("button", { name: "학습 시작" })).toBeTruthy();
     expect(screen.getByText("조선").className).toContain("is-study");
     expect(screen.getByRole("button", { name: "카드 메뉴" })).toBeTruthy();
+
+    const summary = screen.getByText("덱 설명");
+    const disclosure = summary.closest("details");
+    expect(disclosure?.open).toBe(false);
+    await user.click(summary);
+    expect(disclosure?.open).toBe(true);
+    expect(screen.getByText("중간고사 시험 범위")).toBeTruthy();
+  });
+
+  it("edits the deck description from the expanded header", async () => {
+    const user = userEvent.setup();
+    const fetchMock = mockFetchByPath({
+      "/api/decks/deck-1/cards": [card({ id: "card-1" })],
+      "/api/decks/deck-1": (_input: RequestInfo | URL, init?: RequestInit) =>
+        init?.method === "PATCH"
+          ? deck({ description: "기말고사 범위" })
+          : deck({ description: "중간고사 시험 범위" }),
+    });
+
+    renderDeckDetail();
+
+    await user.click(await screen.findByText("덱 설명"));
+    await user.click(screen.getByRole("button", { name: "설명 수정" }));
+    const descriptionInput = await screen.findByLabelText(/덱 설명/);
+    await user.clear(descriptionInput);
+    await user.type(descriptionInput, "기말고사 범위");
+    await user.click(screen.getByRole("button", { name: "변경사항 저장" }));
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/decks/deck-1",
+      expect.objectContaining({
+        method: "PATCH",
+        body: JSON.stringify({
+          title: "국어",
+          description: "기말고사 범위",
+        }),
+      }),
+    );
+    expect(await screen.findByText("기말고사 범위")).toBeTruthy();
   });
 
   it("restarts a completed deck run before opening the study screen", async () => {
@@ -313,24 +353,20 @@ function renderDeckDetail() {
   );
 }
 
-type MockResponse = unknown | { body: unknown; status: number };
+type MockResponse =
+  | unknown
+  | ((input: RequestInfo | URL, init?: RequestInit) => unknown)
+  | { body: unknown; status: number };
 
 function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
     const path = typeof input === "string" ? input : input.toString();
+    const rawResponse =
+      responsesByPath[path] ?? (path === "/api/decks/deck-1" ? deck() : {});
     const response =
-      responsesByPath[path] ??
-      (path === "/api/decks"
-        ? [
-            {
-              id: "deck-1",
-              title: "국어",
-              cardCount: 1,
-              createdAt: "2026-06-22T00:00:00.000Z",
-              updatedAt: "2026-06-22T00:00:00.000Z",
-            },
-          ]
-        : {});
+      typeof rawResponse === "function"
+        ? rawResponse(input, init)
+        : rawResponse;
 
     if (
       path === "/api/cards/card-1" &&
@@ -353,6 +389,17 @@ function mockFetchByPath(responsesByPath: Record<string, MockResponse>) {
 
   vi.stubGlobal("fetch", fetchMock);
   return fetchMock;
+}
+
+function deck(input?: { description?: string | null }) {
+  return {
+    id: "deck-1",
+    title: "국어",
+    description: input?.description ?? "중간고사 시험 범위",
+    cardCount: 1,
+    createdAt: "2026-06-22T00:00:00.000Z",
+    updatedAt: "2026-06-22T00:00:00.000Z",
+  };
 }
 
 function card(input: {

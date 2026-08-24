@@ -3,10 +3,13 @@ import { Hono } from "hono";
 import type { PrismaClient } from "@inq/db";
 import {
   createDeck,
+  getDeck,
   listDecks,
-  renameDeck,
+  updateDeck,
 } from "@inq/db/repositories/decks";
 import type { DeckResponse } from "@inq/shared";
+
+const MAX_DESCRIPTION_LENGTH = 500;
 
 export function createDeckRoutes(options: { prisma: PrismaClient }) {
   const route = new Hono();
@@ -16,15 +19,33 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
     return context.json(decks.map(toDeckResponse));
   });
 
+  route.get("/:deckId", async (context) => {
+    const deck = await getDeck(options.prisma, context.req.param("deckId"));
+
+    if (!deck) {
+      return context.json({ error: "deck_not_found" }, 404);
+    }
+
+    return context.json(toDeckResponse(deck));
+  });
+
   route.post("/", async (context) => {
     const body = await context.req.json();
     const title = trimmedString(readField(body, "title"));
+    const description = optionalDescription(readField(body, "description"));
 
     if (!title) {
       return context.json({ error: "title_required" }, 400);
     }
 
-    const deck = await createDeck(options.prisma, { title });
+    if (!description.valid) {
+      return context.json({ error: description.error }, 400);
+    }
+
+    const deck = await createDeck(options.prisma, {
+      title,
+      description: description.value,
+    });
 
     return context.json(
       toDeckResponse({
@@ -37,10 +58,23 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
 
   route.patch("/:deckId", async (context) => {
     const body = await context.req.json();
-    const title = trimmedString(readField(body, "title"));
+    const titleValue = readField(body, "title");
+    const descriptionValue = readField(body, "description");
+    const hasTitle = titleValue !== undefined;
+    const hasDescription = descriptionValue !== undefined;
 
-    if (!title) {
+    if (!hasTitle && !hasDescription) {
+      return context.json({ error: "deck_update_fields_required" }, 400);
+    }
+
+    const title = hasTitle ? trimmedString(titleValue) : undefined;
+    if (hasTitle && !title) {
       return context.json({ error: "title_required" }, 400);
+    }
+
+    const description = optionalDescription(descriptionValue);
+    if (hasDescription && !description.valid) {
+      return context.json({ error: description.error }, 400);
     }
 
     const deckId = context.req.param("deckId");
@@ -53,8 +87,11 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
       return context.json({ error: "deck_not_found" }, 404);
     }
 
-    const deck = await renameDeck(options.prisma, deckId, {
-      title,
+    const deck = await updateDeck(options.prisma, deckId, {
+      ...(title ? { title } : {}),
+      ...(hasDescription && description.valid
+        ? { description: description.value }
+        : {}),
     });
     const cardCount = await options.prisma.card.count({
       where: { deckId: deck.id },
@@ -87,6 +124,27 @@ function trimmedString(value: unknown): string | null {
   return trimmed ? trimmed : null;
 }
 
+function optionalDescription(
+  value: unknown,
+):
+  | { valid: true; value: string | null }
+  | { valid: false; error: "description_invalid" | "description_too_long" } {
+  if (value === undefined || value === null) {
+    return { valid: true, value: null };
+  }
+
+  if (typeof value !== "string") {
+    return { valid: false, error: "description_invalid" };
+  }
+
+  const trimmed = value.trim();
+  if (trimmed.length > MAX_DESCRIPTION_LENGTH) {
+    return { valid: false, error: "description_too_long" };
+  }
+
+  return { valid: true, value: trimmed || null };
+}
+
 function readField(value: unknown, field: string): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return undefined;
@@ -98,6 +156,7 @@ function readField(value: unknown, field: string): unknown {
 function toDeckResponse(deck: {
   id: string;
   title: string;
+  description: string | null;
   cardCount: number;
   createdAt: Date;
   updatedAt: Date;
@@ -105,6 +164,7 @@ function toDeckResponse(deck: {
   return {
     id: deck.id,
     title: deck.title,
+    description: deck.description,
     cardCount: deck.cardCount,
     createdAt: deck.createdAt.toISOString(),
     updatedAt: deck.updatedAt.toISOString(),

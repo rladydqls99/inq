@@ -47,7 +47,7 @@ export async function exportBackup(
   );
 
   return {
-    schemaVersion: 2,
+    schemaVersion: 3,
     exportedAt: now.toISOString(),
     decks: decks.map((deck) => ({
       ...deck,
@@ -58,19 +58,20 @@ export async function exportBackup(
     challenges,
     challengeCards: challengeCards.map(toChallengeCardExport),
     challengeCardStates: challengeCardStates.map(toChallengeCardStateExport),
-    challengeAnswerEvents: challengeAnswerEvents.map(toChallengeAnswerEventExport),
+    challengeAnswerEvents: challengeAnswerEvents.map(
+      toChallengeAnswerEventExport,
+    ),
     challengeRunSessions: challengeRunSessions.map((session) => {
       const queue = toChallengeRunQueueExport(session.queue, challengeCardMap);
       const completedAt =
-        queue.length === 0
-          ? session.completedAt ?? now
-          : session.completedAt;
+        queue.length === 0 ? (session.completedAt ?? now) : session.completedAt;
 
       return {
         id: session.id,
         challengeId: session.challengeId,
-        status: (queue.length === 0 ? "completed" : session.status) as
-          ChallengeRunSessionExport["status"],
+        status: (queue.length === 0
+          ? "completed"
+          : session.status) as ChallengeRunSessionExport["status"],
         cursor: Math.min(session.cursor, queue.length),
         queue,
         completedAt: completedAt?.toISOString() ?? null,
@@ -91,9 +92,7 @@ function toChallengeRunQueueExport(
   }
 
   return (queue as Array<Omit<ChallengeRunCard, "segments">>)
-    .filter((queueCard) =>
-      challengeCardMap.has(queueCard.challengeCardId),
-    )
+    .filter((queueCard) => challengeCardMap.has(queueCard.challengeCardId))
     .map((queueCard, queueIndex) => ({
       ...queueCard,
       queueIndex,

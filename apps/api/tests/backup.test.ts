@@ -19,7 +19,9 @@ describe("backup routes", () => {
     try {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
-      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      const deck = await prisma.deck.create({
+        data: { title: "국어", description: "1학기 국어 시험 범위" },
+      });
       const card = await createCard(prisma, { deckId: deck.id, segments });
       const challenge = await createChallenge(prisma, {
         name: "중간고사",
@@ -40,9 +42,15 @@ describe("backup routes", () => {
       expect(response.status).toBe(200);
       const backup = await response.json();
       expect(backup).toMatchObject({
-        schemaVersion: 2,
+        schemaVersion: 3,
         exportedAt: expect.any(String),
-        decks: [{ id: deck.id, title: "국어" }],
+        decks: [
+          {
+            id: deck.id,
+            title: "국어",
+            description: "1학기 국어 시험 범위",
+          },
+        ],
         cards: [{ id: card.id, deckId: deck.id, segments }],
         challenges: [{ id: challenge.id, name: "중간고사" }],
       });
@@ -93,7 +101,9 @@ describe("backup routes", () => {
       expect(backup.challengeRunSessions).toHaveLength(1);
       expect(backup.challengeRunSessions[0].status).toBe("completed");
       expect(backup.challengeRunSessions[0].cursor).toBe(1);
-      expect(backup.challengeRunSessions[0].completedAt).toEqual(expect.any(String));
+      expect(backup.challengeRunSessions[0].completedAt).toEqual(
+        expect.any(String),
+      );
       expect(backup.challengeRunSessions[0].queue).toMatchObject([
         {
           challengeCardId: expect.any(String),

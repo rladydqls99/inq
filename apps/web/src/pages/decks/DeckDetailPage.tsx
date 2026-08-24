@@ -3,11 +3,12 @@ import { Trash2 } from "lucide-react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 
 import {
+  useDeck,
   useDeckCards,
-  useDecks,
   useDeleteCard,
   useStartDeckRun,
 } from "@/entities/decks/api";
+import { DeckEditModal } from "@/features/decks/DeckEditModal";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
@@ -25,13 +26,17 @@ export function DeckDetailPage() {
   const [openMenuCardId, setOpenMenuCardId] = useState<string | null>(null);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [startError, setStartError] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const {
+    data: deck,
+    isPending: deckLoading,
+    isError: deckLoadError,
+  } = useDeck(deckId);
   const {
     data: cards = [],
     isPending: loading,
     isError: loadError,
   } = useDeckCards(deckId);
-  const { data: decks = [] } = useDecks();
-  const deck = decks.find((item) => item.id === deckId);
   const deleteCardMutation = useDeleteCard(deckId);
   const startRunMutation = useStartDeckRun(deckId);
   const mountedRef = useRef(true);
@@ -175,7 +180,38 @@ export function DeckDetailPage() {
             </div>
           ) : null}
         </div>
+        {deck ? (
+          <details className="border-t border-inq-line pt-1">
+            <summary className="min-h-12 cursor-pointer py-3 text-sm font-bold text-inq-ink marker:text-inq-ink-soft focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2">
+              덱 설명
+            </summary>
+            <div className="grid justify-items-start gap-3 pb-2 pl-5">
+              <p className="m-0 max-w-[65ch] whitespace-pre-wrap break-words text-sm font-medium leading-[1.65] text-inq-ink-soft text-pretty">
+                {deck.description ??
+                  "아직 설명이 없습니다. 시험 범위나 학습 목적을 기록해 보세요."}
+              </p>
+              <Button
+                size="compact"
+                variant="secondary"
+                type="button"
+                onClick={() => setEditModalOpen(true)}
+              >
+                {deck.description ? "설명 수정" : "설명 추가"}
+              </Button>
+            </div>
+          </details>
+        ) : null}
       </header>
+      {deckLoadError ? (
+        <div className="text-sm font-bold text-inq-error" role="alert">
+          덱 정보를 불러오지 못했습니다.
+        </div>
+      ) : null}
+      {deckLoading ? (
+        <div className="text-sm font-bold text-inq-ink-soft">
+          덱 정보를 불러오는 중입니다.
+        </div>
+      ) : null}
       {loading ? (
         <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           불러오는 중입니다.
@@ -264,6 +300,9 @@ export function DeckDetailPage() {
         >
           <Trash2 aria-hidden="true" size={22} strokeWidth={2.4} />
         </Button>
+      ) : null}
+      {editModalOpen && deck ? (
+        <DeckEditModal deck={deck} onClose={() => setEditModalOpen(false)} />
       ) : null}
     </section>
   );

@@ -34,13 +34,18 @@ describe("UploadPage", () => {
 
     await user.click(await screen.findByRole("button", { name: "덱 만들기" }));
     await user.type(await screen.findByLabelText("덱 이름"), "한국사");
-    await user.click(screen.getByRole("button", { name: "만들기" }));
+    await user.click(
+      within(screen.getByRole("dialog", { name: "덱 만들기" })).getByRole(
+        "button",
+        { name: "덱 만들기" },
+      ),
+    );
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ title: "한국사" }),
+        body: JSON.stringify({ title: "한국사", description: null }),
       }),
     );
     expect(await screen.findByRole("option", { name: "한국사" })).toBeTruthy();
@@ -230,6 +235,7 @@ function deck(input: { id: string; title: string }) {
   return {
     id: input.id,
     title: input.title,
+    description: null,
     cardCount: 0,
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",

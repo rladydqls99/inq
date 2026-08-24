@@ -562,10 +562,6 @@ export type ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput = {
   deleteMany?: Prisma.ChallengeScalarWhereInput | Prisma.ChallengeScalarWhereInput[]
 }
 
-export type NullableStringFieldUpdateOperationsInput = {
-  set?: string | null
-}
-
 export type ChallengeCreateNestedOneWithoutCardsInput = {
   create?: Prisma.XOR<Prisma.ChallengeCreateWithoutCardsInput, Prisma.ChallengeUncheckedCreateWithoutCardsInput>
   connectOrCreate?: Prisma.ChallengeCreateOrConnectWithoutCardsInput

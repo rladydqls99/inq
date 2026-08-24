@@ -9,33 +9,31 @@ import { Textarea } from "@/shared/ui/textarea";
 
 const MAX_DESCRIPTION_LENGTH = 500;
 
-type DeckCreateModalProps = {
+type DeckEditModalProps = {
+  deck: DeckResponse;
   onClose: () => void;
-  onCreated: (deck: DeckResponse) => Promise<void> | void;
 };
 
-export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
+export function DeckEditModal({ deck, onClose }: DeckEditModalProps) {
+  const [title, setTitle] = useState(deck.title);
+  const [description, setDescription] = useState(deck.description ?? "");
   const [error, setError] = useState(false);
-  const createDeck = useDeckMutation();
+  const updateDeck = useDeckMutation();
   const trimmedTitle = title.trim();
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
-    if (!trimmedTitle || createDeck.isPending) {
-      return;
-    }
+    if (!trimmedTitle || updateDeck.isPending) return;
 
     setError(false);
 
     try {
-      const deck = await createDeck.mutateAsync({
+      await updateDeck.mutateAsync({
+        id: deck.id,
         title: trimmedTitle,
         description: description.trim() || null,
       });
-      await onCreated(deck);
       onClose();
     } catch {
       setError(true);
@@ -43,7 +41,7 @@ export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
   }
 
   return (
-    <Modal title="덱 만들기" onClose={onClose}>
+    <Modal title="덱 정보 수정" onClose={onClose}>
       <form className="grid gap-3" onSubmit={submit}>
         <label className="grid gap-1.5 text-sm font-bold text-inq-ink">
           덱 이름
@@ -64,7 +62,7 @@ export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
             className="min-h-28 resize-none font-sans text-base leading-6"
             value={description}
             maxLength={MAX_DESCRIPTION_LENGTH}
-            aria-describedby="deck-create-description-help"
+            aria-describedby="deck-edit-description-help"
             placeholder="시험 범위나 학습 목적을 적어 주세요."
             onChange={(event) => {
               setDescription(event.target.value);
@@ -74,19 +72,19 @@ export function DeckCreateModal({ onClose, onCreated }: DeckCreateModalProps) {
         </label>
         <div
           className="flex items-start justify-between gap-3 text-xs font-medium text-inq-ink-soft"
-          id="deck-create-description-help"
+          id="deck-edit-description-help"
         >
-          <span>덱 상세에서 필요할 때 펼쳐 볼 수 있어요.</span>
+          <span>공백으로 두면 기존 설명이 삭제됩니다.</span>
           <span className="shrink-0 tabular-nums">
             {description.length}/{MAX_DESCRIPTION_LENGTH}
           </span>
         </div>
-        <Button type="submit" disabled={!trimmedTitle || createDeck.isPending}>
-          {createDeck.isPending ? "만드는 중" : "덱 만들기"}
+        <Button type="submit" disabled={!trimmedTitle || updateDeck.isPending}>
+          {updateDeck.isPending ? "저장 중" : "변경사항 저장"}
         </Button>
         {error ? (
           <span className="text-sm font-bold text-inq-error" role="alert">
-            덱을 생성하지 못했습니다.
+            덱 정보를 저장하지 못했습니다. 다시 시도해 주세요.
           </span>
         ) : null}
       </form>

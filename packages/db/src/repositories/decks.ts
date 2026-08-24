@@ -2,11 +2,27 @@ import type { PrismaClient } from "../client";
 
 export async function createDeck(
   prisma: PrismaClient,
-  input: { title: string },
+  input: { title: string; description?: string | null },
 ) {
   return prisma.deck.create({
-    data: { title: input.title },
+    data: { title: input.title, description: input.description ?? null },
   });
+}
+
+export async function getDeck(prisma: PrismaClient, deckId: string) {
+  const deck = await prisma.deck.findUnique({
+    where: { id: deckId },
+    include: {
+      _count: {
+        select: { cards: true },
+      },
+    },
+  });
+
+  if (!deck) return null;
+
+  const { _count, ...result } = deck;
+  return { ...result, cardCount: _count.cards };
 }
 
 export async function listDecks(prisma: PrismaClient) {
@@ -25,14 +41,14 @@ export async function listDecks(prisma: PrismaClient) {
   }));
 }
 
-export async function renameDeck(
+export async function updateDeck(
   prisma: PrismaClient,
   deckId: string,
-  input: { title: string },
+  input: { title?: string; description?: string | null },
 ) {
   return prisma.deck.update({
     where: { id: deckId },
-    data: { title: input.title },
+    data: input,
   });
 }
 

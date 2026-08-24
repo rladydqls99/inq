@@ -1,14 +1,15 @@
 import { useState } from "react";
 
+import type { DeckResponse } from "@inq/shared";
 import { BookOpen, Plus } from "lucide-react";
-import { useDeckMutation, useDecks, useDeleteDeck } from "@/entities/decks/api";
+import { useDecks, useDeleteDeck } from "@/entities/decks/api";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import { PageHeader } from "@/shared/ui/PageHeader";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { ChallengeCreateDialog } from "@/widgets/ChallengeCreateDialog";
 import { DeckCreateModal } from "@/features/decks/DeckCreateModal";
+import { DeckEditModal } from "@/features/decks/DeckEditModal";
 import { DeckListItem } from "@/features/decks/DeckListItem";
 
 export function DeckListPage() {
@@ -18,39 +19,16 @@ export function DeckListPage() {
     isError: loadError,
     refetch,
   } = useDecks();
-  const deckMutation = useDeckMutation();
   const deleteMutation = useDeleteDeck();
-  const [editingDeckId, setEditingDeckId] = useState<string | null>(null);
-  const [editingTitle, setEditingTitle] = useState("");
-  const [renameError, setRenameError] = useState(false);
+  const [editingDeck, setEditingDeck] = useState<DeckResponse | null>(null);
   const [deleteError, setDeleteError] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [challengeDeckId, setChallengeDeckId] = useState<string | null>(null);
   const [openMenuDeckId, setOpenMenuDeckId] = useState<string | null>(null);
 
-  function startRenaming(deck: (typeof decks)[number]) {
-    setEditingDeckId(deck.id);
-    setEditingTitle(deck.title);
-    setRenameError(false);
+  function startEditing(deck: DeckResponse) {
+    setEditingDeck(deck);
     setOpenMenuDeckId(null);
-  }
-
-  async function saveDeckTitle(deckId: string) {
-    const title = editingTitle.trim();
-
-    if (!title) {
-      return;
-    }
-
-    setRenameError(false);
-
-    try {
-      await deckMutation.mutateAsync({ id: deckId, title });
-      setEditingDeckId(null);
-      setEditingTitle("");
-    } catch {
-      setRenameError(true);
-    }
   }
 
   async function deleteDeck(deckId: string) {
@@ -65,7 +43,7 @@ export function DeckListPage() {
   }
 
   const showFloatingAdd =
-    !loading && !loadError && decks.length > 0 && editingDeckId === null;
+    !loading && !loadError && decks.length > 0 && editingDeck === null;
 
   return (
     <section className="grid gap-6">
@@ -73,14 +51,6 @@ export function DeckListPage() {
         <PageHeader title="덱" description="문제를 모아 자유롭게 학습해요." />
       </div>
       <div className="grid gap-2" aria-live="polite">
-        {renameError ? (
-          <div
-            className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
-            role="alert"
-          >
-            덱 이름을 저장하지 못했습니다.
-          </div>
-        ) : null}
         {deleteError ? (
           <div
             className="rounded-lg bg-inq-surface p-3 text-sm font-bold text-inq-error"
@@ -154,8 +124,8 @@ export function DeckListPage() {
                     )
                   }
                 >
-                  <button type="button" onClick={() => startRenaming(deck)}>
-                    이름 변경
+                  <button type="button" onClick={() => startEditing(deck)}>
+                    덱 정보 수정
                   </button>
                   <button
                     type="button"
@@ -175,33 +145,6 @@ export function DeckListPage() {
                 </ActionMenu>
               }
             />
-            {editingDeckId === deck.id ? (
-              <div className="grid grid-cols-[minmax(0,1fr)_auto_auto] items-end gap-2">
-                <label className="grid gap-1 text-sm font-bold">
-                  덱 이름
-                  <Input
-                    className="min-h-11 px-3"
-                    value={editingTitle}
-                    onChange={(event) => setEditingTitle(event.target.value)}
-                  />
-                </label>
-                <Button
-                  size="compact"
-                  type="button"
-                  onClick={() => void saveDeckTitle(deck.id)}
-                >
-                  저장
-                </Button>
-                <Button
-                  size="compact"
-                  variant="secondary"
-                  type="button"
-                  onClick={() => setEditingDeckId(null)}
-                >
-                  취소
-                </Button>
-              </div>
-            ) : null}
           </div>
         ))}
       </div>
@@ -219,6 +162,12 @@ export function DeckListPage() {
         <DeckCreateModal
           onClose={() => setCreateModalOpen(false)}
           onCreated={() => undefined}
+        />
+      ) : null}
+      {editingDeck ? (
+        <DeckEditModal
+          deck={editingDeck}
+          onClose={() => setEditingDeck(null)}
         />
       ) : null}
       {challengeDeckId ? (

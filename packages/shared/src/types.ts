@@ -13,15 +13,18 @@ export type UnlockResponse = {
 
 export type CreateDeckRequest = {
   title: string;
+  description?: string | null;
 };
 
 export type UpdateDeckRequest = {
-  title: string;
+  title?: string;
+  description?: string | null;
 };
 
 export type DeckResponse = {
   id: string;
   title: string;
+  description: string | null;
   cardCount: number;
   createdAt: string;
   updatedAt: string;
@@ -235,7 +238,7 @@ export type DeckRunStateExport = {
 };
 
 export type BackupExport = {
-  schemaVersion: 2;
+  schemaVersion: 3;
   exportedAt: string;
   decks: DeckResponse[];
   cards: CardResponse[];

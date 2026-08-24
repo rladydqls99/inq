@@ -34,13 +34,17 @@ describe("DeckListPage", () => {
     expect(await screen.findByText("등록된 덱이 없습니다.")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "덱 등록하기" }));
     await user.type(await screen.findByLabelText("덱 이름"), "영어");
-    await user.click(screen.getByRole("button", { name: "만들기" }));
+    await user.type(screen.getByLabelText(/덱 설명/), "토익 단어 복습");
+    await user.click(screen.getByRole("button", { name: "덱 만들기" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks",
       expect.objectContaining({
         method: "POST",
-        body: JSON.stringify({ title: "영어" }),
+        body: JSON.stringify({
+          title: "영어",
+          description: "토익 단어 복습",
+        }),
       }),
     );
   });
@@ -64,18 +68,22 @@ describe("DeckListPage", () => {
       within(listItem).getByRole("button", { name: "국어 메뉴" }),
     );
     await user.click(
-      within(listItem).getByRole("button", { name: "이름 변경" }),
+      within(listItem).getByRole("button", { name: "덱 정보 수정" }),
     );
-    const titleInput = within(listItem).getByLabelText("덱 이름");
+    const titleInput = await screen.findByLabelText("덱 이름");
     await user.clear(titleInput);
     await user.type(titleInput, "국어 수정");
-    await user.click(within(listItem).getByRole("button", { name: "저장" }));
+    await user.type(screen.getByLabelText(/덱 설명/), "기말고사 범위");
+    await user.click(screen.getByRole("button", { name: "변경사항 저장" }));
 
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/decks/deck-1",
       expect.objectContaining({
         method: "PATCH",
-        body: JSON.stringify({ title: "국어 수정" }),
+        body: JSON.stringify({
+          title: "국어 수정",
+          description: "기말고사 범위",
+        }),
       }),
     );
 
@@ -122,7 +130,7 @@ describe("DeckListPage", () => {
       within(listItem).getByRole("button", { name: "국어 메뉴" }),
     );
     expect(
-      within(listItem).getByRole("button", { name: "이름 변경" }),
+      within(listItem).getByRole("button", { name: "덱 정보 수정" }),
     ).toBeTruthy();
 
     await user.click(document.body);
@@ -194,6 +202,7 @@ function deck(input: { id: string; title: string; cardCount: number }) {
   return {
     id: input.id,
     title: input.title,
+    description: null,
     cardCount: input.cardCount,
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",

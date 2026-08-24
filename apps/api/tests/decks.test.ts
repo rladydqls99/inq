@@ -25,7 +25,7 @@ describe("deck and card routes", () => {
     }
   });
 
-  it("creates, lists, renames, and deletes decks", async () => {
+  it("creates, lists, reads, updates, and deletes decks", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -34,7 +34,10 @@ describe("deck and card routes", () => {
 
       const createResponse = await app.request("/api/decks", {
         method: "POST",
-        body: JSON.stringify({ title: "국어" }),
+        body: JSON.stringify({
+          title: "국어",
+          description: "  중간고사 시험 범위\n1단원부터 3단원  ",
+        }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -44,6 +47,7 @@ describe("deck and card routes", () => {
       const created = await createResponse.json();
       expect(created).toMatchObject({
         title: "국어",
+        description: "중간고사 시험 범위\n1단원부터 3단원",
         cardCount: 0,
       });
       expect(created.createdAt).toEqual(expect.any(String));
@@ -53,12 +57,31 @@ describe("deck and card routes", () => {
       });
       expect(listResponse.status).toBe(200);
       await expect(listResponse.json()).resolves.toMatchObject([
-        { id: created.id, title: "국어", cardCount: 0 },
+        {
+          id: created.id,
+          title: "국어",
+          description: "중간고사 시험 범위\n1단원부터 3단원",
+          cardCount: 0,
+        },
       ]);
+
+      const detailResponse = await app.request(`/api/decks/${created.id}`, {
+        headers: { cookie },
+      });
+      expect(detailResponse.status).toBe(200);
+      await expect(detailResponse.json()).resolves.toMatchObject({
+        id: created.id,
+        title: "국어",
+        description: "중간고사 시험 범위\n1단원부터 3단원",
+        cardCount: 0,
+      });
 
       const renameResponse = await app.request(`/api/decks/${created.id}`, {
         method: "PATCH",
-        body: JSON.stringify({ title: "한국어" }),
+        body: JSON.stringify({
+          title: "한국어",
+          description: "  기말고사 대비  ",
+        }),
         headers: {
           "content-type": "application/json",
           cookie,
@@ -68,6 +91,25 @@ describe("deck and card routes", () => {
       await expect(renameResponse.json()).resolves.toMatchObject({
         id: created.id,
         title: "한국어",
+        description: "기말고사 대비",
+      });
+
+      const clearDescriptionResponse = await app.request(
+        `/api/decks/${created.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ description: "   " }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        },
+      );
+      expect(clearDescriptionResponse.status).toBe(200);
+      await expect(clearDescriptionResponse.json()).resolves.toMatchObject({
+        id: created.id,
+        title: "한국어",
+        description: null,
       });
 
       const deleteResponse = await app.request(`/api/decks/${created.id}`, {
@@ -159,6 +201,34 @@ describe("deck and card routes", () => {
     }
   });
 
+  it("validates optional deck descriptions", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+
+      for (const [description, error] of [
+        [123, "description_invalid"],
+        ["가".repeat(501), "description_too_long"],
+      ] as const) {
+        const response = await app.request("/api/decks", {
+          method: "POST",
+          body: JSON.stringify({ title: "국어", description }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
+        });
+
+        expect(response.status).toBe(400);
+        await expect(response.json()).resolves.toEqual({ error });
+      }
+    } finally {
+      await cleanup();
+    }
+  });
+
   it("rejects non-object deck request bodies", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
@@ -190,7 +260,7 @@ describe("deck and card routes", () => {
       });
       expect(renameResponse.status).toBe(400);
       await expect(renameResponse.json()).resolves.toEqual({
-        error: "title_required",
+        error: "deck_update_fields_required",
       });
     } finally {
       await cleanup();

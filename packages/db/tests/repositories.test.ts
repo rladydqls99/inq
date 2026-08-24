@@ -20,8 +20,9 @@ import {
 import {
   createDeck,
   deleteDeck,
+  getDeck,
   listDecks,
-  renameDeck,
+  updateDeck,
 } from "../src/repositories/decks";
 import {
   getDeckRunState,
@@ -48,16 +49,37 @@ afterEach(async () => {
 });
 
 describe("deck repositories", () => {
-  it("creates, lists, renames, and deletes decks", async () => {
-    const deck = await createDeck(prisma, { title: "국어" });
+  it("creates, reads, updates, and deletes decks with descriptions", async () => {
+    const deck = await createDeck(prisma, {
+      title: "국어",
+      description: "중간고사 시험 범위",
+    });
 
     await expect(listDecks(prisma)).resolves.toMatchObject([
-      { id: deck.id, title: "국어", cardCount: 0 },
+      {
+        id: deck.id,
+        title: "국어",
+        description: "중간고사 시험 범위",
+        cardCount: 0,
+      },
     ]);
+    await expect(getDeck(prisma, deck.id)).resolves.toMatchObject({
+      id: deck.id,
+      description: "중간고사 시험 범위",
+      cardCount: 0,
+    });
 
-    await renameDeck(prisma, deck.id, { title: "한국어" });
+    await updateDeck(prisma, deck.id, {
+      title: "한국어",
+      description: null,
+    });
     await expect(listDecks(prisma)).resolves.toMatchObject([
-      { id: deck.id, title: "한국어", cardCount: 0 },
+      {
+        id: deck.id,
+        title: "한국어",
+        description: null,
+        cardCount: 0,
+      },
     ]);
 
     await deleteDeck(prisma, deck.id);
@@ -123,9 +145,7 @@ describe("challenge repositories", () => {
       orderBy: { sourceDeckCardId: "asc" },
     });
 
-    expect(
-      challengeCards.map((card) => card.sourceDeckCardId).sort(),
-    ).toEqual(
+    expect(challengeCards.map((card) => card.sourceDeckCardId).sort()).toEqual(
       [firstCard.id, secondCard.id].sort(),
     );
     expect(challengeCards.map((card) => card.segments)).toEqual([
@@ -160,9 +180,9 @@ describe("challenge repositories", () => {
       }),
     ).resolves.toBe(1);
 
-    await expect(updateChallengeFromDeck(prisma, challenge.id)).resolves.toEqual(
-      { addedCount: 1 },
-    );
+    await expect(
+      updateChallengeFromDeck(prisma, challenge.id),
+    ).resolves.toEqual({ addedCount: 1 });
     await expect(
       prisma.challengeCardState.count({
         where: { challengeId: challenge.id },
@@ -248,7 +268,10 @@ describe("run repositories", () => {
 });
 
 function createMigratedDatabaseUrl(): string {
-  const databasePath = join(mkdtempSync(join(tmpdir(), "inq-db-test-")), "test.db");
+  const databasePath = join(
+    mkdtempSync(join(tmpdir(), "inq-db-test-")),
+    "test.db",
+  );
   const databaseUrl = `file:${databasePath}`;
   const migrationsDirectory = join(testDirname, "../prisma/migrations");
 

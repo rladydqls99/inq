@@ -1,10 +1,12 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
   CardResponse,
+  CreateDeckRequest,
   DeckResponse,
   DeckRunResponse,
   ImportPreviewResponse,
   UpdateCardRequest,
+  UpdateDeckRequest,
 } from "@inq/shared";
 import { apiRequest } from "@/shared/api/client";
 
@@ -19,6 +21,12 @@ export const useDecks = () =>
   useQuery({
     queryKey: deckKeys.all,
     queryFn: () => apiRequest<DeckResponse[]>("/decks"),
+  });
+export const useDeck = (id?: string) =>
+  useQuery({
+    queryKey: deckKeys.detail(id ?? ""),
+    queryFn: () => apiRequest<DeckResponse>(`/decks/${id}`),
+    enabled: Boolean(id),
   });
 export const useDeckCards = (id?: string) =>
   useQuery({
@@ -42,12 +50,19 @@ export const useDeckRun = (id?: string) =>
 export function useDeckMutation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, ...body }: { id?: string; title: string }) =>
-      apiRequest<DeckResponse>(id ? `/decks/${id}` : "/decks", {
+    mutationFn: (
+      input:
+        | ({ id?: undefined } & CreateDeckRequest)
+        | ({ id: string } & UpdateDeckRequest),
+    ) => {
+      const { id, ...body } = input;
+      return apiRequest<DeckResponse>(id ? `/decks/${id}` : "/decks", {
         method: id ? "PATCH" : "POST",
         body: JSON.stringify(body),
-      }),
+      });
+    },
     onSuccess: (deck) => {
+      queryClient.setQueryData(deckKeys.detail(deck.id), deck);
       queryClient.setQueryData<DeckResponse[]>(deckKeys.all, (decks) =>
         decks?.some((item) => item.id === deck.id)
           ? decks.map((item) => (item.id === deck.id ? deck : item))

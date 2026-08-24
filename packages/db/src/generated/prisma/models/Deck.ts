@@ -27,6 +27,7 @@ export type AggregateDeck = {
 export type DeckMinAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -34,6 +35,7 @@ export type DeckMinAggregateOutputType = {
 export type DeckMaxAggregateOutputType = {
   id: string | null
   title: string | null
+  description: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -41,6 +43,7 @@ export type DeckMaxAggregateOutputType = {
 export type DeckCountAggregateOutputType = {
   id: number
   title: number
+  description: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -50,6 +53,7 @@ export type DeckCountAggregateOutputType = {
 export type DeckMinAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -57,6 +61,7 @@ export type DeckMinAggregateInputType = {
 export type DeckMaxAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -64,6 +69,7 @@ export type DeckMaxAggregateInputType = {
 export type DeckCountAggregateInputType = {
   id?: true
   title?: true
+  description?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -144,6 +150,7 @@ export type DeckGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalArg
 export type DeckGroupByOutputType = {
   id: string
   title: string
+  description: string | null
   createdAt: Date
   updatedAt: Date
   _count: DeckCountAggregateOutputType | null
@@ -172,6 +179,7 @@ export type DeckWhereInput = {
   NOT?: Prisma.DeckWhereInput | Prisma.DeckWhereInput[]
   id?: Prisma.StringFilter<"Deck"> | string
   title?: Prisma.StringFilter<"Deck"> | string
+  description?: Prisma.StringNullableFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   cards?: Prisma.CardListRelationFilter
@@ -182,6 +190,7 @@ export type DeckWhereInput = {
 export type DeckOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   cards?: Prisma.CardOrderByRelationAggregateInput
@@ -195,6 +204,7 @@ export type DeckWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.DeckWhereInput[]
   NOT?: Prisma.DeckWhereInput | Prisma.DeckWhereInput[]
   title?: Prisma.StringFilter<"Deck"> | string
+  description?: Prisma.StringNullableFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Deck"> | Date | string
   cards?: Prisma.CardListRelationFilter
@@ -205,6 +215,7 @@ export type DeckWhereUniqueInput = Prisma.AtLeast<{
 export type DeckOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.DeckCountOrderByAggregateInput
@@ -218,6 +229,7 @@ export type DeckScalarWhereWithAggregatesInput = {
   NOT?: Prisma.DeckScalarWhereWithAggregatesInput | Prisma.DeckScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Deck"> | string
   title?: Prisma.StringWithAggregatesFilter<"Deck"> | string
+  description?: Prisma.StringNullableWithAggregatesFilter<"Deck"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Deck"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Deck"> | Date | string
 }
@@ -225,6 +237,7 @@ export type DeckScalarWhereWithAggregatesInput = {
 export type DeckCreateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
@@ -235,6 +248,7 @@ export type DeckCreateInput = {
 export type DeckUncheckedCreateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
@@ -245,6 +259,7 @@ export type DeckUncheckedCreateInput = {
 export type DeckUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
@@ -255,6 +270,7 @@ export type DeckUpdateInput = {
 export type DeckUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
@@ -265,6 +281,7 @@ export type DeckUncheckedUpdateInput = {
 export type DeckCreateManyInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -272,6 +289,7 @@ export type DeckCreateManyInput = {
 export type DeckUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -279,6 +297,7 @@ export type DeckUpdateManyMutationInput = {
 export type DeckUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -286,6 +305,7 @@ export type DeckUncheckedUpdateManyInput = {
 export type DeckCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -293,6 +313,7 @@ export type DeckCountOrderByAggregateInput = {
 export type DeckMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -300,6 +321,7 @@ export type DeckMaxOrderByAggregateInput = {
 export type DeckMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   title?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -316,6 +338,10 @@ export type DeckNullableScalarRelationFilter = {
 
 export type StringFieldUpdateOperationsInput = {
   set?: string
+}
+
+export type NullableStringFieldUpdateOperationsInput = {
+  set?: string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -369,6 +395,7 @@ export type DeckUpdateOneRequiredWithoutDeckRunStateNestedInput = {
 export type DeckCreateWithoutCardsInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sourceChallenges?: Prisma.ChallengeCreateNestedManyWithoutSourceDeckInput
@@ -378,6 +405,7 @@ export type DeckCreateWithoutCardsInput = {
 export type DeckUncheckedCreateWithoutCardsInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   sourceChallenges?: Prisma.ChallengeUncheckedCreateNestedManyWithoutSourceDeckInput
@@ -403,6 +431,7 @@ export type DeckUpdateToOneWithWhereWithoutCardsInput = {
 export type DeckUpdateWithoutCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceChallenges?: Prisma.ChallengeUpdateManyWithoutSourceDeckNestedInput
@@ -412,6 +441,7 @@ export type DeckUpdateWithoutCardsInput = {
 export type DeckUncheckedUpdateWithoutCardsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   sourceChallenges?: Prisma.ChallengeUncheckedUpdateManyWithoutSourceDeckNestedInput
@@ -421,6 +451,7 @@ export type DeckUncheckedUpdateWithoutCardsInput = {
 export type DeckCreateWithoutSourceChallengesInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
@@ -430,6 +461,7 @@ export type DeckCreateWithoutSourceChallengesInput = {
 export type DeckUncheckedCreateWithoutSourceChallengesInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
@@ -455,6 +487,7 @@ export type DeckUpdateToOneWithWhereWithoutSourceChallengesInput = {
 export type DeckUpdateWithoutSourceChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
@@ -464,6 +497,7 @@ export type DeckUpdateWithoutSourceChallengesInput = {
 export type DeckUncheckedUpdateWithoutSourceChallengesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
@@ -473,6 +507,7 @@ export type DeckUncheckedUpdateWithoutSourceChallengesInput = {
 export type DeckCreateWithoutDeckRunStateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardCreateNestedManyWithoutDeckInput
@@ -482,6 +517,7 @@ export type DeckCreateWithoutDeckRunStateInput = {
 export type DeckUncheckedCreateWithoutDeckRunStateInput = {
   id?: string
   title: string
+  description?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   cards?: Prisma.CardUncheckedCreateNestedManyWithoutDeckInput
@@ -507,6 +543,7 @@ export type DeckUpdateToOneWithWhereWithoutDeckRunStateInput = {
 export type DeckUpdateWithoutDeckRunStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUpdateManyWithoutDeckNestedInput
@@ -516,6 +553,7 @@ export type DeckUpdateWithoutDeckRunStateInput = {
 export type DeckUncheckedUpdateWithoutDeckRunStateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   title?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   cards?: Prisma.CardUncheckedUpdateManyWithoutDeckNestedInput
@@ -565,6 +603,7 @@ export type DeckCountOutputTypeCountSourceChallengesArgs<ExtArgs extends runtime
 export type DeckSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   cards?: boolean | Prisma.Deck$cardsArgs<ExtArgs>
@@ -576,6 +615,7 @@ export type DeckSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
 export type DeckSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["deck"]>
@@ -583,6 +623,7 @@ export type DeckSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type DeckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["deck"]>
@@ -590,11 +631,12 @@ export type DeckSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
 export type DeckSelectScalar = {
   id?: boolean
   title?: boolean
+  description?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type DeckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
+export type DeckOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "description" | "createdAt" | "updatedAt", ExtArgs["result"]["deck"]>
 export type DeckInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   cards?: boolean | Prisma.Deck$cardsArgs<ExtArgs>
   sourceChallenges?: boolean | Prisma.Deck$sourceChallengesArgs<ExtArgs>
@@ -614,6 +656,7 @@ export type $DeckPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     title: string
+    description: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["deck"]>
@@ -1044,6 +1087,7 @@ export interface Prisma__DeckClient<T, Null = never, ExtArgs extends runtime.Typ
 export interface DeckFieldRefs {
   readonly id: Prisma.FieldRef<"Deck", 'String'>
   readonly title: Prisma.FieldRef<"Deck", 'String'>
+  readonly description: Prisma.FieldRef<"Deck", 'String'>
   readonly createdAt: Prisma.FieldRef<"Deck", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Deck", 'DateTime'>
 }
