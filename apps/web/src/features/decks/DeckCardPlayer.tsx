@@ -11,9 +11,11 @@ import {
 
 import type { QuizSegment } from "@inq/shared";
 import { Button } from "@/shared/ui/button";
+import { QuizCategoryBadge } from "@/shared/ui/quiz-category-badge";
 import { DeckQuizText } from "./DeckQuizText";
 
 type DeckCardPlayerProps = {
+  category?: string | undefined;
   segments: QuizSegment[];
   currentIndex: number;
   totalCards: number;
@@ -29,6 +31,7 @@ type DeckCardPlayerProps = {
 };
 
 export function DeckCardPlayer({
+  category,
   segments,
   currentIndex,
   totalCards,
@@ -222,19 +225,22 @@ export function DeckCardPlayer({
           }
           onKeyDown={!answerRevealed ? handleQuestionKeyDown : undefined}
         >
-          <div
-            className={
-              answerRevealed
-                ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
-                : undefined
-            }
-            aria-live="polite"
-          >
-            <DeckQuizText
-              mode={answerRevealed ? "revealed" : "prompt"}
-              segments={segments}
-              tone={answerRevealed ? "study" : "neutral"}
-            />
+          <div className="grid justify-items-center gap-2">
+            <QuizCategoryBadge category={category} />
+            <div
+              className={
+                answerRevealed
+                  ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
+                  : undefined
+              }
+              aria-live="polite"
+            >
+              <DeckQuizText
+                mode={answerRevealed ? "revealed" : "prompt"}
+                segments={segments}
+                tone={answerRevealed ? "study" : "neutral"}
+              />
+            </div>
           </div>
         </div>
         <button

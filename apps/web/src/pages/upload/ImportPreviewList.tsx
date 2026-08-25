@@ -24,7 +24,7 @@ export function ImportPreviewList({ cards }: ImportPreviewListProps) {
           <span className="text-xs font-bold text-inq-ink-soft">
             {card.blockIndex + 1}번째 카드
           </span>
-          <DeckQuizPreview segments={card.segments} />
+          <DeckQuizPreview category={card.category} segments={card.segments} />
         </article>
       ))}
     </div>

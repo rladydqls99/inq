@@ -20,10 +20,12 @@ export function hasAnswerSegment(segments: QuizSegment[]): boolean {
   return segments.some((segment) => segment.type === "answer");
 }
 
-export function toQuizText(segments: QuizSegment[]): string {
-  return segments
+export function toQuizText(segments: QuizSegment[], category?: string): string {
+  const quizText = segments
     .map((segment) =>
       segment.type === "answer" ? `[${segment.value}]` : segment.value,
     )
     .join("");
+
+  return category ? `**${category}**\n${quizText}` : quizText;
 }

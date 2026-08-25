@@ -23,6 +23,7 @@ model Card {
   deckId               String
   deck                 Deck            @relation(fields: [deckId], references: [id], onDelete: Cascade)
   segments             Json
+  category             String?
   studyViewCount       Int             @default(0)
   lastStudiedAt        DateTime?
   version              Int             @default(1)
@@ -62,6 +63,7 @@ model ChallengeCard {
   sourceDeckCardId String?
   sourceDeckCard   Card?                  @relation("ChallengeCardSource", fields: [sourceDeckCardId], references: [id], onDelete: SetNull)
   segments         Json
+  category         String?
   createdAt        DateTime               @default(now())
   updatedAt        DateTime               @updatedAt
   state            ChallengeCardState?

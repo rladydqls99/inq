@@ -58,6 +58,26 @@ describe("separate card players", () => {
     expect(screen.queryByRole("button", { name: "맞았어요" })).toBeNull();
   });
 
+  it("keeps the category badge secondary to the current question", () => {
+    render(
+      <DeckCardPlayer
+        category="역사"
+        segments={segments}
+        currentIndex={0}
+        totalCards={1}
+        answerRevealed={false}
+        canPrevious={false}
+        canNext={false}
+        onPrevious={() => {}}
+        onNext={() => {}}
+        onMoveTo={() => {}}
+        onAnswerReveal={() => {}}
+      />,
+    );
+
+    expect(screen.getByLabelText("카테고리 역사")).toBeTruthy();
+  });
+
   it("reveals the answer without recording a result", async () => {
     const user = userEvent.setup();
     const onResult = vi.fn();

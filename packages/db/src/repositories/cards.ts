@@ -3,11 +3,12 @@ import type { QuizSegment } from "@inq/shared";
 
 export async function createCard(
   prisma: PrismaClient,
-  input: { deckId: string; segments: QuizSegment[] },
+  input: { deckId: string; category?: string; segments: QuizSegment[] },
 ) {
   return prisma.card.create({
     data: {
       deckId: input.deckId,
+      category: input.category ?? null,
       segments: input.segments as unknown as Prisma.InputJsonValue,
     },
   });
@@ -29,7 +30,7 @@ export async function getCardById(prisma: PrismaClient, cardId: string) {
 export async function updateCard(
   prisma: PrismaClient,
   cardId: string,
-  input: { segments: QuizSegment[]; version: number },
+  input: { category?: string; segments: QuizSegment[]; version: number },
 ) {
   return prisma.card.update({
     where: {
@@ -38,6 +39,7 @@ export async function updateCard(
     },
     data: {
       segments: input.segments as unknown as Prisma.InputJsonValue,
+      category: input.category ?? null,
       version: { increment: 1 },
     },
   });

@@ -21,9 +21,12 @@ describe("challenge run routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
 
-      const response = await app.request("/api/challenges/missing-challenge/run", {
-        headers: { cookie },
-      });
+      const response = await app.request(
+        "/api/challenges/missing-challenge/run",
+        {
+          headers: { cookie },
+        },
+      );
 
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
@@ -41,14 +44,17 @@ describe("challenge run routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
 
-      const response = await app.request("/api/challenges/missing-challenge/run", {
-        method: "PATCH",
-        body: JSON.stringify({ cursor: 1 }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        "/api/challenges/missing-challenge/run",
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: 1 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
@@ -111,6 +117,7 @@ describe("challenge run routes", () => {
       });
       expect(firstRun.cards).toHaveLength(2);
       expect(firstRun.cards[0]).toMatchObject({
+        category: "역사",
         segments,
         queueIndex: 0,
         selectedResult: null,
@@ -140,9 +147,12 @@ describe("challenge run routes", () => {
         reviewIntervalsDays: [3, 5, 10],
       });
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        headers: { cookie },
-      });
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          headers: { cookie },
+        },
+      );
 
       expect(response.status).toBe(200);
       await expect(response.json()).resolves.toMatchObject({
@@ -200,9 +210,12 @@ describe("challenge run routes", () => {
         data: { dueAt: new Date("2999-01-01T00:00:00.000Z") },
       });
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        headers: { cookie },
-      });
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          headers: { cookie },
+        },
+      );
 
       expect(response.status).toBe(200);
       await expect(response.json()).resolves.toMatchObject({
@@ -237,9 +250,12 @@ describe("challenge run routes", () => {
         where: { id: sourceSnapshot.sourceDeckCardId ?? "missing" },
       });
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        headers: { cookie },
-      });
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          headers: { cookie },
+        },
+      );
 
       expect(response.status).toBe(200);
       const reloadedRun = await response.json();
@@ -314,14 +330,17 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        method: "PATCH",
-        body: JSON.stringify({ cursor: 0.5 }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: 0.5 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -341,14 +360,17 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        method: "PATCH",
-        body: "null",
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: "null",
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -367,14 +389,17 @@ describe("challenge run routes", () => {
       const cookie = await unlockTestApp(app);
       const { challenge } = await createChallengeFixture(prisma);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/run`, {
-        method: "PATCH",
-        body: JSON.stringify({ cursor: 1 }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/run`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ cursor: 1 }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
@@ -473,24 +498,28 @@ describe("challenge run routes", () => {
       const run = await getRun(app, challenge.id, cookie);
       const firstSessionCardId = run.cards[0].sessionCardId;
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: firstSessionCardId,
-          finalResult: "wrong",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: firstSessionCardId,
+            finalResult: "wrong",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(200);
       const result = await response.json();
-      expect(result.runState.cards.map((card: { sessionCardId: string }) => card.sessionCardId)).toEqual([
-        run.cards[1].sessionCardId,
-        firstSessionCardId,
-      ]);
+      expect(
+        result.runState.cards.map(
+          (card: { sessionCardId: string }) => card.sessionCardId,
+        ),
+      ).toEqual([run.cards[1].sessionCardId, firstSessionCardId]);
       expect(result.runState.cards[1]).toMatchObject({
         sessionCardId: firstSessionCardId,
         selectedResult: "wrong",
@@ -514,17 +543,20 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       const run = await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: run.cards[0].sessionCardId,
-          finalResult: "maybe",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: run.cards[0].sessionCardId,
+            finalResult: "maybe",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -545,17 +577,20 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: "   ",
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: "   ",
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -575,17 +610,20 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: 123,
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: 123,
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -605,14 +643,17 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: "null",
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: "null",
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(400);
       await expect(response.json()).resolves.toEqual({
@@ -631,17 +672,20 @@ describe("challenge run routes", () => {
       const cookie = await unlockTestApp(app);
       const { challenge } = await createChallengeFixture(prisma);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: "missing-session-card",
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: "missing-session-card",
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
@@ -662,17 +706,20 @@ describe("challenge run routes", () => {
       const { challenge } = await createChallengeFixture(prisma);
       await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: "missing-session-card",
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: "missing-session-card",
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(404);
       await expect(response.json()).resolves.toEqual({
@@ -701,17 +748,20 @@ describe("challenge run routes", () => {
         where: { id: sourceSnapshot.sourceDeckCardId ?? "missing" },
       });
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: runCard.sessionCardId,
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: runCard.sessionCardId,
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(200);
       await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(1);
@@ -787,7 +837,7 @@ describe("challenge run routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
       const deck = await prisma.deck.create({ data: { title: "국어" } });
-      await createCard(prisma, { deckId: deck.id, segments });
+      await createCard(prisma, { deckId: deck.id, category: "역사", segments });
       const challenge = await createChallenge(prisma, {
         name: "최종 복습",
         deckId: deck.id,
@@ -799,17 +849,20 @@ describe("challenge run routes", () => {
       });
       const run = await getRun(app, challenge.id, cookie);
 
-      const response = await app.request(`/api/challenges/${challenge.id}/results`, {
-        method: "POST",
-        body: JSON.stringify({
-          sessionCardId: run.cards[0].sessionCardId,
-          finalResult: "correct",
-        }),
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const response = await app.request(
+        `/api/challenges/${challenge.id}/results`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            sessionCardId: run.cards[0].sessionCardId,
+            finalResult: "correct",
+          }),
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
 
       expect(response.status).toBe(200);
       const updatedChallenge = await prisma.challenge.findUniqueOrThrow({
@@ -880,7 +933,9 @@ describe("challenge run routes", () => {
   });
 });
 
-async function createChallengeFixture(prisma: Awaited<ReturnType<typeof createTestPrisma>>["prisma"]) {
+async function createChallengeFixture(
+  prisma: Awaited<ReturnType<typeof createTestPrisma>>["prisma"],
+) {
   const deck = await prisma.deck.create({ data: { title: "국어" } });
   await createCard(prisma, { deckId: deck.id, segments });
   await createCard(prisma, { deckId: deck.id, segments });

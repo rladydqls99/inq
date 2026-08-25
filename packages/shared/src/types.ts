@@ -33,6 +33,7 @@ export type DeckResponse = {
 export type CardResponse = {
   id: string;
   deckId: string;
+  category?: string;
   segments: QuizSegment[];
   studyViewCount: number;
   lastStudiedAt: string | null;
@@ -87,6 +88,7 @@ export type ChallengeCardResponse = {
   challengeId: string;
   challengeCardId: string;
   sourceDeckCardId: string | null;
+  category?: string;
   segments: QuizSegment[];
   stage: number;
   challengeViewCount: number;
@@ -121,6 +123,7 @@ export type ImportValidationError = {
 
 export type ImportPreviewCard = {
   blockIndex: number;
+  category?: string;
   segments: QuizSegment[];
 };
 
@@ -143,6 +146,7 @@ export type ChallengeRunCard = {
   sessionCardId: string;
   stateId: string;
   challengeCardId: string;
+  category?: string;
   segments: QuizSegment[];
   queueIndex: number;
   selectedResult: "correct" | "wrong" | null;
@@ -168,6 +172,7 @@ export type SubmitChallengeCardResultResponse = {
 
 export type DeckRunCard = {
   cardId: string;
+  category?: string;
   segments: QuizSegment[];
 };
 
@@ -187,6 +192,7 @@ export type ChallengeCardExport = {
   id: string;
   challengeId: string;
   sourceDeckCardId: string | null;
+  category?: string;
   segments: QuizSegment[];
   createdAt: string;
   updatedAt: string;

@@ -29,4 +29,19 @@ describe("DeckQuizPreview", () => {
     expect(screen.getByText("정답 1개")).toBeTruthy();
     expect(screen.queryByText("조선의 왕은 ____ 이다.")).toBeNull();
   });
+
+  it("shows a small category badge above the quiz preview", () => {
+    render(
+      <DeckQuizPreview
+        category="역사"
+        segments={[
+          { type: "text", value: "조선의 왕은 " },
+          { type: "answer", id: "answer-1", value: "세종대왕" },
+          { type: "text", value: " 이다." },
+        ]}
+      />,
+    );
+
+    expect(screen.getByLabelText("카테고리 역사")).toBeTruthy();
+  });
 });

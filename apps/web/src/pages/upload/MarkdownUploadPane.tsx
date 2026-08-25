@@ -77,6 +77,9 @@ export function MarkdownUploadPane({
         <p className="m-0 text-sm text-inq-ink-soft">
           파일을 선택하거나 내용을 직접 붙여 넣으세요.
         </p>
+        <p className="m-0 text-sm text-inq-ink-soft">
+          카테고리는 각 카드의 첫 줄에 <code>**역사**</code>처럼 적을 수 있어요.
+        </p>
       </header>
       <label className="grid gap-1.5 text-sm font-bold">
         마크다운 파일

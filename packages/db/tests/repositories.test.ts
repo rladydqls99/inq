@@ -126,6 +126,7 @@ describe("challenge repositories", () => {
     const deck = await createDeck(prisma, { title: "국어" });
     const firstCard = await createCard(prisma, {
       deckId: deck.id,
+      category: "역사",
       segments: sampleSegments,
     });
     const secondCard = await createCard(prisma, {
@@ -152,6 +153,14 @@ describe("challenge repositories", () => {
       sampleSegments,
       sampleSegments,
     ]);
+    expect(challengeCards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          sourceDeckCardId: firstCard.id,
+          category: "역사",
+        }),
+      ]),
+    );
     expect(challengeCards.every((card) => card.state)).toBe(true);
     expect(challenge).toMatchObject({
       name: "중간고사",

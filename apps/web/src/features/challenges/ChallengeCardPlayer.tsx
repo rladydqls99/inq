@@ -3,9 +3,11 @@ import { useEffect, useRef, useState, type TouchEvent } from "react";
 
 import type { QuizSegment } from "@inq/shared";
 import { Progress } from "@/shared/ui/progress";
+import { QuizCategoryBadge } from "@/shared/ui/quiz-category-badge";
 import { ChallengeQuizText } from "./ChallengeQuizText";
 
 type ChallengeCardPlayerProps = {
+  category?: string | undefined;
   segments: QuizSegment[];
   currentIndex: number;
   totalCards: number;
@@ -21,6 +23,7 @@ type ChallengeCardPlayerProps = {
 };
 
 export function ChallengeCardPlayer({
+  category,
   segments,
   currentIndex,
   totalCards,
@@ -98,21 +101,24 @@ export function ChallengeCardPlayer({
           <ChevronLeft aria-hidden="true" size={32} strokeWidth={2.2} />
         </button>
         <div className="grid w-full max-w-[34rem] place-items-center self-stretch rounded-lg px-0 py-4 text-center">
-          <div
-            className={
-              answerRevealed || selectedResult
-                ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
-                : undefined
-            }
-            aria-live="polite"
-          >
-            <ChallengeQuizText
-              mode={answerRevealed || selectedResult ? "revealed" : "prompt"}
-              segments={segments}
-              tone={selectedResult ? tone : "neutral"}
-              revealedAnswerIds={revealedAnswerIds}
-              showWrongAnswers={showWrongAnswers}
-            />
+          <div className="grid justify-items-center gap-2">
+            <QuizCategoryBadge category={category} />
+            <div
+              className={
+                answerRevealed || selectedResult
+                  ? "motion-safe:animate-[inq-answer-reveal_180ms_ease-out]"
+                  : undefined
+              }
+              aria-live="polite"
+            >
+              <ChallengeQuizText
+                mode={answerRevealed || selectedResult ? "revealed" : "prompt"}
+                segments={segments}
+                tone={selectedResult ? tone : "neutral"}
+                revealedAnswerIds={revealedAnswerIds}
+                showWrongAnswers={showWrongAnswers}
+              />
+            </div>
           </div>
         </div>
         <button

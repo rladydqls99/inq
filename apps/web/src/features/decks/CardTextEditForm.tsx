@@ -9,6 +9,7 @@ import { Textarea } from "@/shared/ui/textarea";
 import { DeckQuizPreview } from "./DeckQuizPreview";
 
 type CardTextEditFormProps = {
+  category?: string | undefined;
   segments: QuizSegment[];
   isSaving: boolean;
   onDirty?: () => void;
@@ -16,12 +17,15 @@ type CardTextEditFormProps = {
 };
 
 export function CardTextEditForm({
+  category,
   segments,
   isSaving,
   onDirty,
   onSave,
 }: CardTextEditFormProps) {
-  const [markdown, setMarkdown] = useState(() => toQuizText(segments));
+  const [markdown, setMarkdown] = useState(() =>
+    toQuizText(segments, category),
+  );
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
   const [validationFailed, setValidationFailed] = useState(false);
   const previewMutation = useQuizTextPreview();
@@ -73,7 +77,7 @@ export function CardTextEditForm({
           id="quiz-format-hint"
         >
           정답으로 만들 단어를 대괄호로 감싸세요. 예: [훈민정음]을 만든 조선의
-          왕은 [세종대왕]이다.
+          왕은 [세종대왕]이다. 카테고리는 첫 줄에 **역사**처럼 적으세요.
         </p>
         <Textarea
           aria-describedby="quiz-format-hint"
@@ -137,6 +141,7 @@ export function CardTextEditForm({
               1장 검증 완료
             </p>
             <DeckQuizPreview
+              category={preview.previewCards[0]?.category}
               segments={preview.previewCards[0]?.segments ?? []}
             />
           </section>

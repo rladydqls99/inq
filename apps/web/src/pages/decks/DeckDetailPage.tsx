@@ -12,6 +12,7 @@ import { DeckEditModal } from "@/features/decks/DeckEditModal";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { QuizCategoryBadge } from "@/shared/ui/quiz-category-badge";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
 import {
   primeVehicleControlFromUserGesture,
@@ -250,12 +251,15 @@ export function DeckDetailPage() {
                 aria-label="카드 선택"
               />
             </label>
-            <DeckQuizText
-              className="min-w-0 text-base leading-[1.55]"
-              mode="revealed"
-              segments={card.segments}
-              tone="study"
-            />
+            <div className="grid min-w-0 gap-1.5">
+              <QuizCategoryBadge category={card.category} />
+              <DeckQuizText
+                className="min-w-0 text-base leading-[1.55]"
+                mode="revealed"
+                segments={card.segments}
+                tone="study"
+              />
+            </div>
             <ActionMenu
               label="카드 메뉴"
               open={openMenuCardId === card.id}

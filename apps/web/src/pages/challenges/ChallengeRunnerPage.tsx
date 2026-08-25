@@ -236,6 +236,7 @@ export function ChallengeRunnerPage() {
       <div className="flex min-h-[calc(100dvh-11rem)] flex-col gap-4">
         <ChallengeCardPlayer
           key={currentCard.sessionCardId}
+          category={currentCard.category}
           segments={currentCard.segments}
           currentIndex={cursor}
           totalCards={runState.cards.length}

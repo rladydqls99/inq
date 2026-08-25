@@ -39,6 +39,25 @@ describe("parseMarkdownImport", () => {
     ]);
   });
 
+  it("extracts a standalone bold first line as a card category", () => {
+    const result = parseMarkdownImport(
+      "**역사**\n훈민정음을 만든 조선의 왕은 [세종]이다.",
+    );
+
+    expect(result.errors).toEqual([]);
+    expect(result.previewCards).toEqual([
+      {
+        blockIndex: 0,
+        category: "역사",
+        segments: [
+          { type: "text", value: "훈민정음을 만든 조선의 왕은 " },
+          { type: "answer", id: "answer-1", value: "세종" },
+          { type: "text", value: "이다." },
+        ],
+      },
+    ]);
+  });
+
   it("trims whitespace around answer values", () => {
     const result = parseMarkdownImport(
       "동명사를 목적어로 취하는 동사는 [ avoid ]이다.",

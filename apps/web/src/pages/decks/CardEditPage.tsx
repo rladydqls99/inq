@@ -63,6 +63,7 @@ export function CardEditPage() {
         <div className="grid gap-3">
           <CardTextEditForm
             key={card.version}
+            category={card.category}
             segments={card.segments}
             isSaving={saveMutation.isPending}
             onDirty={markDirty}

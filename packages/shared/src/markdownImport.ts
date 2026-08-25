@@ -66,6 +66,7 @@ export function parseMarkdownImport(markdown: string): ImportPreviewResponse {
 
     previewCards.push({
       blockIndex: block.blockIndex,
+      ...(parsedBlock.category ? { category: parsedBlock.category } : {}),
       segments: normalizeTextSegments(parsedBlock.segments),
     });
   }
@@ -118,10 +119,12 @@ function addBlockIfNotEmpty(
 }
 
 function parseBlock(block: MarkdownBlock): {
+  category: string | undefined;
   segments: QuizSegment[];
   errors: ImportValidationError[];
   hasAnswer: boolean;
 } {
+  const { category, text } = extractCategory(block.text);
   const segments: QuizSegment[] = [];
   const errors: ImportValidationError[] = [];
   let textBuffer = "";
@@ -129,8 +132,8 @@ function parseBlock(block: MarkdownBlock): {
   let openBracketIndex: number | null = null;
   let answerCount = 0;
 
-  for (let index = 0; index < block.text.length; index += 1) {
-    const character = block.text[index];
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
 
     if (character === "[") {
       if (openBracketIndex !== null) {
@@ -142,7 +145,7 @@ function parseBlock(block: MarkdownBlock): {
             locationForIndex(block, index),
           ),
         );
-        return { segments: [], errors, hasAnswer: false };
+        return { category, segments: [], errors, hasAnswer: false };
       }
 
       if (textBuffer.length > 0) {
@@ -165,7 +168,7 @@ function parseBlock(block: MarkdownBlock): {
             locationForIndex(block, index),
           ),
         );
-        return { segments: [], errors, hasAnswer: false };
+        return { category, segments: [], errors, hasAnswer: false };
       }
 
       if (answerBuffer.trim().length === 0) {
@@ -177,7 +180,7 @@ function parseBlock(block: MarkdownBlock): {
             locationForIndex(block, openBracketIndex),
           ),
         );
-        return { segments: [], errors, hasAnswer: false };
+        return { category, segments: [], errors, hasAnswer: false };
       }
 
       answerCount += 1;
@@ -207,14 +210,36 @@ function parseBlock(block: MarkdownBlock): {
         locationForIndex(block, openBracketIndex),
       ),
     );
-    return { segments: [], errors, hasAnswer: false };
+    return { category, segments: [], errors, hasAnswer: false };
   }
 
   if (textBuffer.length > 0) {
     segments.push({ type: "text", value: textBuffer });
   }
 
-  return { segments, errors, hasAnswer: answerCount > 0 };
+  return { category, segments, errors, hasAnswer: answerCount > 0 };
+}
+
+function extractCategory(text: string): { category?: string; text: string } {
+  const lines = text.split("\n");
+  const categoryLineIndex = lines.findIndex((line) => line.trim().length > 0);
+
+  if (categoryLineIndex === -1) {
+    return { text };
+  }
+
+  const category = lines[categoryLineIndex]
+    ?.match(/^\s*\*\*([^*\n]+)\*\*\s*$/)?.[1]
+    ?.trim();
+
+  if (!category) {
+    return { text };
+  }
+
+  return {
+    category,
+    text: lines.filter((_, index) => index !== categoryLineIndex).join("\n"),
+  };
 }
 
 function createError(

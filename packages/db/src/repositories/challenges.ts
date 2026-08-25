@@ -14,7 +14,7 @@ export async function createChallenge(
         title: true,
         cards: {
           orderBy: { createdAt: "asc" },
-          select: { id: true, segments: true },
+          select: { id: true, category: true, segments: true },
         },
       },
     });
@@ -38,6 +38,7 @@ export async function createChallenge(
         data: {
           challengeId: challenge.id,
           sourceDeckCardId: card.id,
+          category: card.category,
           segments: card.segments as Prisma.InputJsonValue,
           state: { create: { challengeId: challenge.id } },
         },
@@ -65,7 +66,7 @@ export async function updateChallengeFromDeck(
     const cards = await transaction.card.findMany({
       where: { deckId: challenge.sourceDeckId },
       orderBy: { createdAt: "asc" },
-      select: { id: true, segments: true },
+      select: { id: true, category: true, segments: true },
     });
     const existingChallengeCards = await transaction.challengeCard.findMany({
       where: { challengeId },
@@ -85,6 +86,7 @@ export async function updateChallengeFromDeck(
         data: {
           challengeId: challenge.id,
           sourceDeckCardId: card.id,
+          category: card.category,
           segments: card.segments as Prisma.InputJsonValue,
           state: { create: { challengeId: challenge.id } },
         },

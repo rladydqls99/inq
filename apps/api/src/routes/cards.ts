@@ -81,6 +81,7 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
     }
 
     const card = await updateCard(options.prisma, cardId, {
+      ...(quiz.category ? { category: quiz.category } : {}),
       segments: quiz.segments,
       version,
     });
@@ -106,6 +107,7 @@ export function createCardRoutes(options: { prisma: PrismaClient }) {
 function toCardResponse(card: {
   id: string;
   deckId: string;
+  category: string | null;
   segments: unknown;
   studyViewCount: number;
   lastStudiedAt: Date | null;
@@ -116,6 +118,7 @@ function toCardResponse(card: {
   return {
     id: card.id,
     deckId: card.deckId,
+    ...(card.category ? { category: card.category } : {}),
     segments: card.segments as QuizSegment[],
     studyViewCount: card.studyViewCount,
     lastStudiedAt: card.lastStudiedAt?.toISOString() ?? null,

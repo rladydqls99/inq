@@ -22,9 +22,7 @@ export async function getDeckRunResponse(
   ]);
   const cursor = Math.min(runState.cursor, cards.length);
   const completedAt =
-    cursor >= cards.length
-      ? runState.completedAt ?? new Date()
-      : null;
+    cursor >= cards.length ? (runState.completedAt ?? new Date()) : null;
 
   if (
     cursor !== runState.cursor ||
@@ -44,6 +42,7 @@ export async function getDeckRunResponse(
     completedAt: completedAt?.toISOString() ?? null,
     cards: cards.map((card) => ({
       cardId: card.id,
+      ...(card.category ? { category: card.category } : {}),
       segments: card.segments as QuizSegment[],
     })),
   };

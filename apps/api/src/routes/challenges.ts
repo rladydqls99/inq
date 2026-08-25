@@ -152,10 +152,7 @@ export function createChallengeRoutes(options: { prisma: PrismaClient }) {
     }
 
     return context.json(
-      await getOrCreateChallengeRunState(
-        options.prisma,
-        challengeId,
-      ),
+      await getOrCreateChallengeRunState(options.prisma, challengeId),
     );
   });
 
@@ -298,6 +295,7 @@ function toChallengeCardResponse(card: {
   id: string;
   challengeId: string;
   sourceDeckCardId: string | null;
+  category: string | null;
   segments: unknown;
   createdAt: Date;
   updatedAt: Date;
@@ -324,6 +322,7 @@ function toChallengeCardResponse(card: {
     challengeId: card.challengeId,
     challengeCardId: card.id,
     sourceDeckCardId: card.sourceDeckCardId,
+    ...(card.category ? { category: card.category } : {}),
     segments: card.segments as QuizSegment[],
     stage: state.stage,
     challengeViewCount: state.challengeViewCount,

@@ -24,7 +24,9 @@ describe("deck run routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -47,7 +49,9 @@ describe("deck run routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -69,7 +73,9 @@ describe("deck run routes", () => {
       );
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -82,7 +88,11 @@ describe("deck run routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
       const deck = await prisma.deck.create({ data: { title: "국어" } });
-      const card = await createCard(prisma, { deckId: deck.id, segments });
+      const card = await createCard(prisma, {
+        deckId: deck.id,
+        category: "역사",
+        segments,
+      });
 
       const getResponse = await app.request(`/api/decks/${deck.id}/run`, {
         headers: { cookie },
@@ -93,7 +103,7 @@ describe("deck run routes", () => {
         deckTitle: "국어",
         cursor: 0,
         completedAt: null,
-        cards: [{ cardId: card.id, segments }],
+        cards: [{ cardId: card.id, category: "역사", segments }],
       });
 
       const patchResponse = await app.request(`/api/decks/${deck.id}/run`, {

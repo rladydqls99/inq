@@ -85,7 +85,7 @@ export async function exportBackup(
 
 function toChallengeRunQueueExport(
   queue: unknown,
-  challengeCardMap: Map<string, { segments: unknown }>,
+  challengeCardMap: Map<string, { category: string | null; segments: unknown }>,
 ): ChallengeRunCard[] {
   if (!Array.isArray(queue)) {
     return [];
@@ -93,18 +93,25 @@ function toChallengeRunQueueExport(
 
   return (queue as Array<Omit<ChallengeRunCard, "segments">>)
     .filter((queueCard) => challengeCardMap.has(queueCard.challengeCardId))
-    .map((queueCard, queueIndex) => ({
-      ...queueCard,
-      queueIndex,
-      segments: challengeCardMap.get(queueCard.challengeCardId)
-        ?.segments as QuizSegment[],
-    }));
+    .map((queueCard, queueIndex) => {
+      const challengeCard = challengeCardMap.get(queueCard.challengeCardId);
+
+      return {
+        ...queueCard,
+        queueIndex,
+        ...(challengeCard?.category
+          ? { category: challengeCard.category }
+          : {}),
+        segments: challengeCard?.segments as QuizSegment[],
+      };
+    });
 }
 
 function toChallengeCardExport(card: {
   id: string;
   challengeId: string;
   sourceDeckCardId: string | null;
+  category: string | null;
   segments: unknown;
   createdAt: Date;
   updatedAt: Date;
@@ -113,6 +120,7 @@ function toChallengeCardExport(card: {
     id: card.id,
     challengeId: card.challengeId,
     sourceDeckCardId: card.sourceDeckCardId,
+    ...(card.category ? { category: card.category } : {}),
     segments: card.segments as QuizSegment[],
     createdAt: card.createdAt.toISOString(),
     updatedAt: card.updatedAt.toISOString(),
@@ -122,6 +130,7 @@ function toChallengeCardExport(card: {
 function toCardResponse(card: {
   id: string;
   deckId: string;
+  category: string | null;
   segments: unknown;
   studyViewCount: number;
   lastStudiedAt: Date | null;
@@ -132,6 +141,7 @@ function toCardResponse(card: {
   return {
     id: card.id,
     deckId: card.deckId,
+    ...(card.category ? { category: card.category } : {}),
     segments: card.segments as QuizSegment[],
     studyViewCount: card.studyViewCount,
     lastStudiedAt: card.lastStudiedAt?.toISOString() ?? null,

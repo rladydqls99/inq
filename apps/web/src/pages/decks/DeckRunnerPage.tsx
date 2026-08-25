@@ -244,6 +244,7 @@ export function DeckRunnerPage() {
         />
         <DeckCardPlayer
           key={currentCard.cardId}
+          category={currentCard.category}
           segments={currentCard.segments}
           currentIndex={cursor}
           totalCards={runState.cards.length}

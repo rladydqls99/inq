@@ -66,9 +66,9 @@ describe("markdown import routes", () => {
 
       expect(response.status).toBe(201);
       await expect(response.json()).resolves.toEqual({ createdCount: 1 });
-      await expect(prisma.card.count({ where: { deckId: deck.id } })).resolves.toBe(
-        1,
-      );
+      await expect(
+        prisma.card.count({ where: { deckId: deck.id } }),
+      ).resolves.toBe(1);
 
       const invalidResponse = await app.request(
         "/api/import/markdown/confirm",
@@ -85,9 +85,35 @@ describe("markdown import routes", () => {
         },
       );
       expect(invalidResponse.status).toBe(400);
-      await expect(prisma.card.count({ where: { deckId: deck.id } })).resolves.toBe(
-        1,
-      );
+      await expect(
+        prisma.card.count({ where: { deckId: deck.id } }),
+      ).resolves.toBe(1);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("persists a bold first-line category with an imported card", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "한국사" } });
+
+      const response = await app.request("/api/import/markdown/confirm", {
+        method: "POST",
+        body: JSON.stringify({
+          deckId: deck.id,
+          markdown: "**역사**\n훈민정음을 만든 조선의 왕은 [세종]이다.",
+        }),
+        headers: { "content-type": "application/json", cookie },
+      });
+
+      expect(response.status).toBe(201);
+      await expect(
+        prisma.card.findFirstOrThrow({ where: { deckId: deck.id } }),
+      ).resolves.toMatchObject({ category: "역사" });
     } finally {
       await cleanup();
     }
@@ -113,7 +139,9 @@ describe("markdown import routes", () => {
       });
 
       expect(response.status).toBe(404);
-      await expect(response.json()).resolves.toEqual({ error: "deck_not_found" });
+      await expect(response.json()).resolves.toEqual({
+        error: "deck_not_found",
+      });
     } finally {
       await cleanup();
     }
@@ -182,27 +210,33 @@ describe("markdown import routes", () => {
       const app = createApp({ prisma, env: testEnv });
       const cookie = await unlockTestApp(app);
 
-      const previewResponse = await app.request("/api/import/markdown/preview", {
-        method: "POST",
-        body: "null",
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const previewResponse = await app.request(
+        "/api/import/markdown/preview",
+        {
+          method: "POST",
+          body: "null",
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
       expect(previewResponse.status).toBe(400);
       await expect(previewResponse.json()).resolves.toEqual({
         error: "markdown_required",
       });
 
-      const confirmResponse = await app.request("/api/import/markdown/confirm", {
-        method: "POST",
-        body: "null",
-        headers: {
-          "content-type": "application/json",
-          cookie,
+      const confirmResponse = await app.request(
+        "/api/import/markdown/confirm",
+        {
+          method: "POST",
+          body: "null",
+          headers: {
+            "content-type": "application/json",
+            cookie,
+          },
         },
-      });
+      );
       expect(confirmResponse.status).toBe(400);
       await expect(confirmResponse.json()).resolves.toEqual({
         error: "import_fields_required",

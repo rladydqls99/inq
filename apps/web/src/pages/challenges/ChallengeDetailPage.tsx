@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useChallengeCards, useChallenges } from "@/entities/challenges/api";
 import { ChallengeQuizText } from "@/features/challenges/ChallengeQuizText";
+import { QuizCategoryBadge } from "@/shared/ui/quiz-category-badge";
 
 export function ChallengeDetailPage() {
   const { challengeId } = useParams();
@@ -47,17 +48,17 @@ export function ChallengeDetailPage() {
         </div>
       </header>
       {loading ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           불러오는 중입니다.
         </div>
       ) : null}
       {loadError ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           챌린지 카드를 불러오지 못했습니다.
         </div>
       ) : null}
       {!loading && !loadError && cards.length === 0 ? (
-        <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
+        <div className="mt-4 text-sm font-bold text-inq-ink-soft">
           등록된 카드가 없습니다.
         </div>
       ) : null}
@@ -67,12 +68,15 @@ export function ChallengeDetailPage() {
             key={card.challengeCardId}
             className="grid gap-2 border-b border-inq-line py-4"
           >
-            <ChallengeQuizText
-              className="text-base leading-[1.6]"
-              mode="revealed"
-              segments={card.segments}
-              tone="study"
-            />
+            <div className="grid min-w-0 gap-1.5">
+              <QuizCategoryBadge category={card.category} />
+              <ChallengeQuizText
+                className="text-base leading-[1.6]"
+                mode="revealed"
+                segments={card.segments}
+                tone="study"
+              />
+            </div>
             <div className="flex flex-wrap gap-x-2 gap-y-1 text-sm font-medium text-inq-ink-soft [&_span+span]:before:mr-2 [&_span+span]:before:content-['·']">
               <span>단계 {card.stage}</span>
               <span>{card.completedAt ? "완료" : "진행 중"}</span>

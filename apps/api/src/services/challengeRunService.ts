@@ -134,7 +134,9 @@ export function applySessionCardResult(input: {
     index === targetIndex ? updatedTarget : card,
   );
   const shouldMoveToBack = isFirstSelection && input.result === "wrong";
-  const nextQueue = shouldMoveToBack ? moveCardToBack(queue, targetIndex) : queue;
+  const nextQueue = shouldMoveToBack
+    ? moveCardToBack(queue, targetIndex)
+    : queue;
 
   return {
     queue: reindexQueue(nextQueue),
@@ -403,9 +405,7 @@ async function toChallengeRunState(
     status: session.status as ChallengeRunState["status"],
     cursor: session.cursor,
     cards: queue.map((queueCard): ChallengeRunCard => {
-      const challengeCard = challengeCardsById.get(
-        queueCard.challengeCardId,
-      );
+      const challengeCard = challengeCardsById.get(queueCard.challengeCardId);
 
       if (!challengeCard) {
         throw new Error(
@@ -417,6 +417,7 @@ async function toChallengeRunState(
         sessionCardId: queueCard.sessionCardId,
         stateId: queueCard.stateId,
         challengeCardId: queueCard.challengeCardId,
+        ...(challengeCard.category ? { category: challengeCard.category } : {}),
         segments: challengeCard.segments as QuizSegment[],
         queueIndex: queueCard.queueIndex,
         selectedResult: queueCard.selectedResult,

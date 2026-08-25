@@ -15,6 +15,7 @@ export async function confirmMarkdownImport(
   for (const card of preview.previewCards) {
     await createCard(prisma, {
       deckId: input.deckId,
+      ...(card.category ? { category: card.category } : {}),
       segments: card.segments,
     });
   }
