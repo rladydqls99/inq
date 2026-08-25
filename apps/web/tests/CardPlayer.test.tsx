@@ -76,6 +76,9 @@ describe("separate card players", () => {
     );
 
     expect(screen.getByLabelText("카테고리 역사")).toBeTruthy();
+    expect(
+      screen.getByText("훈민정음의 창제자는").parentElement?.className,
+    ).toContain("text-2xl");
   });
 
   it("reveals the answer without recording a result", async () => {

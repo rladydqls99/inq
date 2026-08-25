@@ -17,11 +17,25 @@ export function ChallengeListItem({
     challenge.dueCount > 0
       ? `오늘 ${challenge.dueCount}장 학습 예정`
       : "오늘 학습 완료";
+  const stageProgress = [
+    {
+      label: "바로 풀기",
+      count: challenge.progress.currentStageCounts[0] ?? 0,
+    },
+    ...challenge.reviewIntervalsDays.map((days, index) => ({
+      label: `${days}일`,
+      count: challenge.progress.currentStageCounts[index + 1] ?? 0,
+    })),
+  ];
+  const stageProgressCopy = stageProgress
+    .map(({ label, count }) => `${label} ${count}장 남음`)
+    .join(", ");
   const accessibleLabel = [
     challenge.name,
     challenge.deckTitle,
     dueCopy,
     `전체 ${challenge.progress.totalCards}장 중 ${challenge.progress.completedCards}장 완료`,
+    `단계별 남은 카드: ${stageProgressCopy}`,
   ].join(", ");
 
   const completion =
@@ -82,6 +96,16 @@ export function ChallengeListItem({
                 className="block h-full origin-left bg-inq-highlight-strong transition-transform duration-180 motion-reduce:transition-none"
                 style={{ transform: `scaleX(${completion / 100})` }}
               />
+            </span>
+            <span
+              className="flex flex-wrap gap-x-2 gap-y-1 text-xs font-bold leading-5 text-inq-ink-soft"
+              aria-label={`단계별 남은 카드: ${stageProgressCopy}`}
+            >
+              {stageProgress.map(({ label, count }) => (
+                <span className="whitespace-nowrap" key={label}>
+                  {label} {count}장
+                </span>
+              ))}
             </span>
           </span>
         </span>

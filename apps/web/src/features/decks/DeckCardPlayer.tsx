@@ -236,6 +236,7 @@ export function DeckCardPlayer({
               aria-live="polite"
             >
               <DeckQuizText
+                className="text-2xl leading-[1.45] tracking-[-0.02em]"
                 mode={answerRevealed ? "revealed" : "prompt"}
                 segments={segments}
                 tone={answerRevealed ? "study" : "neutral"}

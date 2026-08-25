@@ -112,6 +112,7 @@ export function ChallengeCardPlayer({
               aria-live="polite"
             >
               <ChallengeQuizText
+                className="text-2xl leading-[1.45] tracking-[-0.02em]"
                 mode={answerRevealed || selectedResult ? "revealed" : "prompt"}
                 segments={segments}
                 tone={selectedResult ? tone : "neutral"}

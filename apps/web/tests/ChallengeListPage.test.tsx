@@ -20,6 +20,7 @@ describe("ChallengeListPage", () => {
           id: "challenge-1",
           name: "중간고사",
           currentStageCounts: { 0: 2, 1: 2, 2: 2, 3: 2 },
+          reviewIntervalsDays: [1, 3, 5],
         }),
       ],
     });
@@ -33,6 +34,10 @@ describe("ChallengeListPage", () => {
     });
     expect(progress.getAttribute("aria-valuenow")).toBe("2");
     expect(progress.getAttribute("aria-valuemax")).toBe("10");
+    expect(within(row).getByText("바로 풀기 2장")).toBeTruthy();
+    expect(within(row).getByText("1일 2장")).toBeTruthy();
+    expect(within(row).getByText("3일 2장")).toBeTruthy();
+    expect(within(row).getByText("5일 2장")).toBeTruthy();
   });
 
   it("shows empty state and creates a challenge from the modal", async () => {
@@ -211,6 +216,7 @@ function challenge(input: {
   id: string;
   name: string;
   currentStageCounts?: Record<number, number>;
+  reviewIntervalsDays?: number[];
   sourceDeckId?: string | null;
 }) {
   return {
@@ -221,7 +227,7 @@ function challenge(input: {
     deckTitle: "국어",
     status: "active",
     answerMode: "manual",
-    reviewIntervalsDays: [3, 5, 10],
+    reviewIntervalsDays: input.reviewIntervalsDays ?? [3, 5, 10],
     maxStage: 3,
     dueCount: 1,
     progress: {
