@@ -2,9 +2,13 @@ import { describe, expect, it } from "vitest";
 
 import { createCard } from "@inq/db/repositories/cards";
 import { createChallenge } from "@inq/db/repositories/challenges";
-import type { QuizSegment } from "@inq/shared";
+import type { ChallengeRunState, QuizSegment } from "@inq/shared";
 import { createApp } from "../src/app";
-import { getOrCreateChallengeRunState } from "../src/services/challengeRunService";
+import {
+  getOrCreateChallengeRunState,
+  submitChallengeRunResult,
+  updateChallengeRunCursor,
+} from "../src/services/challengeRunService";
 import { createTestPrisma, testEnv, unlockTestApp } from "./testUtils";
 
 const segments: QuizSegment[] = [
@@ -116,10 +120,16 @@ describe("challenge run routes", () => {
         cursor: 0,
       });
       expect(firstRun.cards).toHaveLength(2);
-      expect(firstRun.cards[0]).toMatchObject({
+      expect(
+        firstRun.cards.map((card: { queueIndex: number }) => card.queueIndex),
+      ).toEqual([0, 1]);
+      expect(
+        firstRun.cards.find(
+          (card: { category?: string }) => card.category === "역사",
+        ),
+      ).toMatchObject({
         category: "역사",
         segments,
-        queueIndex: 0,
         selectedResult: null,
       });
 
@@ -488,7 +498,7 @@ describe("challenge run routes", () => {
     }
   });
 
-  it("submits a wrong result and moves the card to the back of the active queue", async () => {
+  it("submits a wrong result without moving the card in the active queue", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -519,15 +529,15 @@ describe("challenge run routes", () => {
         result.runState.cards.map(
           (card: { sessionCardId: string }) => card.sessionCardId,
         ),
-      ).toEqual([run.cards[1].sessionCardId, firstSessionCardId]);
-      expect(result.runState.cards[1]).toMatchObject({
+      ).toEqual([firstSessionCardId, run.cards[1].sessionCardId]);
+      expect(result.runState.cards[0]).toMatchObject({
         sessionCardId: firstSessionCardId,
         selectedResult: "wrong",
       });
       expect(result.progress).toMatchObject({
         totalCards: 2,
         completedCards: 0,
-        dueCards: 1,
+        dueCards: 2,
       });
     } finally {
       await cleanup();
@@ -811,8 +821,8 @@ describe("challenge run routes", () => {
         correction.runState.cards.map(
           (card: { sessionCardId: string }) => card.sessionCardId,
         ),
-      ).toEqual([run.cards[1].sessionCardId, sessionCardId]);
-      expect(correction.runState.cards[1]).toMatchObject({
+      ).toEqual([sessionCardId, run.cards[1].sessionCardId]);
+      expect(correction.runState.cards[0]).toMatchObject({
         sessionCardId,
         selectedResult: "correct",
       });
@@ -825,6 +835,155 @@ describe("challenge run routes", () => {
       expect(state.stage).toBe(1);
       expect(state.result).toBe("correct");
       await expect(prisma.challengeAnswerEvent.count()).resolves.toBe(2);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("runs wrong cards again immediately and advances correct cards by calendar date", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+      for (const category of ["퀴즈1", "퀴즈2", "퀴즈3"]) {
+        await createCard(prisma, { deckId: deck.id, category, segments });
+      }
+      const challenge = await createChallenge(prisma, {
+        name: "날짜별 복습",
+        deckId: deck.id,
+        reviewIntervalsDays: [1, 3, 10],
+      });
+      const firstDay = new Date("2026-08-26T23:00:00.000+09:00");
+      const firstRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        firstDay,
+      );
+
+      await submitChallengeRunResult(prisma, {
+        challengeId: challenge.id,
+        sessionCardId: findRunCard(firstRun, "퀴즈1").sessionCardId,
+        finalResult: "correct",
+        now: firstDay,
+      });
+      for (const category of ["퀴즈2", "퀴즈3"]) {
+        await submitChallengeRunResult(prisma, {
+          challengeId: challenge.id,
+          sessionCardId: findRunCard(firstRun, category).sessionCardId,
+          finalResult: "wrong",
+          now: firstDay,
+        });
+      }
+      await updateChallengeRunCursor(prisma, {
+        challengeId: challenge.id,
+        cursor: firstRun.cards.length,
+      });
+
+      const immediateRetry = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        firstDay,
+      );
+      expect(immediateRetry.cards.map((card) => card.category).sort()).toEqual([
+        "퀴즈2",
+        "퀴즈3",
+      ]);
+
+      for (const card of immediateRetry.cards) {
+        await submitChallengeRunResult(prisma, {
+          challengeId: challenge.id,
+          sessionCardId: card.sessionCardId,
+          finalResult: "wrong",
+          now: firstDay,
+        });
+      }
+      await updateChallengeRunCursor(prisma, {
+        challengeId: challenge.id,
+        cursor: immediateRetry.cards.length,
+      });
+
+      const secondDay = new Date("2026-08-27T09:00:00.000+09:00");
+      const secondDayRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        secondDay,
+      );
+      expect(secondDayRun.cards.map((card) => card.category).sort()).toEqual([
+        "퀴즈1",
+        "퀴즈2",
+        "퀴즈3",
+      ]);
+
+      for (const category of ["퀴즈1", "퀴즈2"]) {
+        await submitChallengeRunResult(prisma, {
+          challengeId: challenge.id,
+          sessionCardId: findRunCard(secondDayRun, category).sessionCardId,
+          finalResult: "correct",
+          now: secondDay,
+        });
+      }
+      await submitChallengeRunResult(prisma, {
+        challengeId: challenge.id,
+        sessionCardId: findRunCard(secondDayRun, "퀴즈3").sessionCardId,
+        finalResult: "wrong",
+        now: secondDay,
+      });
+
+      const statesAfterSecondDay = await prisma.challengeCardState.findMany({
+        where: { challengeId: challenge.id },
+        include: { challengeCard: true },
+      });
+      expect(
+        statesAfterSecondDay.map((state) => ({
+          category: state.challengeCard.category,
+          stage: state.stage,
+          dueAt: state.dueAt,
+        })),
+      ).toEqual(
+        expect.arrayContaining([
+          {
+            category: "퀴즈1",
+            stage: 2,
+            dueAt: new Date("2026-08-30T00:00:00.000+09:00"),
+          },
+          {
+            category: "퀴즈2",
+            stage: 1,
+            dueAt: new Date("2026-08-28T00:00:00.000+09:00"),
+          },
+          { category: "퀴즈3", stage: 0, dueAt: null },
+        ]),
+      );
+
+      await updateChallengeRunCursor(prisma, {
+        challengeId: challenge.id,
+        cursor: secondDayRun.cards.length,
+      });
+      const fourthDay = new Date("2026-08-30T10:00:00.000+09:00");
+      const fourthDayRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        fourthDay,
+      );
+      await submitChallengeRunResult(prisma, {
+        challengeId: challenge.id,
+        sessionCardId: findRunCard(fourthDayRun, "퀴즈1").sessionCardId,
+        finalResult: "wrong",
+        now: fourthDay,
+      });
+
+      await expect(
+        prisma.challengeCardState.findUniqueOrThrow({
+          where: {
+            id: findRunCard(fourthDayRun, "퀴즈1").stateId,
+          },
+        }),
+      ).resolves.toMatchObject({
+        stage: 0,
+        dueAt: null,
+        completedAt: null,
+        result: "wrong",
+      });
     } finally {
       await cleanup();
     }
@@ -937,7 +1096,7 @@ async function createChallengeFixture(
   prisma: Awaited<ReturnType<typeof createTestPrisma>>["prisma"],
 ) {
   const deck = await prisma.deck.create({ data: { title: "국어" } });
-  await createCard(prisma, { deckId: deck.id, segments });
+  await createCard(prisma, { deckId: deck.id, category: "역사", segments });
   await createCard(prisma, { deckId: deck.id, segments });
   const challenge = await createChallenge(prisma, {
     name: "중간고사",
@@ -960,4 +1119,14 @@ async function getRun(
   expect(response.status).toBe(200);
 
   return response.json();
+}
+
+function findRunCard(run: ChallengeRunState, category: string) {
+  const card = run.cards.find((candidate) => candidate.category === category);
+
+  if (!card) {
+    throw new Error(`Challenge run card not found: ${category}`);
+  }
+
+  return card;
 }

@@ -6,7 +6,7 @@ import {
   calculateStageTransition,
 } from "../src/services/challengeRunService";
 
-const now = new Date("2026-06-22T00:00:00.000Z");
+const now = new Date("2026-06-22T00:00:00.000+09:00");
 const intervalsDays = [3, 5, 10];
 
 describe("calculateStageTransition", () => {
@@ -20,7 +20,7 @@ describe("calculateStageTransition", () => {
       }),
     ).toMatchObject({
       stage: 1,
-      dueAt: new Date("2026-06-25T00:00:00.000Z"),
+      dueAt: new Date("2026-06-25T00:00:00.000+09:00"),
       completedAt: null,
       event: { previousStage: 0, nextStage: 1 },
     });
@@ -34,7 +34,7 @@ describe("calculateStageTransition", () => {
       }),
     ).toMatchObject({
       stage: 2,
-      dueAt: new Date("2026-06-27T00:00:00.000Z"),
+      dueAt: new Date("2026-06-27T00:00:00.000+09:00"),
       completedAt: null,
       event: { previousStage: 1, nextStage: 2 },
     });
@@ -48,7 +48,7 @@ describe("calculateStageTransition", () => {
       }),
     ).toMatchObject({
       stage: 3,
-      dueAt: new Date("2026-07-02T00:00:00.000Z"),
+      dueAt: new Date("2026-07-02T00:00:00.000+09:00"),
       completedAt: null,
       event: { previousStage: 2, nextStage: 3 },
     });
@@ -68,7 +68,7 @@ describe("calculateStageTransition", () => {
     });
   });
 
-  it("resets wrong answers to stage 0 and schedules the first interval", () => {
+  it("resets wrong answers to stage 0 and makes them immediately due", () => {
     expect(
       calculateStageTransition({
         stage: 2,
@@ -78,9 +78,24 @@ describe("calculateStageTransition", () => {
       }),
     ).toMatchObject({
       stage: 0,
-      dueAt: new Date("2026-06-25T00:00:00.000Z"),
+      dueAt: null,
       completedAt: null,
       event: { previousStage: 2, nextStage: 0 },
+    });
+  });
+
+  it("schedules a correct answer at midnight of the target date in Seoul", () => {
+    expect(
+      calculateStageTransition({
+        stage: 0,
+        result: "correct",
+        intervalsDays: [1, 3, 10],
+        now: new Date("2026-08-26T23:00:00.000+09:00"),
+      }),
+    ).toMatchObject({
+      stage: 1,
+      dueAt: new Date("2026-08-27T00:00:00.000+09:00"),
+      completedAt: null,
     });
   });
 });
@@ -111,7 +126,7 @@ describe("buildChallengeRunQueue", () => {
 });
 
 describe("applySessionCardResult", () => {
-  it("moves a first-time wrong card to the back of the current queue", () => {
+  it("keeps a wrong card in place so each card is attempted once per run", () => {
     const queue = buildChallengeRunQueue([
       {
         stateId: "state-1",
@@ -138,10 +153,10 @@ describe("applySessionCardResult", () => {
     });
 
     expect(result.queue.map((card) => card.sessionCardId)).toEqual([
-      "state-2",
       "state-1",
+      "state-2",
     ]);
-    expect(result.queue[1]?.selectedResult).toBe("wrong");
+    expect(result.queue[0]?.selectedResult).toBe("wrong");
   });
 
   it("recalculates a corrected result from starting stage and keeps queue order stable", () => {
@@ -179,7 +194,7 @@ describe("applySessionCardResult", () => {
     expect(result.queue[1]?.selectedResult).toBe("correct");
     expect(result.transition).toMatchObject({
       stage: 1,
-      dueAt: new Date("2026-06-25T00:00:00.000Z"),
+      dueAt: new Date("2026-06-25T00:00:00.000+09:00"),
       completedAt: null,
       event: {
         previousStage: 0,

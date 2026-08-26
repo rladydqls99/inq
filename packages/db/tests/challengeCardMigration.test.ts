@@ -86,7 +86,7 @@ describe("challenge card separation migration", () => {
       expect(
         queryRows(
           databasePath,
-          'SELECT id, sourceDeckId, sourceDeckTitle FROM Challenge;',
+          "SELECT id, sourceDeckId, sourceDeckTitle FROM Challenge;",
         ),
       ).toEqual([
         {
@@ -98,21 +98,20 @@ describe("challenge card separation migration", () => {
       expect(
         queryRows(
           databasePath,
-          'SELECT id, challengeId, sourceDeckCardId, json(segments) AS segments FROM ChallengeCard;',
+          "SELECT id, challengeId, sourceDeckCardId, json(segments) AS segments FROM ChallengeCard;",
         ),
       ).toEqual([
         {
           id: "challenge-card-state-1",
           challengeId: "challenge-1",
           sourceDeckCardId: "card-1",
-          segments:
-            '[{"type":"answer","id":"answer-1","value":"정답"}]',
+          segments: '[{"type":"answer","id":"answer-1","value":"정답"}]',
         },
       ]);
       expect(
         queryRows(
           databasePath,
-          'SELECT id, challengeId, challengeCardId, stage, challengeViewCount, dueAt, lastChallengedAt, result FROM ChallengeCardState;',
+          "SELECT id, challengeId, challengeCardId, stage, challengeViewCount, dueAt, lastChallengedAt, result FROM ChallengeCardState;",
         ),
       ).toEqual([
         {
@@ -129,7 +128,7 @@ describe("challenge card separation migration", () => {
       expect(
         queryRows(
           databasePath,
-          'SELECT id, challengeId, stateId, challengeCardId, sessionCardId FROM ChallengeAnswerEvent;',
+          "SELECT id, challengeId, stateId, challengeCardId, sessionCardId FROM ChallengeAnswerEvent;",
         ),
       ).toEqual([
         {
@@ -143,7 +142,7 @@ describe("challenge card separation migration", () => {
 
       const [session] = queryRows(
         databasePath,
-        'SELECT id, status, cursor, json(queue) AS queue FROM ChallengeRunSession;',
+        "SELECT id, status, cursor, json(queue) AS queue FROM ChallengeRunSession;",
       );
       expect(session).toMatchObject({
         id: "session-1",
@@ -161,6 +160,17 @@ describe("challenge card separation migration", () => {
         },
       ]);
 
+      applyMigration(
+        databasePath,
+        "20260826090000_make_wrong_challenge_cards_immediately_due",
+      );
+      expect(
+        queryRows(
+          databasePath,
+          "SELECT stage, dueAt, completedAt FROM ChallengeCardState;",
+        ),
+      ).toEqual([{ stage: 0, dueAt: null, completedAt: null }]);
+
       executeSql(
         databasePath,
         "PRAGMA foreign_keys=ON; DELETE FROM Deck WHERE id = 'deck-1';",
@@ -169,23 +179,29 @@ describe("challenge card separation migration", () => {
       expect(
         queryRows(
           databasePath,
-          'SELECT sourceDeckId, sourceDeckTitle FROM Challenge;',
+          "SELECT sourceDeckId, sourceDeckTitle FROM Challenge;",
         ),
       ).toEqual([{ sourceDeckId: null, sourceDeckTitle: "원본 덱" }]);
       expect(
-        queryRows(
-          databasePath,
-          'SELECT sourceDeckCardId FROM ChallengeCard;',
-        ),
+        queryRows(databasePath, "SELECT sourceDeckCardId FROM ChallengeCard;"),
       ).toEqual([{ sourceDeckCardId: null }]);
       expect(
-        queryRows(databasePath, "SELECT count(*) AS count FROM ChallengeCardState;"),
+        queryRows(
+          databasePath,
+          "SELECT count(*) AS count FROM ChallengeCardState;",
+        ),
       ).toEqual([{ count: 1 }]);
       expect(
-        queryRows(databasePath, "SELECT count(*) AS count FROM ChallengeAnswerEvent;"),
+        queryRows(
+          databasePath,
+          "SELECT count(*) AS count FROM ChallengeAnswerEvent;",
+        ),
       ).toEqual([{ count: 1 }]);
       expect(
-        queryRows(databasePath, "SELECT count(*) AS count FROM ChallengeRunSession;"),
+        queryRows(
+          databasePath,
+          "SELECT count(*) AS count FROM ChallengeRunSession;",
+        ),
       ).toEqual([{ count: 1 }]);
     } finally {
       rmSync(directory, { recursive: true, force: true });

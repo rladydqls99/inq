@@ -28,6 +28,7 @@ export const useChallengeRun = (id?: string) =>
     queryKey: challengeKeys.run(id ?? ""),
     queryFn: () => apiRequest<ChallengeRunState>(`/challenges/${id}/run`),
     enabled: Boolean(id),
+    refetchOnMount: "always",
   });
 export function useChallengeMutation() {
   const queryClient = useQueryClient();

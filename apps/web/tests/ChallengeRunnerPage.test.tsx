@@ -1,11 +1,13 @@
 // @vitest-environment jsdom
 
 import { act, cleanup, fireEvent, render, screen, waitFor } from "./test-utils";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { ChallengeRunnerPage } from "../src/pages/challenges/ChallengeRunnerPage";
+import { challengeKeys } from "../src/entities/challenges/api";
 import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
 
 const voiceAnswer = vi.hoisted(() => ({
@@ -143,9 +145,51 @@ describe("ChallengeRunnerPage", () => {
     expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
   });
 
+  it("refetches a cached completed run when entering the runner again", async () => {
+    const fetchMock = mockFetch();
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false, staleTime: 30_000 },
+        mutations: { retry: false },
+      },
+    });
+    queryClient.setQueryData(challengeKeys.run("challenge-1"), {
+      ...runState({ cardCount: 0 }),
+      status: "completed",
+    });
+
+    render(
+      <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
+        <Routes>
+          <Route
+            path="/challenges/:challengeId/run"
+            element={<ChallengeRunnerPage />}
+          />
+        </Routes>
+      </MemoryRouter>,
+      {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        ),
+      },
+    );
+
+    expect(
+      await screen.findByText((_, element) =>
+        matchesTextContent(element, "훈민정음의 창제자는 ____이다."),
+      ),
+    ).toBeTruthy();
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/challenges/challenge-1/run",
+      expect.objectContaining({ credentials: "include" }),
+    );
+  });
+
   it("keeps the answered wrong card visible before advancing to the next queue card", async () => {
     const user = userEvent.setup();
-    const fetchMock = mockFetch({ moveWrongToBack: true });
+    const fetchMock = mockFetch();
 
     render(
       <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
@@ -176,7 +220,7 @@ describe("ChallengeRunnerPage", () => {
       "/api/challenges/challenge-1/run",
       expect.objectContaining({
         method: "PATCH",
-        body: JSON.stringify({ cursor: 0 }),
+        body: JSON.stringify({ cursor: 1 }),
       }),
     );
     expect(
@@ -337,7 +381,6 @@ function mockFetch(
     failLoad?: boolean;
     failMove?: boolean;
     failResult?: boolean;
-    moveWrongToBack?: boolean;
   } = {},
 ) {
   const fetchMock = vi.fn((input: RequestInfo | URL, init?: RequestInit) => {
@@ -353,12 +396,7 @@ function mockFetch(
       }
 
       const body = JSON.parse(init.body as string) as { cursor: number };
-      const nextState = options.moveWrongToBack
-        ? moveFirstCardToBack(state)
-        : state;
-      return Promise.resolve(
-        jsonResponse({ ...nextState, cursor: body.cursor }),
-      );
+      return Promise.resolve(jsonResponse({ ...state, cursor: body.cursor }));
     }
 
     if (path === "/api/challenges/challenge-1/run") {
@@ -381,9 +419,7 @@ function mockFetch(
 
       return Promise.resolve(
         jsonResponse({
-          runState: options.moveWrongToBack
-            ? moveFirstCardToBack(state)
-            : state,
+          runState: state,
           progress: {},
         }),
       );
@@ -395,15 +431,6 @@ function mockFetch(
   vi.stubGlobal("fetch", fetchMock);
 
   return fetchMock;
-}
-
-function moveFirstCardToBack(state: ReturnType<typeof runState>) {
-  const [firstCard, ...remainingCards] = state.cards;
-
-  return {
-    ...state,
-    cards: firstCard ? [...remainingCards, firstCard] : state.cards,
-  };
 }
 
 function jsonResponse(body: unknown, status = 200) {

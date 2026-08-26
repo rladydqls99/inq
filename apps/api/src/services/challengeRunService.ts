@@ -49,7 +49,7 @@ export function calculateStageTransition(input: {
   if (input.result === "wrong") {
     return {
       stage: 0,
-      dueAt: addDays(input.now, firstInterval(input.intervalsDays)),
+      dueAt: null,
       completedAt: null,
       result: "wrong",
       event: {
@@ -78,7 +78,10 @@ export function calculateStageTransition(input: {
 
   return {
     stage: nextStage,
-    dueAt: addDays(input.now, input.intervalsDays[input.stage] ?? 0),
+    dueAt: startOfChallengeDayAfter(
+      input.now,
+      input.intervalsDays[input.stage] ?? 0,
+    ),
     completedAt: null,
     result: "correct",
     event: {
@@ -133,13 +136,9 @@ export function applySessionCardResult(input: {
   const queue = input.queue.map((card, index) =>
     index === targetIndex ? updatedTarget : card,
   );
-  const shouldMoveToBack = isFirstSelection && input.result === "wrong";
-  const nextQueue = shouldMoveToBack
-    ? moveCardToBack(queue, targetIndex)
-    : queue;
 
   return {
-    queue: reindexQueue(nextQueue),
+    queue,
     transition: calculateStageTransition({
       stage: targetCard.startingStage,
       result: input.result,
@@ -430,20 +429,6 @@ function parseQueue(queue: unknown): ChallengeRunQueueCard[] {
   return queue as ChallengeRunQueueCard[];
 }
 
-function moveCardToBack(
-  queue: ChallengeRunQueueCard[],
-  targetIndex: number,
-): ChallengeRunQueueCard[] {
-  const nextQueue = [...queue];
-  const [targetCard] = nextQueue.splice(targetIndex, 1);
-
-  if (!targetCard) {
-    return queue;
-  }
-
-  return [...nextQueue, targetCard];
-}
-
 function reindexQueue(queue: ChallengeRunQueueCard[]): ChallengeRunQueueCard[] {
   return queue.map((card, index) => ({
     ...card,
@@ -451,12 +436,17 @@ function reindexQueue(queue: ChallengeRunQueueCard[]): ChallengeRunQueueCard[] {
   }));
 }
 
-function addDays(date: Date, days: number): Date {
-  const result = new Date(date.getTime());
-  result.setUTCDate(result.getUTCDate() + days);
-  return result;
-}
+const CHALLENGE_TIME_ZONE_OFFSET_MS = 9 * 60 * 60 * 1000;
 
-function firstInterval(intervalsDays: number[]): number {
-  return intervalsDays[0] ?? 0;
+function startOfChallengeDayAfter(date: Date, days: number): Date {
+  const challengeLocalDate = new Date(
+    date.getTime() + CHALLENGE_TIME_ZONE_OFFSET_MS,
+  );
+  const startOfTargetDayUtc = Date.UTC(
+    challengeLocalDate.getUTCFullYear(),
+    challengeLocalDate.getUTCMonth(),
+    challengeLocalDate.getUTCDate() + days,
+  );
+
+  return new Date(startOfTargetDayUtc - CHALLENGE_TIME_ZONE_OFFSET_MS);
 }
