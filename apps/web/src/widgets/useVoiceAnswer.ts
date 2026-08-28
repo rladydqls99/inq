@@ -13,25 +13,49 @@ export function useVoiceAnswer({
   enabled,
   answers,
   active,
+  accepting,
+  contextTerms,
+  sessionKey,
   onMatch,
 }: {
   enabled: boolean;
   answers: { id: string; value: string }[];
   active: boolean;
+  accepting: boolean;
+  contextTerms: string[];
+  sessionKey: string;
   onMatch: (answerIds: string[]) => void;
 }) {
   const [state, setState] = useState<VoiceAnswerState | null>(null);
   const onMatchRef = useRef(onMatch);
+  const answersRef = useRef(answers);
+  const acceptingRef = useRef(accepting);
+  const contextTermsRef = useRef(contextTerms);
+  const finalTranscriptRef = useRef("");
+  const recordingRef = useRef<Recording | null>(null);
   onMatchRef.current = onMatch;
+  answersRef.current = answers;
+  acceptingRef.current = accepting;
+  contextTermsRef.current = contextTerms;
 
   useEffect(() => {
-    if (!enabled || !active || answers.length === 0) {
+    finalTranscriptRef.current = "";
+    setState(
+      accepting && recordingRef.current?.state === "recording"
+        ? { status: "listening", transcript: "" }
+        : null,
+    );
+  }, [accepting, answers]);
+
+  const hasContextTerms = contextTerms.length > 0;
+
+  useEffect(() => {
+    if (!enabled || !active || !hasContextTerms) {
       setState(null);
       return;
     }
 
     let recording: Recording | null = null;
-    let finalTranscript = "";
     let closed = false;
 
     const client = new SonioxClient({
@@ -48,7 +72,7 @@ export function useVoiceAnswer({
       endpoint_latency_adjustment_level: 2,
       endpoint_sensitivity: 0.3,
       max_endpoint_delay_ms: 1000,
-      context: { terms: answers.map((answer) => answer.value) },
+      context: { terms: contextTermsRef.current },
       source: new MicrophoneSource({
         constraints: {
           autoGainControl: true,
@@ -57,21 +81,29 @@ export function useVoiceAnswer({
         },
       }),
     });
+    recordingRef.current = recording;
     recording.on("connected", () => {
-      if (!closed) setState({ status: "listening", transcript: "" });
+      if (!closed && acceptingRef.current) {
+        setState({ status: "listening", transcript: "" });
+      }
     });
     recording.on("result", (result) => {
-      finalTranscript += result.tokens
+      if (!acceptingRef.current) {
+        finalTranscriptRef.current = "";
+        return;
+      }
+
+      finalTranscriptRef.current += result.tokens
         .filter((token) => token.is_final)
         .map((token) => token.text)
         .join("");
     });
     recording.on("endpoint", () => {
-      const transcript = finalTranscript.trim();
-      finalTranscript = "";
-      if (!transcript || closed) return;
+      const transcript = finalTranscriptRef.current.trim();
+      finalTranscriptRef.current = "";
+      if (!transcript || closed || !acceptingRef.current) return;
 
-      const answerIds = matchingVoiceAnswerIds(transcript, answers);
+      const answerIds = matchingVoiceAnswerIds(transcript, answersRef.current);
       if (answerIds.length > 0) {
         setState({ status: "listening", transcript });
         onMatchRef.current(answerIds);
@@ -91,8 +123,12 @@ export function useVoiceAnswer({
     return () => {
       closed = true;
       recording?.cancel();
+      if (recordingRef.current === recording) {
+        recordingRef.current = null;
+      }
+      finalTranscriptRef.current = "";
     };
-  }, [active, answers, enabled]);
+  }, [active, enabled, hasContextTerms, sessionKey]);
 
   return state;
 }

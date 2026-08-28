@@ -162,6 +162,19 @@ export function ChallengeRunnerPage() {
       ) ?? [],
     [currentCard],
   );
+  const voiceContextTerms = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          runState?.cards.flatMap((card) =>
+            card.segments.flatMap((segment) =>
+              segment.type === "answer" ? [segment.value] : [],
+            ),
+          ) ?? [],
+        ),
+      ),
+    [runState?.cards],
+  );
 
   useEffect(() => {
     matchedAnswerIdsRef.current = new Set();
@@ -171,7 +184,10 @@ export function ChallengeRunnerPage() {
   const voiceFeedback = useVoiceAnswer({
     enabled: voiceAnswerEnabled,
     answers: voiceAnswers,
-    active: Boolean(pageVisible && currentCard && !selectedResult),
+    active: Boolean(pageVisible && currentCard),
+    accepting: !selectedResult,
+    contextTerms: voiceContextTerms,
+    sessionKey: runState?.sessionId ?? "",
     onMatch: (answerIds) => {
       answerIds.forEach((id) => matchedAnswerIdsRef.current.add(id));
       setRevealedAnswerIds([...matchedAnswerIdsRef.current]);
