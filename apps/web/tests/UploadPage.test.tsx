@@ -2,7 +2,7 @@
 
 import { cleanup, render, screen, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, useLocation } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { UploadPage } from "../src/pages/upload/UploadPage";
@@ -24,6 +24,53 @@ describe("UploadPage", () => {
     expect(screen.getByLabelText("덱 선택")).toBeTruthy();
     expect(screen.getByTestId("upload-source-pane")).toBeTruthy();
     expect(screen.getByTestId("upload-preview-pane")).toBeTruthy();
+  });
+
+  it("selects the deck requested by the upload URL", async () => {
+    mockFetchByPath({
+      "/api/decks": [
+        deck({ id: "deck-1", title: "국어" }),
+        deck({ id: "deck-2", title: "한국사" }),
+      ],
+    });
+
+    renderUploadPage("/upload?deckId=deck-2");
+
+    await screen.findByRole("option", { name: "한국사" });
+    expect(screen.getByLabelText("덱 선택")).toHaveProperty("value", "deck-2");
+  });
+
+  it("falls back to the first deck when the requested deck does not exist", async () => {
+    mockFetchByPath({
+      "/api/decks": [
+        deck({ id: "deck-1", title: "국어" }),
+        deck({ id: "deck-2", title: "한국사" }),
+      ],
+    });
+
+    renderUploadPage("/upload?deckId=missing-deck");
+
+    await screen.findByRole("option", { name: "한국사" });
+    expect(screen.getByLabelText("덱 선택")).toHaveProperty("value", "deck-1");
+  });
+
+  it("keeps the upload URL in sync when the selected deck changes", async () => {
+    const user = userEvent.setup();
+    mockFetchByPath({
+      "/api/decks": [
+        deck({ id: "deck-1", title: "국어" }),
+        deck({ id: "deck-2", title: "한국사" }),
+      ],
+    });
+
+    renderUploadPage("/upload?deckId=deck-1");
+
+    await screen.findByRole("option", { name: "한국사" });
+    await user.selectOptions(screen.getByLabelText("덱 선택"), "deck-2");
+
+    expect(screen.getByTestId("location-search").textContent).toBe(
+      "?deckId=deck-2",
+    );
   });
 
   it("creates a deck from the modal and selects it", async () => {
@@ -186,12 +233,19 @@ describe("UploadPage", () => {
   });
 });
 
-function renderUploadPage() {
+function renderUploadPage(initialEntry = "/upload") {
   render(
-    <MemoryRouter>
+    <MemoryRouter initialEntries={[initialEntry]}>
       <UploadPage />
+      <LocationSearchProbe />
     </MemoryRouter>,
   );
+}
+
+function LocationSearchProbe() {
+  const location = useLocation();
+
+  return <output data-testid="location-search">{location.search}</output>;
 }
 
 type MockResponse =

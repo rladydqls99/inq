@@ -45,6 +45,9 @@ describe("DeckDetailPage", () => {
     ).toBeTruthy();
     expect(screen.getByRole("heading", { name: "국어" })).toBeTruthy();
     expect(screen.getByRole("button", { name: "학습 시작" })).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: "카드 업로드" }).getAttribute("href"),
+    ).toBe("/upload?deckId=deck-1");
     expect(screen.getByText("조선").className).toContain("is-study");
     expect(screen.getByRole("button", { name: "카드 메뉴" })).toBeTruthy();
 

@@ -10,7 +10,7 @@ import {
 } from "@/entities/decks/api";
 import { DeckEditModal } from "@/features/decks/DeckEditModal";
 import { DeckQuizText } from "@/features/decks/DeckQuizText";
-import { Button } from "@/shared/ui/button";
+import { Button, buttonVariants } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { QuizCategoryBadge } from "@/shared/ui/quiz-category-badge";
 import { ActionMenu } from "@/shared/ui/ActionMenu";
@@ -148,19 +148,39 @@ export function DeckDetailPage() {
   return (
     <section className="grid gap-6">
       <header className="grid gap-4 border-b border-inq-line pb-5">
-        <div className="flex flex-wrap items-end justify-between gap-3">
-          <div className="grid min-w-0 gap-1.5">
-            <h1 className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
-              {deck?.title ?? "덱 카드"}
-            </h1>
-            <p className="m-0 text-sm font-medium text-inq-ink-soft">
-              {loading ? "카드를 불러오고 있어요" : `카드 ${cards.length}장`}
-            </p>
-          </div>
-          {deckId ? (
-            <div className="flex flex-wrap gap-2">
+        <div className="grid min-w-0 gap-1.5">
+          <h1 className="m-0 text-2xl font-extrabold leading-[1.25] tracking-[-0.025em] text-balance">
+            {deck?.title ?? "덱 카드"}
+          </h1>
+          <p className="m-0 text-sm font-medium text-inq-ink-soft">
+            {loading ? "카드를 불러오고 있어요" : `카드 ${cards.length}장`}
+          </p>
+        </div>
+        {deckId ? (
+          <div className="grid gap-3">
+            <Button
+              className="w-full"
+              type="button"
+              disabled={
+                loading || cards.length === 0 || startRunMutation.isPending
+              }
+              onClick={() => void startDeckRun()}
+            >
+              {startRunMutation.isPending ? "준비 중" : "학습 시작"}
+            </Button>
+            <div className="grid grid-cols-2 gap-2">
+              <Link
+                className={buttonVariants({
+                  className: "w-full no-underline",
+                  size: "default",
+                  variant: "secondary",
+                })}
+                to={`/upload?deckId=${encodeURIComponent(deckId)}`}
+              >
+                카드 업로드
+              </Link>
               <Button
-                size="compact"
+                className="w-full"
                 variant="danger"
                 type="button"
                 disabled={loading || cards.length === 0 || bulkDeleting}
@@ -168,19 +188,9 @@ export function DeckDetailPage() {
               >
                 {bulkDeleting ? "삭제 중" : "전체 삭제"}
               </Button>
-              <Button
-                size="compact"
-                type="button"
-                disabled={
-                  loading || cards.length === 0 || startRunMutation.isPending
-                }
-                onClick={() => void startDeckRun()}
-              >
-                {startRunMutation.isPending ? "준비 중" : "학습 시작"}
-              </Button>
             </div>
-          ) : null}
-        </div>
+          </div>
+        ) : null}
         {deck ? (
           <details className="border-t border-inq-line pt-1">
             <summary className="min-h-12 cursor-pointer py-3 text-sm font-bold text-inq-ink marker:text-inq-ink-soft focus-visible:rounded-md focus-visible:outline-3 focus-visible:outline-inq-highlight-strong focus-visible:outline-offset-2">

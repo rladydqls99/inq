@@ -82,8 +82,8 @@ test("challenge runner reveals inline answers when self-scoring", async ({
   await correctButton.click();
   await expect(page.getByText("훈민정음을 만든 세종대왕이다.")).toBeVisible();
   await expect(correctButton).toHaveAttribute("aria-pressed", "true");
-  await expect(page.getByText("5초")).toBeVisible();
-  await expect(page.getByText("4초")).toBeVisible({ timeout: 2000 });
+  await expect(page.getByText("3초")).toBeVisible();
+  await expect(page.getByText("2초")).toBeVisible({ timeout: 2000 });
   await page.getByRole("button", { name: /다음 문제/ }).click();
   await expect(page.getByText("완료되었습니다.")).toBeVisible();
 });

@@ -64,7 +64,7 @@ describe("ChallengeRunnerPage", () => {
         matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    expect(screen.getByText("5초")).toBeTruthy();
+    expect(screen.getByText("3초")).toBeTruthy();
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges/challenge-1/results",
       expect.objectContaining({
@@ -212,7 +212,7 @@ describe("ChallengeRunnerPage", () => {
         matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    await screen.findByText("5초");
+    await screen.findByText("3초");
 
     await user.click(screen.getByRole("button", { name: /다음 문제/ }));
 
@@ -256,7 +256,7 @@ describe("ChallengeRunnerPage", () => {
         matchesTextContent(element, "훈민정음의 창제자는 세종대왕이다."),
       ),
     ).toBeTruthy();
-    expect(screen.queryByText("5초")).toBeNull();
+    expect(screen.queryByText("3초")).toBeNull();
   });
 
   it("shows an error and keeps the answered card when moving fails", async () => {
@@ -288,7 +288,7 @@ describe("ChallengeRunnerPage", () => {
     ).toBeTruthy();
   });
 
-  it("automatically advances five seconds after a result is selected", async () => {
+  it("automatically advances three seconds after a result is selected", async () => {
     const fetchMock = mockFetch();
 
     render(
@@ -314,7 +314,7 @@ describe("ChallengeRunnerPage", () => {
       await Promise.resolve();
     });
     await act(async () => {
-      await vi.advanceTimersByTimeAsync(5000);
+      await vi.advanceTimersByTimeAsync(3000);
       await Promise.resolve();
     });
 

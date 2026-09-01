@@ -16,6 +16,8 @@ import {
   VOICE_ANSWER_STORAGE_KEY,
 } from "@/widgets/voiceAnswerSettings";
 
+const AUTO_ADVANCE_SECONDS = 3;
+
 export function ChallengeRunnerPage() {
   const { challengeId } = useParams();
   const [answeredCard, setAnsweredCard] = useState<ChallengeRunCard | null>(
@@ -207,7 +209,7 @@ export function ChallengeRunnerPage() {
 
     const timer = window.setTimeout(() => {
       void moveTo(nextCursorAfterAnswer ?? cursor + 1);
-    }, 5000);
+    }, AUTO_ADVANCE_SECONDS * 1000);
 
     return () => window.clearTimeout(timer);
   }, [
@@ -257,7 +259,9 @@ export function ChallengeRunnerPage() {
           currentIndex={cursor}
           totalCards={runState.cards.length}
           selectedResult={selectedResult}
-          {...(answeredCard && selectedResult ? { autoAdvanceSeconds: 5 } : {})}
+          {...(answeredCard && selectedResult
+            ? { autoAdvanceSeconds: AUTO_ADVANCE_SECONDS }
+            : {})}
           canPrevious={cursor > 0}
           canNext={cursor < runState.cards.length}
           onPrevious={() => void moveTo(cursor - 1)}

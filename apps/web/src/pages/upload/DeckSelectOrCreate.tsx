@@ -12,12 +12,22 @@ export function DeckSelectOrCreate({
   selectedDeckId,
   onSelectDeck,
 }: DeckSelectOrCreateProps) {
-  const { data: decks = [], isError: loadError } = useDecks();
+  const {
+    data: decks = [],
+    isPending: loading,
+    isError: loadError,
+  } = useDecks();
   const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
-    if (!selectedDeckId && decks[0]) onSelectDeck(decks[0].id);
-  }, [decks, onSelectDeck, selectedDeckId]);
+    if (loading) return;
+
+    const selectedDeckExists = decks.some((deck) => deck.id === selectedDeckId);
+
+    if (selectedDeckExists) return;
+    if (decks[0]) onSelectDeck(decks[0].id);
+    else if (selectedDeckId) onSelectDeck("");
+  }, [decks, loading, onSelectDeck, selectedDeckId]);
 
   return (
     <div className="flex flex-wrap items-end gap-3">

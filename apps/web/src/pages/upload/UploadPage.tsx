@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 
 import type { ImportPreviewResponse } from "@inq/shared";
 import {
@@ -14,7 +15,8 @@ import { ImportValidationSummary } from "./ImportValidationSummary";
 import { MarkdownUploadPane } from "./MarkdownUploadPane";
 
 export function UploadPage() {
-  const [selectedDeckId, setSelectedDeckId] = useState("");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const selectedDeckId = searchParams.get("deckId") ?? "";
   const [markdown, setMarkdown] = useState("");
   const [preview, setPreview] = useState<ImportPreviewResponse | null>(null);
   const [createdMessage, setCreatedMessage] = useState<string | null>(null);
@@ -22,9 +24,22 @@ export function UploadPage() {
   const [validationError, setValidationError] = useState(false);
   const previewMutation = useMarkdownPreview();
   const importMutation = useConfirmMarkdownImport();
-  const selectDeck = useCallback((deckId: string) => {
-    setSelectedDeckId(deckId);
-  }, []);
+  const selectDeck = useCallback(
+    (deckId: string) => {
+      setSearchParams(
+        (currentSearchParams) => {
+          const nextSearchParams = new URLSearchParams(currentSearchParams);
+
+          if (deckId) nextSearchParams.set("deckId", deckId);
+          else nextSearchParams.delete("deckId");
+
+          return nextSearchParams;
+        },
+        { replace: true },
+      );
+    },
+    [setSearchParams],
+  );
   const updateMarkdown = useCallback((nextMarkdown: string) => {
     setMarkdown(nextMarkdown);
     setPreview(null);
