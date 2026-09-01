@@ -139,6 +139,51 @@ describe("challenge run routes", () => {
       );
       const secondRun = await secondResponse.json();
       expect(secondRun.sessionId).toBe(firstRun.sessionId);
+      expect(secondRun.cards).toEqual(firstRun.cards);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("adds newly synced deck cards to the remaining active run queue", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv });
+      const cookie = await unlockTestApp(app);
+      const { deck, challenge } = await createChallengeFixture(prisma);
+      const firstRun = await getRun(app, challenge.id, cookie);
+      const currentSessionCardId = firstRun.cards[0].sessionCardId;
+
+      await createCard(prisma, {
+        deckId: deck.id,
+        category: "신규",
+        segments,
+      });
+      const updateResponse = await app.request(
+        `/api/challenges/${challenge.id}/update-from-deck`,
+        { method: "POST", headers: { cookie } },
+      );
+
+      expect(updateResponse.status).toBe(200);
+      await expect(updateResponse.json()).resolves.toEqual({ addedCount: 1 });
+
+      const updatedRun = await getRun(app, challenge.id, cookie);
+
+      expect(updatedRun).toMatchObject({
+        sessionId: firstRun.sessionId,
+        cursor: 0,
+      });
+      expect(updatedRun.cards).toHaveLength(3);
+      expect(updatedRun.cards[0].sessionCardId).toBe(currentSessionCardId);
+      expect(
+        updatedRun.cards.map((card: { queueIndex: number }) => card.queueIndex),
+      ).toEqual([0, 1, 2]);
+      expect(
+        updatedRun.cards.find(
+          (card: { category?: string }) => card.category === "신규",
+        ),
+      ).toBeTruthy();
     } finally {
       await cleanup();
     }

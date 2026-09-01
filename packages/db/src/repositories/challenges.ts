@@ -1,5 +1,14 @@
 import type { Prisma, PrismaClient } from "../client";
 
+type PersistedChallengeRunQueueCard = {
+  sessionCardId: string;
+  stateId: string;
+  challengeCardId: string;
+  queueIndex: number;
+  startingStage: number;
+  selectedResult: "correct" | "wrong" | null;
+};
+
 export async function createChallenge(
   prisma: PrismaClient,
   input: { name: string; deckId: string; reviewIntervalsDays: number[] },
@@ -81,8 +90,10 @@ export async function updateChallengeFromDeck(
       (card) => !existingSourceCardIds.has(card.id),
     );
 
+    const addedQueueCards: PersistedChallengeRunQueueCard[] = [];
+
     for (const card of missingCards) {
-      await transaction.challengeCard.create({
+      const challengeCard = await transaction.challengeCard.create({
         data: {
           challengeId: challenge.id,
           sourceDeckCardId: card.id,
@@ -90,10 +101,51 @@ export async function updateChallengeFromDeck(
           segments: card.segments as Prisma.InputJsonValue,
           state: { create: { challengeId: challenge.id } },
         },
+        include: { state: true },
+      });
+
+      if (!challengeCard.state) {
+        throw new Error(
+          `Challenge card state was not created: ${challengeCard.id}`,
+        );
+      }
+
+      addedQueueCards.push({
+        sessionCardId: challengeCard.state.id,
+        stateId: challengeCard.state.id,
+        challengeCardId: challengeCard.id,
+        queueIndex: 0,
+        startingStage: challengeCard.state.stage,
+        selectedResult: null,
       });
     }
 
     if (missingCards.length > 0) {
+      const activeSession = await transaction.challengeRunSession.findFirst({
+        where: { challengeId: challenge.id, status: "active" },
+        orderBy: { createdAt: "desc" },
+      });
+
+      if (activeSession) {
+        const currentQueue = activeSession.queue as unknown as
+          PersistedChallengeRunQueueCard[] | undefined;
+        const queue = Array.isArray(currentQueue) ? currentQueue : [];
+        const preservedCount = Math.min(activeSession.cursor + 1, queue.length);
+        const preservedQueue = queue.slice(0, preservedCount);
+        const remainingQueue = shuffle([
+          ...queue.slice(preservedCount),
+          ...addedQueueCards,
+        ]);
+        const nextQueue = [...preservedQueue, ...remainingQueue].map(
+          (queueCard, queueIndex) => ({ ...queueCard, queueIndex }),
+        );
+
+        await transaction.challengeRunSession.update({
+          where: { id: activeSession.id },
+          data: { queue: nextQueue as unknown as Prisma.InputJsonValue },
+        });
+      }
+
       await transaction.challenge.update({
         where: { id: challenge.id },
         data: {
@@ -112,4 +164,18 @@ export class ChallengeSourceDeckUnavailableError extends Error {
     super(`Source deck is unavailable for challenge: ${challengeId}`);
     this.name = "ChallengeSourceDeckUnavailableError";
   }
+}
+
+function shuffle<T>(items: T[]): T[] {
+  const shuffled = [...items];
+
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [
+      shuffled[swapIndex] as T,
+      shuffled[index] as T,
+    ];
+  }
+
+  return shuffled;
 }

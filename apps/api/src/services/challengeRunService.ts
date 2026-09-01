@@ -94,17 +94,28 @@ export function calculateStageTransition(input: {
 
 export function buildChallengeRunQueue(
   states: ChallengeCardStateSnapshot[],
+  random: () => number = Math.random,
 ): ChallengeRunQueueCard[] {
-  return states
+  const queue: ChallengeRunQueueCard[] = states
     .filter((state) => state.completedAt === null)
-    .map((state, index) => ({
+    .map((state) => ({
       sessionCardId: state.stateId,
       stateId: state.stateId,
       challengeCardId: state.challengeCardId,
-      queueIndex: index,
+      queueIndex: 0,
       startingStage: state.stage,
       selectedResult: null,
     }));
+
+  for (let index = queue.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(random() * (index + 1));
+    [queue[index], queue[swapIndex]] = [
+      queue[swapIndex] as ChallengeRunQueueCard,
+      queue[index] as ChallengeRunQueueCard,
+    ];
+  }
+
+  return reindexQueue(queue);
 }
 
 export function applySessionCardResult(input: {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   applySessionCardResult,
@@ -123,26 +123,67 @@ describe("buildChallengeRunQueue", () => {
       },
     ]);
   });
+
+  it("randomizes a new run queue and reindexes the shuffled cards", () => {
+    const random = vi.fn().mockReturnValue(0);
+    const queue = buildChallengeRunQueue(
+      [
+        {
+          stateId: "state-1",
+          challengeCardId: "challenge-card-1",
+          stage: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+        {
+          stateId: "state-2",
+          challengeCardId: "challenge-card-2",
+          stage: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+        {
+          stateId: "state-3",
+          challengeCardId: "challenge-card-3",
+          stage: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+      ],
+      random,
+    );
+
+    expect(queue.map((card) => card.sessionCardId)).toEqual([
+      "state-2",
+      "state-3",
+      "state-1",
+    ]);
+    expect(queue.map((card) => card.queueIndex)).toEqual([0, 1, 2]);
+    expect(random).toHaveBeenCalledTimes(2);
+  });
 });
 
 describe("applySessionCardResult", () => {
   it("keeps a wrong card in place so each card is attempted once per run", () => {
-    const queue = buildChallengeRunQueue([
-      {
-        stateId: "state-1",
-        challengeCardId: "challenge-card-1",
-        stage: 0,
-        dueAt: null,
-        completedAt: null,
-      },
-      {
-        stateId: "state-2",
-        challengeCardId: "challenge-card-2",
-        stage: 0,
-        dueAt: null,
-        completedAt: null,
-      },
-    ]);
+    const queue = buildChallengeRunQueue(
+      [
+        {
+          stateId: "state-1",
+          challengeCardId: "challenge-card-1",
+          stage: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+        {
+          stateId: "state-2",
+          challengeCardId: "challenge-card-2",
+          stage: 0,
+          dueAt: null,
+          completedAt: null,
+        },
+      ],
+      () => 0.999,
+    );
 
     const result = applySessionCardResult({
       queue,
