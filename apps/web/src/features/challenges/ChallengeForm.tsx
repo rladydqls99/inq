@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useChallengeMutation } from "@/entities/challenges/api";
 import { useDecks } from "@/entities/decks/api";
@@ -13,10 +13,11 @@ type ChallengeFormProps = {
 export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
   const [name, setName] = useState("");
   const [deckId, setDeckId] = useState(presetDeckId ?? "");
-  const [intervalOne, setIntervalOne] = useState("3");
-  const [intervalTwo, setIntervalTwo] = useState("5");
-  const [intervalThree, setIntervalThree] = useState("10");
+  const [intervalOne, setIntervalOne] = useState("1");
+  const [intervalTwo, setIntervalTwo] = useState("3");
+  const [intervalThree, setIntervalThree] = useState("7");
   const [error, setError] = useState(false);
+  const nameWasEdited = useRef(false);
   const { data: decks = [], isError: deckLoadError } = useDecks();
   const createChallenge = useChallengeMutation();
   const parsedIntervals = parseIntervals([
@@ -29,6 +30,14 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
   useEffect(() => {
     setDeckId((current) => (presetDeckId ?? current) || decks[0]?.id || "");
   }, [decks, presetDeckId]);
+
+  useEffect(() => {
+    if (nameWasEdited.current) {
+      return;
+    }
+
+    setName(decks.find((deck) => deck.id === deckId)?.title ?? "");
+  }, [deckId, decks]);
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -60,6 +69,7 @@ export function ChallengeForm({ onCreated, presetDeckId }: ChallengeFormProps) {
         <Input
           value={name}
           onChange={(event) => {
+            nameWasEdited.current = true;
             setName(event.target.value);
             setError(false);
           }}

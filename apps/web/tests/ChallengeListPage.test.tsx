@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "./test-utils";
+import { cleanup, render, screen, waitFor, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -51,7 +51,10 @@ describe("ChallengeListPage", () => {
 
     expect(await screen.findByText("등록된 챌린지가 없습니다.")).toBeTruthy();
     await user.click(screen.getByRole("button", { name: "챌린지 등록하기" }));
-    await user.type(await screen.findByLabelText("챌린지 이름"), "새 챌린지");
+    const challengeName = (await screen.findByLabelText(
+      "챌린지 이름",
+    )) as HTMLInputElement;
+    await waitFor(() => expect(challengeName.value).toBe("국어"));
     await user.selectOptions(screen.getByLabelText("덱"), "deck-1");
     await user.click(screen.getByRole("button", { name: "등록하기" }));
 
@@ -60,9 +63,9 @@ describe("ChallengeListPage", () => {
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          name: "새 챌린지",
+          name: "국어",
           deckId: "deck-1",
-          reviewIntervalsDays: [3, 5, 10],
+          reviewIntervalsDays: [1, 3, 7],
         }),
       }),
     );

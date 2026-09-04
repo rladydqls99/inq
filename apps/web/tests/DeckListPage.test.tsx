@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from "./test-utils";
+import { cleanup, render, screen, waitFor, within } from "./test-utils";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
@@ -51,13 +51,15 @@ describe("DeckListPage", () => {
 
   it("uses the row menu for rename, challenge creation, and delete", async () => {
     const user = userEvent.setup();
+    let deckTitle = "국어";
     const fetchMock = mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 2 })],
-      "/api/decks/deck-1": deck({
-        id: "deck-1",
-        title: "국어 수정",
-        cardCount: 2,
-      }),
+      "/api/decks": () => [
+        deck({ id: "deck-1", title: deckTitle, cardCount: 2 }),
+      ],
+      "/api/decks/deck-1": () => {
+        deckTitle = "국어 수정";
+        return deck({ id: "deck-1", title: deckTitle, cardCount: 2 });
+      },
       "/api/challenges": { id: "challenge-1" },
     });
 
@@ -93,22 +95,25 @@ describe("DeckListPage", () => {
     await user.click(
       within(listItem).getByRole("button", { name: "챌린지 등록" }),
     );
-    await user.type(await screen.findByLabelText("챌린지 이름"), "중간고사");
+    const challengeName = (await screen.findByLabelText(
+      "챌린지 이름",
+    )) as HTMLInputElement;
+    await waitFor(() => expect(challengeName.value).toBe("국어 수정"));
     await user.click(screen.getByRole("button", { name: "등록하기" }));
     expect(fetchMock).toHaveBeenCalledWith(
       "/api/challenges",
       expect.objectContaining({
         method: "POST",
         body: JSON.stringify({
-          name: "중간고사",
+          name: "국어 수정",
           deckId: "deck-1",
-          reviewIntervalsDays: [3, 5, 10],
+          reviewIntervalsDays: [1, 3, 7],
         }),
       }),
     );
 
     await user.click(
-      within(listItem).getByRole("button", { name: "국어 메뉴" }),
+      within(listItem).getByRole("button", { name: "국어 수정 메뉴" }),
     );
     await user.click(within(listItem).getByRole("button", { name: "삭제" }));
     expect(fetchMock).toHaveBeenCalledWith(
