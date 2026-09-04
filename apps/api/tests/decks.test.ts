@@ -49,6 +49,7 @@ describe("deck and card routes", () => {
         title: "국어",
         description: "중간고사 시험 범위\n1단원부터 3단원",
         cardCount: 0,
+        challengeCount: 0,
       });
       expect(created.createdAt).toEqual(expect.any(String));
 
@@ -62,6 +63,7 @@ describe("deck and card routes", () => {
           title: "국어",
           description: "중간고사 시험 범위\n1단원부터 3단원",
           cardCount: 0,
+          challengeCount: 0,
         },
       ]);
 
@@ -74,6 +76,7 @@ describe("deck and card routes", () => {
         title: "국어",
         description: "중간고사 시험 범위\n1단원부터 3단원",
         cardCount: 0,
+        challengeCount: 0,
       });
 
       const renameResponse = await app.request(`/api/decks/${created.id}`, {
@@ -122,6 +125,37 @@ describe("deck and card routes", () => {
         headers: { cookie },
       });
       await expect(emptyListResponse.json()).resolves.toEqual([]);
+    } finally {
+      await cleanup();
+    }
+  });
+
+  it("reports the number of challenges registered from each deck", async () => {
+    const { prisma, cleanup } = await createTestPrisma();
+
+    try {
+      const app = createApp({ prisma, env: testEnv() });
+      const cookie = await unlockTestApp(app);
+      const deck = await prisma.deck.create({ data: { title: "국어" } });
+
+      await prisma.challenge.create({
+        data: {
+          name: "국어",
+          sourceDeckId: deck.id,
+          sourceDeckTitle: deck.title,
+          reviewIntervalsDays: [1, 3, 7],
+          maxStage: 3,
+        },
+      });
+
+      const listResponse = await app.request("/api/decks", {
+        headers: { cookie },
+      });
+
+      expect(listResponse.status).toBe(200);
+      await expect(listResponse.json()).resolves.toMatchObject([
+        { id: deck.id, challengeCount: 1 },
+      ]);
     } finally {
       await cleanup();
     }

@@ -14,7 +14,7 @@ export async function getDeck(prisma: PrismaClient, deckId: string) {
     where: { id: deckId },
     include: {
       _count: {
-        select: { cards: true },
+        select: { cards: true, sourceChallenges: true },
       },
     },
   });
@@ -22,14 +22,18 @@ export async function getDeck(prisma: PrismaClient, deckId: string) {
   if (!deck) return null;
 
   const { _count, ...result } = deck;
-  return { ...result, cardCount: _count.cards };
+  return {
+    ...result,
+    cardCount: _count.cards,
+    challengeCount: _count.sourceChallenges,
+  };
 }
 
 export async function listDecks(prisma: PrismaClient) {
   const decks = await prisma.deck.findMany({
     include: {
       _count: {
-        select: { cards: true },
+        select: { cards: true, sourceChallenges: true },
       },
     },
     orderBy: { createdAt: "asc" },
@@ -38,6 +42,7 @@ export async function listDecks(prisma: PrismaClient) {
   return decks.map(({ _count, ...deck }) => ({
     ...deck,
     cardCount: _count.cards,
+    challengeCount: _count.sourceChallenges,
   }));
 }
 

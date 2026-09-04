@@ -4,6 +4,7 @@ import type {
   ChallengeResponse,
   ChallengeRunState,
 } from "@inq/shared";
+import { deckKeys } from "@/entities/decks/api";
 import { apiRequest } from "@/shared/api/client";
 
 export const challengeKeys = {
@@ -46,8 +47,13 @@ export function useChallengeMutation() {
         method: id ? "PATCH" : "POST",
         body: JSON.stringify(body),
       }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: challengeKeys.all }),
+    onSuccess: (_challenge, input) => {
+      queryClient.invalidateQueries({ queryKey: challengeKeys.all });
+
+      if (!input.id) {
+        queryClient.invalidateQueries({ queryKey: deckKeys.all });
+      }
+    },
   });
 }
 export function useDeleteChallenge() {
@@ -55,8 +61,10 @@ export function useDeleteChallenge() {
   return useMutation({
     mutationFn: (id: string) =>
       apiRequest(`/challenges/${id}`, { method: "DELETE" }),
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: challengeKeys.all }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: challengeKeys.all });
+      queryClient.invalidateQueries({ queryKey: deckKeys.all });
+    },
   });
 }
 export function useUpdateChallengeFromDeck() {

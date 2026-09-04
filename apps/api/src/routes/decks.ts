@@ -51,6 +51,7 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
       toDeckResponse({
         ...deck,
         cardCount: 0,
+        challengeCount: 0,
       }),
       201,
     );
@@ -93,11 +94,14 @@ export function createDeckRoutes(options: { prisma: PrismaClient }) {
         ? { description: description.value }
         : {}),
     });
-    const cardCount = await options.prisma.card.count({
-      where: { deckId: deck.id },
-    });
+    const [cardCount, challengeCount] = await Promise.all([
+      options.prisma.card.count({ where: { deckId: deck.id } }),
+      options.prisma.challenge.count({
+        where: { sourceDeckId: deck.id },
+      }),
+    ]);
 
-    return context.json(toDeckResponse({ ...deck, cardCount }));
+    return context.json(toDeckResponse({ ...deck, cardCount, challengeCount }));
   });
 
   route.delete("/:deckId", async (context) => {
@@ -158,6 +162,7 @@ function toDeckResponse(deck: {
   title: string;
   description: string | null;
   cardCount: number;
+  challengeCount: number;
   createdAt: Date;
   updatedAt: Date;
 }): DeckResponse {
@@ -166,6 +171,7 @@ function toDeckResponse(deck: {
     title: deck.title,
     description: deck.description,
     cardCount: deck.cardCount,
+    challengeCount: deck.challengeCount,
     createdAt: deck.createdAt.toISOString(),
     updatedAt: deck.updatedAt.toISOString(),
   };

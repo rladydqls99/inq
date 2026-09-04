@@ -26,6 +26,7 @@ export type DeckResponse = {
   title: string;
   description: string | null;
   cardCount: number;
+  challengeCount: number;
   createdAt: string;
   updatedAt: string;
 };

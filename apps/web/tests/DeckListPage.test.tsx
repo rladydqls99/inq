@@ -15,7 +15,15 @@ describe("DeckListPage", () => {
 
   it("renders deck cards that open the card list", async () => {
     mockFetchByPath({
-      "/api/decks": [deck({ id: "deck-1", title: "국어", cardCount: 7 })],
+      "/api/decks": [
+        deck({
+          id: "deck-1",
+          title: "국어",
+          cardCount: 7,
+          challengeCount: 1,
+        }),
+        deck({ id: "deck-2", title: "영어", cardCount: 3 }),
+      ],
     });
 
     renderDeckListPage();
@@ -23,6 +31,12 @@ describe("DeckListPage", () => {
     const row = await screen.findByRole("link", { name: /국어/ });
     expect(row.getAttribute("href")).toBe("/decks/deck-1/manage");
     expect(row.textContent).toContain("7장");
+    expect(within(row).getByText("챌린지 등록됨")).toBeTruthy();
+
+    const deckWithoutChallenge = screen.getByRole("link", { name: /영어/ });
+    expect(
+      within(deckWithoutChallenge).queryByText("챌린지 등록됨"),
+    ).toBeNull();
   });
 
   it("shows empty state and creates a deck from the modal", async () => {
@@ -52,15 +66,24 @@ describe("DeckListPage", () => {
   it("uses the row menu for rename, challenge creation, and delete", async () => {
     const user = userEvent.setup();
     let deckTitle = "국어";
+    let challengeCount = 0;
     const fetchMock = mockFetchByPath({
       "/api/decks": () => [
-        deck({ id: "deck-1", title: deckTitle, cardCount: 2 }),
+        deck({
+          id: "deck-1",
+          title: deckTitle,
+          cardCount: 2,
+          challengeCount,
+        }),
       ],
       "/api/decks/deck-1": () => {
         deckTitle = "국어 수정";
         return deck({ id: "deck-1", title: deckTitle, cardCount: 2 });
       },
-      "/api/challenges": { id: "challenge-1" },
+      "/api/challenges": () => {
+        challengeCount = 1;
+        return { id: "challenge-1" };
+      },
     });
 
     renderDeckListPage();
@@ -111,6 +134,7 @@ describe("DeckListPage", () => {
         }),
       }),
     );
+    expect(await within(listItem).findByText("챌린지 등록됨")).toBeTruthy();
 
     await user.click(
       within(listItem).getByRole("button", { name: "국어 수정 메뉴" }),
@@ -203,12 +227,18 @@ function jsonResponse(response: unknown, status = 200) {
   });
 }
 
-function deck(input: { id: string; title: string; cardCount: number }) {
+function deck(input: {
+  id: string;
+  title: string;
+  cardCount: number;
+  challengeCount?: number;
+}) {
   return {
     id: input.id,
     title: input.title,
     description: null,
     cardCount: input.cardCount,
+    challengeCount: input.challengeCount ?? 0,
     createdAt: "2026-06-22T00:00:00.000Z",
     updatedAt: "2026-06-22T00:00:00.000Z",
   };

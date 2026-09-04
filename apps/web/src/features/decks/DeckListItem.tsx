@@ -1,5 +1,5 @@
 import type { DeckResponse } from "@inq/shared";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Flag } from "lucide-react";
 import type { ReactNode } from "react";
 import { Link } from "react-router-dom";
 
@@ -18,9 +18,25 @@ export function DeckListItem({ deck, action }: DeckListItemProps) {
         <h2 className="m-0 overflow-hidden text-base font-bold text-ellipsis whitespace-nowrap">
           {deck.title}
         </h2>
-        <span className="text-sm font-medium text-inq-ink-soft">
-          카드 {deck.cardCount}장
-        </span>
+        <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1">
+          <span className="text-sm font-medium text-inq-ink-soft">
+            카드 {deck.cardCount}장
+          </span>
+          {deck.challengeCount > 0 ? (
+            <span
+              className="inline-flex items-center gap-1 text-xs font-bold text-inq-ink"
+              aria-label={`챌린지 ${deck.challengeCount}개 등록됨`}
+            >
+              <Flag
+                className="shrink-0 text-inq-highlight-strong"
+                size={14}
+                strokeWidth={2.4}
+                aria-hidden="true"
+              />
+              챌린지 등록됨
+            </span>
+          ) : null}
+        </div>
       </Link>
       {!action ? (
         <ChevronRight
