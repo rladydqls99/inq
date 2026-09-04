@@ -6,11 +6,22 @@ import { MemoryRouter, Route, Routes } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { DeckRunnerPage } from "../src/pages/decks/DeckRunnerPage";
+import { DECK_PROMPT_SPEECH_STORAGE_KEY } from "../src/widgets/deckPromptSpeechSettings";
+import { releaseDeckPromptSpeechAudio } from "../src/widgets/useDeckPromptSpeech";
 import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 
+const speech = vi.hoisted(() => ({ generateStream: vi.fn() }));
+
+vi.mock("@soniox/client", () => ({
+  SonioxClient: class {
+    tts = { generateStream: speech.generateStream };
+  },
+}));
+
 describe("DeckRunnerPage", () => {
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    await releaseDeckPromptSpeechAudio();
     window.localStorage.clear();
     Reflect.deleteProperty(navigator, "mediaSession");
     Object.defineProperty(document, "visibilityState", {
@@ -19,6 +30,7 @@ describe("DeckRunnerPage", () => {
     });
     vi.unstubAllGlobals();
     vi.restoreAllMocks();
+    speech.generateStream.mockReset();
   });
 
   it("hides answers until the learner reveals them", async () => {
@@ -103,6 +115,35 @@ describe("DeckRunnerPage", () => {
     expect(
       await screen.findByText(matchesTextContent("수도는 ____이다.")),
     ).toBeTruthy();
+  });
+
+  it("reads the prompt once when each card becomes active", async () => {
+    window.localStorage.setItem(DECK_PROMPT_SPEECH_STORAGE_KEY, "true");
+    speech.generateStream.mockImplementation(async function* () {
+      yield new Uint8Array([0, 0, 255, 127]);
+    });
+    installSpeechAudioContext();
+    mockFetchByPath({
+      "/api/decks/deck-1/run": deckRun({ cursor: 0 }),
+    });
+
+    renderDeckRunner();
+
+    await waitFor(() => expect(speech.generateStream).toHaveBeenCalledTimes(1));
+    expect(speech.generateStream.mock.calls[0]?.[0]).toMatchObject({
+      voice: "Kayla",
+      language: "ko",
+      text: "훈민정음을 만든 빈칸이다.",
+    });
+
+    await userEvent
+      .setup()
+      .click(screen.getByRole("button", { name: "다음 카드" }));
+
+    await waitFor(() => expect(speech.generateStream).toHaveBeenCalledTimes(2));
+    expect(speech.generateStream.mock.calls[1]?.[0]).toMatchObject({
+      text: "수도는 빈칸이다.",
+    });
   });
 
   it("deletes the current card from the learning progress row", async () => {
@@ -385,6 +426,34 @@ function installVehicleControls() {
     play,
     revokeObjectURL,
   };
+}
+
+function installSpeechAudioContext() {
+  class FakeAudioContext {
+    state: AudioContextState = "running";
+    destination = {};
+    sampleRate = 24_000;
+    currentTime = 0;
+    resume = vi.fn(() => Promise.resolve());
+    close = vi.fn(() => {
+      this.state = "closed";
+      return Promise.resolve();
+    });
+    createBuffer = vi.fn((_channels: number, length: number, rate: number) => ({
+      duration: length / rate,
+      getChannelData: vi.fn(() => new Float32Array(length)),
+    }));
+    createBufferSource = vi.fn(() => ({
+      buffer: null,
+      connect: vi.fn(),
+      disconnect: vi.fn(),
+      onended: null,
+      start: vi.fn(),
+      stop: vi.fn(),
+    }));
+  }
+
+  vi.stubGlobal("AudioContext", FakeAudioContext);
 }
 
 function patchCalls(fetchMock: ReturnType<typeof vi.fn>) {

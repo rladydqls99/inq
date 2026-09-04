@@ -18,6 +18,7 @@ import {
   primeVehicleControlFromUserGesture,
   releasePrimedVehicleControl,
 } from "@/widgets/vehicleControl";
+import { primeDeckPromptSpeechFromUserGesture } from "@/widgets/useDeckPromptSpeech";
 
 export function DeckDetailPage() {
   const { deckId } = useParams();
@@ -123,6 +124,7 @@ export function DeckDetailPage() {
     }
 
     primeVehicleControlFromUserGesture();
+    primeDeckPromptSpeechFromUserGesture();
     handOffPrimedAudioRef.current = false;
     setStartError(false);
 

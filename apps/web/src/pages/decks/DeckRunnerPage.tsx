@@ -20,6 +20,12 @@ import {
   VEHICLE_CONTROL_CHANGE_EVENT,
   VEHICLE_CONTROL_STORAGE_KEY,
 } from "@/widgets/vehicleControlSettings";
+import {
+  DECK_PROMPT_SPEECH_CHANGE_EVENT,
+  DECK_PROMPT_SPEECH_STORAGE_KEY,
+  isDeckPromptSpeechEnabled,
+} from "@/widgets/deckPromptSpeechSettings";
+import { useDeckPromptSpeech } from "@/widgets/useDeckPromptSpeech";
 
 export function DeckRunnerPage() {
   const { deckId } = useParams();
@@ -32,6 +38,9 @@ export function DeckRunnerPage() {
   const cursor = runState?.cursor ?? 0;
   const [vehicleControlEnabled, setVehicleControlEnabled] = useState(
     isVehicleControlEnabled,
+  );
+  const [deckPromptSpeechEnabled, setDeckPromptSpeechEnabled] = useState(
+    isDeckPromptSpeechEnabled,
   );
   const [vehicleControlStatus, setVehicleControlStatus] =
     useState<VehicleControlStatus>(() =>
@@ -72,6 +81,31 @@ export function DeckRunnerPage() {
     return () => {
       window.removeEventListener("storage", syncSetting);
       window.removeEventListener(VEHICLE_CONTROL_CHANGE_EVENT, syncSetting);
+    };
+  }, []);
+
+  useEffect(() => {
+    function syncSetting(event: Event) {
+      if (
+        event instanceof StorageEvent &&
+        event.key !== DECK_PROMPT_SPEECH_STORAGE_KEY
+      ) {
+        return;
+      }
+
+      const enabled =
+        event instanceof CustomEvent && typeof event.detail === "boolean"
+          ? event.detail
+          : isDeckPromptSpeechEnabled();
+      setDeckPromptSpeechEnabled(enabled);
+    }
+
+    window.addEventListener("storage", syncSetting);
+    window.addEventListener(DECK_PROMPT_SPEECH_CHANGE_EVENT, syncSetting);
+
+    return () => {
+      window.removeEventListener("storage", syncSetting);
+      window.removeEventListener(DECK_PROMPT_SPEECH_CHANGE_EVENT, syncSetting);
     };
   }, []);
 
@@ -211,6 +245,12 @@ export function DeckRunnerPage() {
   }, []);
 
   const currentCard = runState?.cards[cursor];
+  const promptSpeech = useDeckPromptSpeech({
+    enabled: deckPromptSpeechEnabled,
+    active: Boolean(currentCard) && revealedCardId !== currentCard?.cardId,
+    cardId: currentCard?.cardId,
+    segments: currentCard?.segments,
+  });
   if (loadError) {
     return (
       <div className="mt-[18px] text-sm font-bold text-inq-ink-soft">
@@ -258,6 +298,21 @@ export function DeckRunnerPage() {
           onDelete={() => void deleteCard(currentCard.cardId)}
           deleting={deleteMutation.isPending}
         />
+        {promptSpeech.state?.status === "error" ? (
+          <div
+            className="flex items-center justify-between gap-2 text-sm font-bold text-inq-error"
+            role="alert"
+          >
+            <span>{promptSpeech.state.message}</span>
+            <Button
+              size="compact"
+              variant="secondary"
+              onClick={promptSpeech.retry}
+            >
+              다시 듣기
+            </Button>
+          </div>
+        ) : null}
         {moveError ? (
           <div className="text-sm font-bold text-inq-error" role="alert">
             카드를 이동하지 못했습니다.

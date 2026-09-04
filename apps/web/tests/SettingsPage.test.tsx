@@ -6,6 +6,7 @@ import { MemoryRouter } from "react-router-dom";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { SettingsPage } from "../src/pages/settings/SettingsPage";
+import { DECK_PROMPT_SPEECH_STORAGE_KEY } from "../src/widgets/deckPromptSpeechSettings";
 import { VEHICLE_CONTROL_STORAGE_KEY } from "../src/widgets/vehicleControlSettings";
 import { VOICE_ANSWER_STORAGE_KEY } from "../src/widgets/voiceAnswerSettings";
 import { THEME_STORAGE_KEY } from "../src/shared/lib/theme";
@@ -67,6 +68,23 @@ describe("SettingsPage", () => {
 
     expect(voiceAnswer.checked).toBe(true);
     expect(window.localStorage.getItem(VOICE_ANSWER_STORAGE_KEY)).toBe("true");
+  });
+
+  it("keeps automatic deck speech off until enabled on this device", async () => {
+    const user = userEvent.setup();
+    renderSettings();
+
+    const deckPromptSpeech = screen.getByRole("switch", {
+      name: /덱 문제 자동 읽기/,
+    }) as HTMLInputElement;
+    expect(deckPromptSpeech.checked).toBe(false);
+
+    await user.click(deckPromptSpeech);
+
+    expect(deckPromptSpeech.checked).toBe(true);
+    expect(window.localStorage.getItem(DECK_PROMPT_SPEECH_STORAGE_KEY)).toBe(
+      "true",
+    );
   });
 
   it("uses dark mode by default and persists the selected theme", async () => {

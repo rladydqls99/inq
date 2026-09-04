@@ -6,6 +6,13 @@ export function getPromptText(segments: QuizSegment[]): string {
     .join("");
 }
 
+export function getSpokenPromptText(segments: QuizSegment[]): string {
+  return segments
+    .map((segment) => (segment.type === "answer" ? "빈칸" : segment.value))
+    .join("")
+    .trim();
+}
+
 export function getRevealedText(segments: QuizSegment[]): string {
   return segments.map((segment) => segment.value).join("");
 }

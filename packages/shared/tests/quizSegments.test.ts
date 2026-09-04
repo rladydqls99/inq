@@ -5,6 +5,7 @@ import {
   getAnswers,
   getPromptText,
   getRevealedText,
+  getSpokenPromptText,
   hasAnswerSegment,
   toQuizText,
 } from "../src";
@@ -22,6 +23,22 @@ describe("quiz segment helpers", () => {
     expect(getPromptText(quizSegments)).toBe(
       "훈민정음을 만든 ____의 왕은 ____이다.",
     );
+  });
+
+  it("renders answer segments as spoken Korean blanks", () => {
+    expect(getSpokenPromptText(quizSegments)).toBe(
+      "훈민정음을 만든 빈칸의 왕은 빈칸이다.",
+    );
+  });
+
+  it("removes only outer whitespace from spoken prompts", () => {
+    expect(
+      getSpokenPromptText([
+        { type: "text", value: "\n대한민국의 수도는 " },
+        { type: "answer", id: "answer-1", value: "서울" },
+        { type: "text", value: "이다.\n" },
+      ]),
+    ).toBe("대한민국의 수도는 빈칸이다.");
   });
 
   it("renders revealed text with inline answers", () => {

@@ -15,6 +15,10 @@ import {
   setVehicleControlEnabled,
 } from "@/widgets/vehicleControlSettings";
 import {
+  isDeckPromptSpeechEnabled,
+  setDeckPromptSpeechEnabled,
+} from "@/widgets/deckPromptSpeechSettings";
+import {
   isVoiceAnswerEnabled,
   setVoiceAnswerEnabled,
 } from "@/widgets/voiceAnswerSettings";
@@ -24,6 +28,9 @@ export function SettingsPage() {
   const lockMutation = useLock();
   const [vehicleControlEnabled, setVehicleControlEnabledState] = useState(
     isVehicleControlEnabled,
+  );
+  const [deckPromptSpeechEnabled, setDeckPromptSpeechEnabledState] = useState(
+    isDeckPromptSpeechEnabled,
   );
   const [voiceAnswerEnabled, setVoiceAnswerEnabledState] =
     useState(isVoiceAnswerEnabled);
@@ -37,6 +44,11 @@ export function SettingsPage() {
   function updateVoiceAnswer(enabled: boolean) {
     setVoiceAnswerEnabledState(enabled);
     setVoiceAnswerEnabled(enabled);
+  }
+
+  function updateDeckPromptSpeech(enabled: boolean) {
+    setDeckPromptSpeechEnabledState(enabled);
+    setDeckPromptSpeechEnabled(enabled);
   }
 
   function updateTheme(preference: ThemePreference) {
@@ -117,6 +129,26 @@ export function SettingsPage() {
               checked={vehicleControlEnabled}
               aria-describedby="vehicle-control-description"
               onChange={(event) => updateVehicleControl(event.target.checked)}
+            />
+          </label>
+        </section>
+        <section className="grid gap-2.5">
+          <h2>카드 음성</h2>
+          <label className="flex min-h-12 cursor-pointer items-center justify-between gap-4 rounded-lg border border-inq-line bg-inq-canvas p-3 focus-within:outline-3 focus-within:outline-inq-highlight-strong focus-within:outline-offset-2">
+            <span className="grid min-w-0 gap-1">
+              <strong className="text-sm font-bold">덱 문제 자동 읽기</strong>
+              <span
+                className="text-sm leading-[1.45] text-inq-ink-soft"
+                id="deck-prompt-speech-description"
+              >
+                새 카드를 열면 Soniox가 빈칸을 “빈칸”으로 읽습니다.
+              </span>
+            </span>
+            <Switch
+              role="switch"
+              checked={deckPromptSpeechEnabled}
+              aria-describedby="deck-prompt-speech-description"
+              onChange={(event) => updateDeckPromptSpeech(event.target.checked)}
             />
           </label>
         </section>
