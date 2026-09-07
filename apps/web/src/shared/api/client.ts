@@ -14,6 +14,14 @@ export async function apiRequest<TResponse>(
   });
 
   if (!response.ok) {
+    if (
+      response.status === 401 &&
+      !path.startsWith("/auth/") &&
+      typeof window !== "undefined"
+    ) {
+      window.dispatchEvent(new Event("inq:locked"));
+    }
+
     throw new ApiError(response.status, await response.text());
   }
 
