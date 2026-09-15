@@ -1,14 +1,23 @@
-import type { PrismaClient } from "@inq/db";
+import type { Prisma, PrismaClient } from "@inq/db";
 import type { ChallengeProgress, ChallengeResponse } from "@inq/shared";
+import { challengeRetryAvailableAt } from "./challengeSchedule";
 
 type ChallengeWithRelations = Awaited<ReturnType<typeof findChallenge>>;
+
+const challengeRelations = {
+  cards: { include: { state: true } },
+  runSessions: {
+    where: { status: "completed" },
+    orderBy: { completedAt: "desc" },
+    take: 1,
+    select: { completedAt: true, queue: true },
+  },
+} satisfies Prisma.ChallengeInclude;
 
 export async function findChallenge(prisma: PrismaClient, challengeId: string) {
   return prisma.challenge.findUniqueOrThrow({
     where: { id: challengeId },
-    include: {
-      cards: { include: { state: true } },
-    },
+    include: challengeRelations,
   });
 }
 
@@ -17,9 +26,7 @@ export async function listChallengeResponses(
   now = new Date(),
 ): Promise<ChallengeResponse[]> {
   const challenges = await prisma.challenge.findMany({
-    include: {
-      cards: { include: { state: true } },
-    },
+    include: challengeRelations,
     orderBy: { createdAt: "asc" },
   });
 
@@ -32,8 +39,20 @@ export function toChallengeResponse(
   challenge: NonNullable<ChallengeWithRelations>,
   now = new Date(),
 ): ChallengeResponse {
+  const retryAvailableAt = challengeRetryAvailableAt(challenge.runSessions[0]);
   const states = challenge.cards.flatMap((card) =>
-    card.state ? [card.state] : [],
+    card.state
+      ? [
+          {
+            ...card.state,
+            dueAt:
+              retryAvailableAt &&
+              (!card.state.dueAt || card.state.dueAt < retryAvailableAt)
+                ? retryAvailableAt
+                : card.state.dueAt,
+          },
+        ]
+      : [],
   );
   const progress = calculateProgress(states, now);
 
@@ -72,7 +91,8 @@ function calculateProgress(
       continue;
     }
 
-    currentStageCounts[state.stage] = (currentStageCounts[state.stage] ?? 0) + 1;
+    currentStageCounts[state.stage] =
+      (currentStageCounts[state.stage] ?? 0) + 1;
 
     if (isDue(state.dueAt, now)) {
       dueCards += 1;

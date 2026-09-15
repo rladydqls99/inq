@@ -7,6 +7,10 @@ import type {
   SubmitChallengeCardResultResponse,
 } from "@inq/shared";
 import { findChallenge, toChallengeResponse } from "./challengeService";
+import {
+  challengeRetryAvailableAt,
+  startOfChallengeDayAfter,
+} from "./challengeSchedule";
 
 export type ChallengeAnswerResult = "correct" | "wrong";
 
@@ -49,7 +53,7 @@ export function calculateStageTransition(input: {
   if (input.result === "wrong") {
     return {
       stage: 0,
-      dueAt: null,
+      dueAt: startOfChallengeDayAfter(input.now, 1),
       completedAt: null,
       result: "wrong",
       event: {
@@ -177,6 +181,16 @@ export async function getOrCreateChallengeRunState(
     return toChallengeRunState(prisma, existing);
   }
 
+  const completedSession = await prisma.challengeRunSession.findFirst({
+    where: { challengeId, status: "completed" },
+    orderBy: { completedAt: "desc" },
+  });
+  const retryAvailableAt = challengeRetryAvailableAt(completedSession);
+
+  if (completedSession && retryAvailableAt && now < retryAvailableAt) {
+    return toChallengeRunState(prisma, completedSession);
+  }
+
   const states = await prisma.challengeCardState.findMany({
     where: {
       challengeCard: { challengeId },
@@ -204,18 +218,8 @@ export async function getOrCreateChallengeRunState(
         })
       : queue.length;
 
-  if (queue.length === 0) {
-    const completedSession = await prisma.challengeRunSession.findFirst({
-      where: {
-        challengeId,
-        status: "completed",
-      },
-      orderBy: { createdAt: "desc" },
-    });
-
-    if (completedSession) {
-      return toChallengeRunState(prisma, completedSession);
-    }
+  if (queue.length === 0 && completedSession) {
+    return toChallengeRunState(prisma, completedSession);
   }
 
   const session = await prisma.$transaction(async (transaction) => {
@@ -247,6 +251,7 @@ export async function getOrCreateChallengeRunState(
 export async function updateChallengeRunCursor(
   prisma: PrismaClient,
   input: { challengeId: string; cursor: number },
+  now = new Date(),
 ): Promise<ChallengeRunState> {
   const session = await prisma.challengeRunSession.findFirstOrThrow({
     where: {
@@ -263,7 +268,7 @@ export async function updateChallengeRunCursor(
     data: {
       cursor: boundedCursor,
       status: completed ? "completed" : "active",
-      completedAt: completed ? new Date() : null,
+      completedAt: completed ? now : null,
     },
   });
 
@@ -445,19 +450,4 @@ function reindexQueue(queue: ChallengeRunQueueCard[]): ChallengeRunQueueCard[] {
     ...card,
     queueIndex: index,
   }));
-}
-
-const CHALLENGE_TIME_ZONE_OFFSET_MS = 9 * 60 * 60 * 1000;
-
-function startOfChallengeDayAfter(date: Date, days: number): Date {
-  const challengeLocalDate = new Date(
-    date.getTime() + CHALLENGE_TIME_ZONE_OFFSET_MS,
-  );
-  const startOfTargetDayUtc = Date.UTC(
-    challengeLocalDate.getUTCFullYear(),
-    challengeLocalDate.getUTCMonth(),
-    challengeLocalDate.getUTCDate() + days,
-  );
-
-  return new Date(startOfTargetDayUtc - CHALLENGE_TIME_ZONE_OFFSET_MS);
 }

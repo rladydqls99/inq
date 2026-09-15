@@ -114,9 +114,18 @@ describe("ChallengeRunnerPage", () => {
     expect(screen.queryByText("불러오는 중입니다.")).toBeNull();
   });
 
-  it("moves past the final card into completed state", async () => {
+  it("completes the run and invalidates the cached challenge availability", async () => {
     const user = userEvent.setup();
     const fetchMock = mockFetch({ cardCount: 1 });
+    const queryClient = new QueryClient({
+      defaultOptions: {
+        queries: { retry: false, staleTime: 30_000 },
+        mutations: { retry: false },
+      },
+    });
+    queryClient.setQueryData(challengeKeys.all, [
+      { id: "challenge-1", dueCount: 1 },
+    ]);
 
     render(
       <MemoryRouter initialEntries={["/challenges/challenge-1/run"]}>
@@ -127,6 +136,13 @@ describe("ChallengeRunnerPage", () => {
           />
         </Routes>
       </MemoryRouter>,
+      {
+        wrapper: ({ children }) => (
+          <QueryClientProvider client={queryClient}>
+            {children}
+          </QueryClientProvider>
+        ),
+      },
     );
 
     await screen.findByText((_, element) =>
@@ -143,6 +159,9 @@ describe("ChallengeRunnerPage", () => {
       }),
     );
     expect(await screen.findByText("완료되었습니다.")).toBeTruthy();
+    expect(queryClient.getQueryState(challengeKeys.all)?.isInvalidated).toBe(
+      true,
+    );
   });
 
   it("refetches a cached completed run when entering the runner again", async () => {
@@ -396,7 +415,13 @@ function mockFetch(
       }
 
       const body = JSON.parse(init.body as string) as { cursor: number };
-      return Promise.resolve(jsonResponse({ ...state, cursor: body.cursor }));
+      return Promise.resolve(
+        jsonResponse({
+          ...state,
+          cursor: body.cursor,
+          status: body.cursor >= state.cards.length ? "completed" : "active",
+        }),
+      );
     }
 
     if (path === "/api/challenges/challenge-1/run") {

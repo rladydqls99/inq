@@ -9,6 +9,7 @@ import {
   submitChallengeRunResult,
   updateChallengeRunCursor,
 } from "../src/services/challengeRunService";
+import { listChallengeResponses } from "../src/services/challengeService";
 import { createTestPrisma, testEnv, unlockTestApp } from "./testUtils";
 
 const segments: QuizSegment[] = [
@@ -582,7 +583,7 @@ describe("challenge run routes", () => {
       expect(result.progress).toMatchObject({
         totalCards: 2,
         completedCards: 0,
-        dueCards: 2,
+        dueCards: 1,
       });
     } finally {
       await cleanup();
@@ -885,7 +886,7 @@ describe("challenge run routes", () => {
     }
   });
 
-  it("runs wrong cards again immediately and advances correct cards by calendar date", async () => {
+  it("blocks same-day retries and makes wrong cards available at the next Seoul midnight", async () => {
     const { prisma, cleanup } = await createTestPrisma();
 
     try {
@@ -919,40 +920,63 @@ describe("challenge run routes", () => {
           now: firstDay,
         });
       }
-      await updateChallengeRunCursor(prisma, {
-        challengeId: challenge.id,
-        cursor: firstRun.cards.length,
-      });
+      const resumedRun = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        firstDay,
+      );
+      expect(resumedRun.sessionId).toBe(firstRun.sessionId);
+      expect(resumedRun.status).toBe("active");
+      await updateChallengeRunCursor(
+        prisma,
+        {
+          challengeId: challenge.id,
+          cursor: firstRun.cards.length,
+        },
+        firstDay,
+      );
 
       const immediateRetry = await getOrCreateChallengeRunState(
         prisma,
         challenge.id,
         firstDay,
       );
-      expect(immediateRetry.cards.map((card) => card.category).sort()).toEqual([
-        "퀴즈2",
-        "퀴즈3",
+      expect(immediateRetry).toMatchObject({
+        sessionId: firstRun.sessionId,
+        status: "completed",
+      });
+      await expect(prisma.challengeRunSession.count()).resolves.toBe(1);
+      await expect(
+        listChallengeResponses(prisma, firstDay),
+      ).resolves.toMatchObject([
+        {
+          id: challenge.id,
+          status: "active",
+          dueCount: 0,
+          progress: { dueCards: 0, currentStageCounts: { 0: 2, 1: 1 } },
+          nextDueAt: "2026-08-26T15:00:00.000Z",
+        },
       ]);
 
-      for (const card of immediateRetry.cards) {
-        await submitChallengeRunResult(prisma, {
-          challengeId: challenge.id,
-          sessionCardId: card.sessionCardId,
-          finalResult: "wrong",
-          now: firstDay,
-        });
-      }
-      await updateChallengeRunCursor(prisma, {
-        challengeId: challenge.id,
-        cursor: immediateRetry.cards.length,
-      });
+      const beforeMidnight = await getOrCreateChallengeRunState(
+        prisma,
+        challenge.id,
+        new Date("2026-08-26T23:59:59.999+09:00"),
+      );
+      expect(beforeMidnight.sessionId).toBe(firstRun.sessionId);
+      expect(beforeMidnight.status).toBe("completed");
 
-      const secondDay = new Date("2026-08-27T09:00:00.000+09:00");
+      const secondDay = new Date("2026-08-27T00:00:00.000+09:00");
+      await expect(
+        listChallengeResponses(prisma, secondDay),
+      ).resolves.toMatchObject([{ id: challenge.id, dueCount: 3 }]);
       const secondDayRun = await getOrCreateChallengeRunState(
         prisma,
         challenge.id,
         secondDay,
       );
+      expect(secondDayRun.sessionId).not.toBe(firstRun.sessionId);
+      expect(secondDayRun.status).toBe("active");
       expect(secondDayRun.cards.map((card) => card.category).sort()).toEqual([
         "퀴즈1",
         "퀴즈2",
@@ -996,14 +1020,22 @@ describe("challenge run routes", () => {
             stage: 1,
             dueAt: new Date("2026-08-28T00:00:00.000+09:00"),
           },
-          { category: "퀴즈3", stage: 0, dueAt: null },
+          {
+            category: "퀴즈3",
+            stage: 0,
+            dueAt: new Date("2026-08-28T00:00:00.000+09:00"),
+          },
         ]),
       );
 
-      await updateChallengeRunCursor(prisma, {
-        challengeId: challenge.id,
-        cursor: secondDayRun.cards.length,
-      });
+      await updateChallengeRunCursor(
+        prisma,
+        {
+          challengeId: challenge.id,
+          cursor: secondDayRun.cards.length,
+        },
+        secondDay,
+      );
       const fourthDay = new Date("2026-08-30T10:00:00.000+09:00");
       const fourthDayRun = await getOrCreateChallengeRunState(
         prisma,
@@ -1025,7 +1057,7 @@ describe("challenge run routes", () => {
         }),
       ).resolves.toMatchObject({
         stage: 0,
-        dueAt: null,
+        dueAt: new Date("2026-08-31T00:00:00.000+09:00"),
         completedAt: null,
         result: "wrong",
       });
@@ -1033,6 +1065,91 @@ describe("challenge run routes", () => {
       await cleanup();
     }
   });
+
+  it.each(["correct", "wrong"] as const)(
+    "blocks a finished %s run through the API even with newly synced or legacy due cards",
+    async (finalResult) => {
+      const { prisma, cleanup } = await createTestPrisma();
+
+      try {
+        const app = createApp({ prisma, env: testEnv });
+        const cookie = await unlockTestApp(app);
+        const { deck, challenge } = await createChallengeFixture(prisma);
+        const firstRun = await getRun(app, challenge.id, cookie);
+
+        for (const card of firstRun.cards) {
+          await submitChallengeRunResult(prisma, {
+            challengeId: challenge.id,
+            sessionCardId: card.sessionCardId,
+            finalResult,
+          });
+        }
+        await updateChallengeRunCursor(prisma, {
+          challengeId: challenge.id,
+          cursor: firstRun.cards.length,
+        });
+
+        if (finalResult === "wrong") {
+          // Wrong answers saved before this change have no scheduled date.
+          await prisma.challengeCardState.updateMany({
+            where: { challengeId: challenge.id },
+            data: { dueAt: null },
+          });
+        }
+
+        await createCard(prisma, {
+          deckId: deck.id,
+          category: "신규",
+          segments,
+        });
+        const syncResponse = await app.request(
+          `/api/challenges/${challenge.id}/update-from-deck`,
+          { method: "POST", headers: { cookie } },
+        );
+        expect(syncResponse.status).toBe(200);
+        const listResponse = await app.request("/api/challenges", {
+          headers: { cookie },
+        });
+        await expect(listResponse.json()).resolves.toMatchObject([
+          { id: challenge.id, dueCount: 0, progress: { dueCards: 0 } },
+        ]);
+
+        const retry = await getRun(app, challenge.id, cookie);
+        expect(retry).toMatchObject({
+          sessionId: firstRun.sessionId,
+          status: "completed",
+        });
+        const resultResponse = await app.request(
+          `/api/challenges/${challenge.id}/results`,
+          {
+            method: "POST",
+            headers: { cookie, "content-type": "application/json" },
+            body: JSON.stringify({
+              sessionCardId: firstRun.cards[0].sessionCardId,
+              finalResult: "correct",
+            }),
+          },
+        );
+        expect(resultResponse.status).toBe(404);
+        await expect(resultResponse.json()).resolves.toEqual({
+          error: "active_challenge_run_not_found",
+        });
+        await expect(prisma.challengeRunSession.count()).resolves.toBe(1);
+
+        const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000);
+        const nextRun = await getOrCreateChallengeRunState(
+          prisma,
+          challenge.id,
+          tomorrow,
+        );
+        expect(nextRun.status).toBe("active");
+        expect(nextRun.sessionId).not.toBe(firstRun.sessionId);
+        expect(nextRun.cards).toHaveLength(finalResult === "wrong" ? 3 : 1);
+      } finally {
+        await cleanup();
+      }
+    },
+  );
 
   it("completes the challenge when every card state is completed", async () => {
     const { prisma, cleanup } = await createTestPrisma();

@@ -86,8 +86,15 @@ export const useMoveChallengeRun = (id?: string) => {
         method: "PATCH",
         body: JSON.stringify({ cursor }),
       }),
-    onSuccess: (run) =>
-      queryClient.setQueryData(challengeKeys.run(id ?? ""), run),
+    onSuccess: (run) => {
+      queryClient.setQueryData(challengeKeys.run(id ?? ""), run);
+      if (run.status === "completed") {
+        void queryClient.invalidateQueries({
+          queryKey: challengeKeys.all,
+          exact: true,
+        });
+      }
+    },
   });
 };
 export const useSubmitChallengeResult = (id?: string) => {

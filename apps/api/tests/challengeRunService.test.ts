@@ -68,21 +68,24 @@ describe("calculateStageTransition", () => {
     });
   });
 
-  it("resets wrong answers to stage 0 and makes them immediately due", () => {
-    expect(
-      calculateStageTransition({
-        stage: 2,
-        result: "wrong",
-        intervalsDays,
-        now,
-      }),
-    ).toMatchObject({
-      stage: 0,
-      dueAt: null,
-      completedAt: null,
-      event: { previousStage: 2, nextStage: 0 },
-    });
-  });
+  it.each([0, 2])(
+    "resets wrong answers at stage %s until the next Seoul day",
+    (stage) => {
+      expect(
+        calculateStageTransition({
+          stage,
+          result: "wrong",
+          intervalsDays,
+          now,
+        }),
+      ).toMatchObject({
+        stage: 0,
+        dueAt: new Date("2026-06-23T00:00:00.000+09:00"),
+        completedAt: null,
+        event: { previousStage: stage, nextStage: 0 },
+      });
+    },
+  );
 
   it("schedules a correct answer at midnight of the target date in Seoul", () => {
     expect(
