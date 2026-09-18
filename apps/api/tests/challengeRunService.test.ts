@@ -68,9 +68,14 @@ describe("calculateStageTransition", () => {
     });
   });
 
-  it.each([0, 2])(
-    "resets wrong answers at stage %s until the next Seoul day",
-    (stage) => {
+  it.each([
+    [0, 0],
+    [1, 0],
+    [2, 1],
+    [3, 2],
+  ])(
+    "moves wrong answers from stage %s to %s until the next Seoul day",
+    (stage, nextStage) => {
       expect(
         calculateStageTransition({
           stage,
@@ -79,10 +84,10 @@ describe("calculateStageTransition", () => {
           now,
         }),
       ).toMatchObject({
-        stage: 0,
+        stage: nextStage,
         dueAt: new Date("2026-06-23T00:00:00.000+09:00"),
         completedAt: null,
-        event: { previousStage: stage, nextStage: 0 },
+        event: { previousStage: stage, nextStage },
       });
     },
   );
@@ -167,6 +172,39 @@ describe("buildChallengeRunQueue", () => {
 });
 
 describe("applySessionCardResult", () => {
+  it("uses the starting stage when changing or resubmitting a result", () => {
+    let queue = buildChallengeRunQueue([
+      {
+        stateId: "state-1",
+        challengeCardId: "challenge-card-1",
+        stage: 2,
+        dueAt: null,
+        completedAt: null,
+      },
+    ]);
+
+    for (const [result, expectedStage, isCorrection] of [
+      ["correct", 3, false],
+      ["wrong", 1, true],
+      ["wrong", 1, true],
+      ["correct", 3, true],
+    ] as const) {
+      const applied = applySessionCardResult({
+        queue,
+        sessionCardId: "state-1",
+        result,
+        intervalsDays,
+        now,
+      });
+
+      expect(applied.transition).toMatchObject({
+        stage: expectedStage,
+        event: { previousStage: 2, nextStage: expectedStage, isCorrection },
+      });
+      queue = applied.queue;
+    }
+  });
+
   it("keeps a wrong card in place so each card is attempted once per run", () => {
     const queue = buildChallengeRunQueue(
       [

@@ -1056,11 +1056,19 @@ describe("challenge run routes", () => {
           },
         }),
       ).resolves.toMatchObject({
-        stage: 0,
+        stage: 1,
         dueAt: new Date("2026-08-31T00:00:00.000+09:00"),
         completedAt: null,
         result: "wrong",
       });
+      await expect(
+        prisma.challengeAnswerEvent.findFirstOrThrow({
+          where: {
+            stateId: findRunCard(fourthDayRun, "퀴즈1").stateId,
+            answeredAt: fourthDay,
+          },
+        }),
+      ).resolves.toMatchObject({ previousStage: 2, nextStage: 1 });
     } finally {
       await cleanup();
     }
@@ -1248,6 +1256,15 @@ describe("challenge run routes", () => {
       });
       expect(updatedChallenge.status).toBe("active");
       expect(updatedChallenge.completedAt).toBeNull();
+      await expect(
+        prisma.challengeCardState.findUniqueOrThrow({
+          where: { id: run.cards[0].stateId },
+        }),
+      ).resolves.toMatchObject({
+        stage: 2,
+        completedAt: null,
+        result: "wrong",
+      });
     } finally {
       await cleanup();
     }

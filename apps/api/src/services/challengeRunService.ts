@@ -51,14 +51,16 @@ export function calculateStageTransition(input: {
   isCorrection?: boolean;
 }): ChallengeStageTransition {
   if (input.result === "wrong") {
+    const nextStage = Math.max(0, input.stage - 1);
+
     return {
-      stage: 0,
+      stage: nextStage,
       dueAt: startOfChallengeDayAfter(input.now, 1),
       completedAt: null,
       result: "wrong",
       event: {
         previousStage: input.stage,
-        nextStage: 0,
+        nextStage,
         isCorrection: input.isCorrection ?? false,
       },
     };
